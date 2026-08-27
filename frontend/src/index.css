@@ -5,7 +5,8 @@
 @layer base {
   body {
     @apply bg-slate-950 text-slate-100 antialiased;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    letter-spacing: -0.01em;
   }
 
   /* Custom subtle scrollbar */
