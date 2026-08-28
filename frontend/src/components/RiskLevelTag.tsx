@@ -18,25 +18,25 @@ export const RiskLevelTag: React.FC<RiskLevelTagProps> = ({
 }) => {
   const config = {
     LOW: {
-      bg: 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300',
+      bg: 'bg-emerald-50 border-emerald-200 text-emerald-800',
       icon: ShieldCheck,
       label: 'Low Risk',
-      dot: 'bg-emerald-400',
+      dot: 'bg-emerald-500',
     },
     MEDIUM: {
-      bg: 'bg-amber-950/40 border-amber-500/30 text-amber-300',
+      bg: 'bg-amber-50 border-amber-200 text-amber-800',
       icon: AlertTriangle,
       label: 'Medium Risk',
-      dot: 'bg-amber-400',
+      dot: 'bg-amber-500',
     },
     HIGH: {
-      bg: 'bg-rose-950/40 border-rose-500/30 text-rose-300',
+      bg: 'bg-rose-50 border-rose-200 text-rose-800',
       icon: AlertOctagon,
       label: 'High Risk',
-      dot: 'bg-rose-400',
+      dot: 'bg-rose-500',
     },
   }[level] || {
-    bg: 'bg-slate-800 border-slate-700 text-slate-300',
+    bg: 'bg-slate-100 border-slate-200 text-slate-600',
     icon: AlertTriangle,
     label: level,
     dot: 'bg-slate-400',

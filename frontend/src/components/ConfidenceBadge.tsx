@@ -22,20 +22,20 @@ export const ConfidenceBadge: React.FC<ConfidenceBadgeProps> = ({
   const getBadgeStyle = () => {
     if (percentage >= 85) {
       return {
-        bg: 'bg-indigo-950/60 border-indigo-500/40 text-indigo-200',
-        bar: 'bg-indigo-400',
+        bg: 'bg-indigo-50 border-indigo-200 text-indigo-800',
+        bar: 'bg-indigo-500',
         badgeText: 'Robust Evidence',
       };
     }
     if (percentage >= 70) {
       return {
-        bg: 'bg-cyan-950/60 border-cyan-500/40 text-cyan-200',
-        bar: 'bg-cyan-400',
+        bg: 'bg-cyan-50 border-cyan-200 text-cyan-800',
+        bar: 'bg-cyan-500',
         badgeText: 'Adequate Evidence',
       };
     }
     return {
-      bg: 'bg-slate-800/80 border-slate-600 text-slate-300',
+      bg: 'bg-slate-100 border-slate-200 text-slate-600',
       bar: 'bg-slate-400',
       badgeText: 'Sparse Evidence',
     };
@@ -46,7 +46,7 @@ export const ConfidenceBadge: React.FC<ConfidenceBadgeProps> = ({
   return (
     <div
       className={cn(
-        'inline-flex flex-col gap-1 rounded-lg border px-3 py-1.5 backdrop-blur-sm shadow-sm',
+        'inline-flex flex-col gap-1 rounded-lg border px-3 py-1.5 shadow-sm',
         style.bg,
         className
       )}
@@ -54,17 +54,17 @@ export const ConfidenceBadge: React.FC<ConfidenceBadgeProps> = ({
     >
       <div className="flex items-center justify-between gap-2.5">
         <div className="flex items-center gap-1.5 text-xs font-medium tracking-wide">
-          <Database className="w-3.5 h-3.5 opacity-80" />
-          <span className="text-slate-400">Evidence Completeness:</span>
-          <span className="font-mono font-semibold text-slate-100">{percentage}%</span>
+          <Database className="w-3.5 h-3.5 opacity-70" />
+          <span className="text-slate-500">Evidence Completeness:</span>
+          <span className="font-mono font-semibold text-slate-800">{percentage}%</span>
         </div>
-        <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-slate-800/80 border border-slate-700/50 text-slate-300">
+        <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-500">
           {style.badgeText}
         </span>
       </div>
 
       {showProgress && (
-        <div className="w-full bg-slate-800/90 rounded-full h-1.5 overflow-hidden">
+        <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
           <div
             className={cn('h-full rounded-full transition-all duration-500', style.bar)}
             style={{ width: `${percentage}%` }}

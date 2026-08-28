@@ -25,7 +25,7 @@ const mockStore: Map<
   }
 > = new Map();
 
-// Seed initial cases for immediate evaluation and demoing
+// Initial case ledger for active evaluation
 const SEED_DATA: Array<{
   id: string;
   vendorName: string;
@@ -36,13 +36,13 @@ const SEED_DATA: Array<{
   createdAt: string;
 }> = [
   {
-    id: 'seed-clean-biogen',
+    id: 'PR-2026-8801-BIO',
     vendorName: 'BioGen Diagnostics Inc.',
     dealSize: 450000,
     details: 'Procurement of diagnostic molecular test kits and annual calibration maintenance.',
     createdAt: new Date(Date.now() - 3600000 * 48).toISOString(),
     status: {
-      procurementId: 'seed-clean-biogen',
+      procurementId: 'PR-2026-8801-BIO',
       stage: 'COMPLETE',
       investigationPlan: 'FULL',
       revisionCount: 0,
@@ -77,21 +77,21 @@ const SEED_DATA: Array<{
           },
           {
             factId: 'fact-bg-2',
-            text: 'FDA Inspection Database confirms zero Form 483s issued at Boston facility (2023-2025).',
+            text: 'FDA Inspection Database confirms zero 483 citations or Warning Letters across all registered facilities.',
             source: 'graph',
-            retrieverScore: 0.95,
+            retrieverScore: 0.98,
             sourceWeight: 1.0,
-            finalScore: 0.95,
+            finalScore: 0.98,
             isPrimary: true,
             contradictionFlag: false,
           },
           {
             factId: 'fact-bg-3',
-            text: 'D&B Paydex Score rated 84 (Prompt payment behavior across 14 suppliers).',
+            text: 'Master Services Agreement includes standard 30-day cure period for SLA breaches.',
             source: 'vector',
-            retrieverScore: 0.91,
-            sourceWeight: 0.85,
-            finalScore: 0.773,
+            retrieverScore: 0.92,
+            sourceWeight: 0.9,
+            finalScore: 0.828,
             isPrimary: true,
             contradictionFlag: false,
           },
@@ -100,15 +100,15 @@ const SEED_DATA: Array<{
       riskAssessment: {
         financialRisk: {
           level: 'LOW',
-          rationale: 'Robust liquidity, zero debt defaults, profitable 4 consecutive quarters.',
+          rationale: 'Liquid balance sheet with quick ratio > 1.8. Low probability of commercial default.',
         },
         complianceRisk: {
           level: 'LOW',
-          rationale: 'Clean FDA inspection trail and active ISO certificates validated via official registry.',
+          rationale: 'Fully certified ISO 13485 facility with unblemished FDA inspection track record.',
         },
         contractRisk: {
           level: 'LOW',
-          rationale: 'Standard boilerplate clauses with equitable liability cap and breach remediation clauses.',
+          rationale: 'Balanced liability limits and customary termination terms.',
         },
         pricingRisk: {
           status: 'WITHIN_CEILING',
@@ -119,19 +119,19 @@ const SEED_DATA: Array<{
         confidenceScore: 0.94,
       },
       riskExplanation:
-        'Vendor represents low operational and financial risk. Strong liquidity combined with faultless regulatory compliance justifies standard procurement approval.',
+        'All 4 risk dimensions scored LOW with 94% verifiable evidence coverage across SEC and FDA databases.',
       recommendation:
-        'Approve standard master service agreement with annual compliance audit check-ins.',
+        'Approve procurement contract with standard warranty and annual calibration SLA schedule.',
     },
   },
   {
-    id: 'seed-contradiction-medisupply',
+    id: 'PR-2026-8802-MSI',
     vendorName: 'MediSupply Global Logistics',
     dealSize: 890000,
     details: 'Cold-chain storage and distribution vendor for temperature-sensitive reagents across APAC.',
     createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
     status: {
-      procurementId: 'seed-contradiction-medisupply',
+      procurementId: 'PR-2026-8802-MSI',
       stage: 'COMPLETE',
       investigationPlan: 'FULL',
       revisionCount: 1,
@@ -139,124 +139,46 @@ const SEED_DATA: Array<{
     },
     report: {
       vendorSummary:
-        'MediSupply is a multi-regional cold-chain logistics provider. A critical discrepancy was uncovered between self-reported audit certifications in the RFP document and live FDA CDER enforcement records.',
+        'MediSupply Global provides logistics for pharmaceutical cold chains. A critical contradiction between self-disclosed compliance and FDA warning history was flagged and resolved.',
       financialAssessment:
-        'Adequate working capital, but exposure to potential regulatory penalties in regional hubs.',
+        'Adequate debt service coverage (1.4x), but operating margins compressed due to fuel inflation.',
       complianceFindings:
-        'FDA Import Alert #66-40 issued in Q2 2024 for temperature logging failure at Singapore transit facility. Discrepant with self-certified clean record in RFP contract attachments.',
+        'FDA Warning Letter (WL-2024-0982) active regarding temperature excursions in Singapore distribution facility.',
       flaggedContractClauses: [
-        'Section 6.4: Liability for temperature excursion limited to freight fee rather than product value (High Exposure).',
-        'Section 12: Force majeure includes broad undefined "supply disruption" language.',
+        'Section 6.4: Liability for spoiled biological materials capped at $50,000 per shipment.',
+        'Section 11.2: Force Majeure includes ambient temperature events exceeding 35°C.',
       ],
       evidenceSummary:
-        'Hybrid RAG conflict detection triggered: Graph knowledge node containing official FDA warning letter superseded vector similarity snippet of outdated 2023 internal audit report.',
+        'Contradiction detected: Self-disclosed audit certificate claimed unblemished FDA status; Knowledge Graph retrieved active Warning Letter.',
       fusedContext: {
-        overallConfidence: 0.79,
+        overallConfidence: 0.88,
         fallbackToVectorOnly: false,
         facts: [
           {
-            factId: 'fact-ms-graph-01',
-            text: 'FDA Warning Letter CDER-2024-09 issued May 2024: 3 thermal excursions detected on lyophilized cargo, remediation pending verification.',
+            factId: 'fact-ms-1',
+            text: 'FDA Warning Letter WL-2024-0982 citing uncalibrated continuous cold-chain temperature loggers in Singapore depot.',
             source: 'graph',
-            retrieverScore: 0.98,
+            retrieverScore: 0.99,
             sourceWeight: 1.0,
-            finalScore: 0.98,
+            finalScore: 0.99,
             isPrimary: true,
             contradictionFlag: true,
-            conflictsWith: 'fact-ms-vec-02',
+            conflictsWith: 'fact-ms-2',
           },
           {
-            factId: 'fact-ms-vec-02',
-            text: 'Vendor RFP Exhibit B states "Zero temperature deviations recorded across all pharma transport operations in past 24 months."',
+            factId: 'fact-ms-2',
+            text: 'Vendor RFP response claims: "Zero regulatory findings or warning letters across all global operations (2022-2025)"',
             source: 'vector',
-            retrieverScore: 0.88,
-            sourceWeight: 0.75,
-            finalScore: 0.66,
+            retrieverScore: 0.94,
+            sourceWeight: 0.6,
+            finalScore: 0.564,
             isPrimary: false,
             contradictionFlag: true,
-            conflictsWith: 'fact-ms-graph-01',
+            conflictsWith: 'fact-ms-1',
           },
           {
             factId: 'fact-ms-3',
-            text: 'Dun & Bradstreet Viability rating 4 (Moderate financial stability; low bankruptcy risk).',
-            source: 'vector',
-            retrieverScore: 0.84,
-            sourceWeight: 0.85,
-            finalScore: 0.714,
-            isPrimary: true,
-            contradictionFlag: false,
-          },
-        ],
-      },
-      riskAssessment: {
-        financialRisk: {
-          level: 'MEDIUM',
-          rationale: 'Revenue stable, but uninsured thermal excursion claims may create liability drag.',
-        },
-        complianceRisk: {
-          level: 'HIGH',
-          rationale: 'Active unresolved FDA Warning Letter contradicting vendor self-disclosures.',
-        },
-        contractRisk: {
-          level: 'HIGH',
-          rationale: 'Clause 6.4 restricts reimbursement to carrier freight cost ($15K) on $890K payload.',
-        },
-        pricingRisk: {
-          status: 'WITHIN_CEILING',
-          ceilingPrice: 950000,
-          quotedPrice: 890000,
-        },
-        overallRisk: 'HIGH',
-        confidenceScore: 0.79,
-      },
-      riskExplanation:
-        'Unresolved contradiction between vector RFP text and authoritative FDA graph node reveals masked regulatory exposure and deficient cargo indemnity clauses.',
-      recommendation:
-        'Reject or suspend until vendor proves FDA Warning Letter closeout and amends Section 6.4 payload insurance.',
-    },
-  },
-  {
-    id: 'seed-indeterminate-phytochem',
-    vendorName: 'PhytoChem Novel Therapeutics',
-    dealSize: 620000,
-    details: 'Custom chiral intermediate synthesis for Phase 1 candidate pipeline.',
-    createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
-    status: {
-      procurementId: 'seed-indeterminate-phytochem',
-      stage: 'COMPLETE',
-      investigationPlan: 'LIGHT',
-      revisionCount: 0,
-      maxRevisions: 3,
-    },
-    report: {
-      vendorSummary:
-        'PhytoChem is a specialized chemical synthesis startup offering bespoke reaction pathway services for proprietary pharmaceutical molecules.',
-      financialAssessment:
-        'Early-stage biotechnology venture with 18-month cash runway backed by Series A venture funding.',
-      complianceFindings:
-        'DEA chemical precursor registration confirmed. cGMP compliant pilot batch facility.',
-      flaggedContractClauses: [
-        'Section 4.1: Background IP rights retained by vendor on proprietary catalysts.',
-      ],
-      evidenceSummary:
-        'No direct historical benchmark pricing exists for this novel custom stereoisomer synthesis in internal procurement databases or market index feeds.',
-      fusedContext: {
-        overallConfidence: 0.72,
-        fallbackToVectorOnly: true,
-        facts: [
-          {
-            factId: 'fact-pc-1',
-            text: 'Vendor registered with US DEA for Controlled Substance Precursor Schedule II handling.',
-            source: 'vector',
-            retrieverScore: 0.94,
-            sourceWeight: 0.9,
-            finalScore: 0.846,
-            isPrimary: true,
-            contradictionFlag: false,
-          },
-          {
-            factId: 'fact-pc-2',
-            text: 'Historical database lookup for CAS #149202-88-1 yielded 0 internal and external benchmark matches.',
+            text: 'Liability for cargo spoilage capped at $50,000 against typical batch values of $300,000.',
             source: 'vector',
             retrieverScore: 0.89,
             sourceWeight: 0.9,
@@ -269,22 +191,100 @@ const SEED_DATA: Array<{
       riskAssessment: {
         financialRisk: {
           level: 'MEDIUM',
-          rationale: 'Pre-revenue startup structure; financial solvency relies on ongoing milestone funding.',
+          rationale: 'Moderate liquidity with debt maturity obligations within 12 months.',
+        },
+        complianceRisk: {
+          level: 'HIGH',
+          rationale: 'Active FDA Warning Letter for temperature control failure unresolved in knowledge graph ontology.',
+        },
+        contractRisk: {
+          level: 'HIGH',
+          rationale: 'Severe indemnification gap: $50,000 liability cap on $300,000 average shipment value.',
+        },
+        pricingRisk: {
+          status: 'WITHIN_CEILING',
+          ceilingPrice: 950000,
+          quotedPrice: 890000,
+        },
+        overallRisk: 'HIGH',
+        confidenceScore: 0.88,
+      },
+      riskExplanation:
+        'High compliance risk from unaddressed FDA Warning Letter compounded by high contract risk from inadequate spoilage liability coverage.',
+      recommendation:
+        'Reject or suspend until vendor proves FDA Warning Letter closeout and amends Section 6.4 payload insurance.',
+    },
+  },
+  {
+    id: 'PR-2026-8803-PCT',
+    vendorName: 'PhytoChem Novel Therapeutics',
+    dealSize: 620000,
+    details: 'Custom chiral intermediate synthesis for Phase 1 candidate pipeline.',
+    createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+    status: {
+      procurementId: 'PR-2026-8803-PCT',
+      stage: 'COMPLETE',
+      investigationPlan: 'LIGHT',
+      revisionCount: 0,
+      maxRevisions: 3,
+    },
+    report: {
+      vendorSummary:
+        'PhytoChem is a specialized chemical synthesis startup offering bespoke reaction pathway services for proprietary pharmaceutical molecules.',
+      financialAssessment:
+        'Early-stage biotechnology venture with 18-month cash runway backed by Series A venture funding.',
+      complianceFindings:
+        'DEA Schedule II-V registered analytical laboratory. Good Laboratory Practices (GLP) certified.',
+      flaggedContractClauses: [
+        'Section 4.1: Intellectual property created during custom pathway development vests with vendor unless buy-out fee paid.',
+      ],
+      evidenceSummary:
+        'Novel synthesis compound has no direct category benchmark pricing data in historical index.',
+      fusedContext: {
+        overallConfidence: 0.68,
+        fallbackToVectorOnly: true,
+        facts: [
+          {
+            factId: 'fact-pc-1',
+            text: 'DEA research registration valid through 2027 for Schedule I-IV controlled substance research.',
+            source: 'graph',
+            retrieverScore: 0.95,
+            sourceWeight: 1.0,
+            finalScore: 0.95,
+            isPrimary: true,
+            contradictionFlag: false,
+          },
+          {
+            factId: 'fact-pc-2',
+            text: 'No historical procurement matches for 7-step asymmetric chiral synthesis in category index.',
+            source: 'vector',
+            retrieverScore: 0.72,
+            sourceWeight: 0.9,
+            finalScore: 0.648,
+            isPrimary: true,
+            contradictionFlag: false,
+          },
+        ],
+      },
+      riskAssessment: {
+        financialRisk: {
+          level: 'MEDIUM',
+          rationale: 'Series A startup dependent on venture milestone tranches.',
         },
         complianceRisk: {
           level: 'LOW',
-          rationale: 'Regulatory precursor licenses fully authenticated.',
+          rationale: 'Active DEA credentials and certified GLP laboratory protocols.',
         },
         contractRisk: {
-          level: 'MEDIUM',
-          rationale: 'Catalyst IP ownership retention requires legal alignment.',
+          level: 'HIGH',
+          rationale: 'IP retention clause contradicts enterprise procurement standard assignment policy.',
         },
         pricingRisk: {
           status: 'INDETERMINATE',
           quotedPrice: 620000,
         },
         overallRisk: 'MEDIUM',
-        confidenceScore: 0.72,
+        confidenceScore: 0.68,
       },
       riskExplanation:
         'Pricing Risk is explicitly INDETERMINATE because this custom synthesis lacks market pricing datasets. Financial viability is moderate based on Series A cash runway.',
@@ -293,13 +293,13 @@ const SEED_DATA: Array<{
     },
   },
   {
-    id: 'seed-exceeds-ceiling-nanopharma',
+    id: 'PR-2026-8804-NPH',
     vendorName: 'NanoPharma Automation Corp',
     dealSize: 1450000,
     details: 'Cleanroom high-throughput vial filling and automated inspection robotics.',
     createdAt: new Date(Date.now() - 3600000 * 6).toISOString(),
     status: {
-      procurementId: 'seed-exceeds-ceiling-nanopharma',
+      procurementId: 'PR-2026-8804-NPH',
       stage: 'AWAITING_APPROVAL',
       investigationPlan: 'FULL',
       revisionCount: 2,
@@ -372,18 +372,18 @@ const SEED_DATA: Array<{
     },
   },
   {
-    id: 'seed-failure-missing-vendor',
+    id: 'PR-2026-8805-UKN',
     vendorName: 'OmniSpec Unknown LLC',
     dealSize: 120000,
     details: 'Unregistered foreign reagent distributor with unverified tax identifier.',
     createdAt: new Date(Date.now() - 3600000 * 8).toISOString(),
     status: {
-      procurementId: 'seed-failure-missing-vendor',
+      procurementId: 'PR-2026-8805-UKN',
       stage: 'FAILED',
       investigationPlan: 'LIGHT',
       revisionCount: 0,
       maxRevisions: 3,
-      failureReason: 'Vendor record not found in corporate registries or D&B database. Workflow terminated per compliance protocols (POC §8.3).',
+      failureReason: 'Vendor record not found in corporate registries or D&B database. Workflow terminated per compliance protocol §8.3.',
     },
   },
 ];
@@ -509,9 +509,9 @@ export const mockProcurementAPI: ProcurementAPI = {
     };
 
     // Edge-case simulation for missing vendor name "FAIL_VENDOR"
-    if (request.vendorName.toUpperCase().includes('FAIL_VENDOR')) {
+    if (request.vendorName.toLowerCase().includes('unknown') || request.vendorName.toLowerCase().includes('fail')) {
       status.stage = 'FAILED';
-      status.failureReason = 'Vendor record not found in corporate registries or D&B database (POC §8.3).';
+      status.failureReason = 'Vendor record not found in corporate registries or D&B database (Compliance Protocol §8.3).';
     }
 
     mockStore.set(id, {

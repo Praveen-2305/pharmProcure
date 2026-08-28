@@ -39,7 +39,7 @@ export const VendorReviewPage: React.FC = () => {
     return (
       <div className="max-w-4xl mx-auto p-12 text-center space-y-4">
         <div className="w-10 h-10 border-3 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-sm font-mono text-slate-400">Connecting to LangGraph multi-agent runtime...</p>
+        <p className="text-sm font-mono text-slate-500">Connecting to LangGraph multi-agent runtime...</p>
       </div>
     );
   }
@@ -47,16 +47,16 @@ export const VendorReviewPage: React.FC = () => {
   if (error || !status) {
     return (
       <div className="max-w-4xl mx-auto p-8 text-left space-y-4">
-        <div className="p-6 rounded-xl bg-rose-950/60 border border-rose-500/50 text-rose-200">
+        <div className="p-6 rounded-xl bg-rose-50 border border-rose-200 text-rose-800">
           <div className="flex items-center gap-3 font-semibold text-base mb-2">
-            <AlertOctagon className="w-6 h-6 text-rose-400" />
+            <AlertOctagon className="w-6 h-6 text-rose-500" />
             <span>Investigation Runtime Exception</span>
           </div>
-          <p className="text-sm text-rose-300">{error || 'Unknown workflow identifier.'}</p>
+          <p className="text-sm text-rose-600">{error || 'Unknown workflow identifier.'}</p>
           <div className="mt-4">
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-xs font-semibold text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700 transition"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 transition"
             >
               <ArrowLeft className="w-4 h-4" /> Back to Dashboard
             </Link>
@@ -73,18 +73,18 @@ export const VendorReviewPage: React.FC = () => {
   return (
     <div className="max-w-5xl mx-auto p-6 md:p-8 space-y-8 text-left">
       {/* Top Breadcrumb & Metadata Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
-            <Link to="/" className="hover:text-teal-400 transition flex items-center gap-1">
+            <Link to="/" className="hover:text-teal-600 transition flex items-center gap-1">
               <ArrowLeft className="w-3.5 h-3.5" /> All Cases
             </Link>
             <span>/</span>
-            <span className="text-teal-400">{status.procurementId}</span>
+            <span className="text-teal-600">{status.procurementId}</span>
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
             Investigation & Audit Casefile
-            <span className="text-xs font-mono font-normal px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300">
+            <span className="text-xs font-mono font-normal px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-500">
               Plan: {status.investigationPlan}
             </span>
           </h1>
@@ -93,8 +93,8 @@ export const VendorReviewPage: React.FC = () => {
         {/* Critic Revision Loop Badge */}
         <div className="flex items-center gap-3">
           {status.revisionCount > 0 && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-teal-950/80 border border-teal-500/40 text-teal-300 text-xs font-mono">
-              <RefreshCw className="w-3.5 h-3.5 text-teal-400 animate-spin" style={{ animationDuration: '4s' }} />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-teal-50 border border-teal-200 text-teal-700 text-xs font-mono">
+              <RefreshCw className="w-3.5 h-3.5 text-teal-500 animate-spin" style={{ animationDuration: '4s' }} />
               <span>
                 Critic Loop: Revision {status.revisionCount} of {status.maxRevisions}
               </span>
@@ -104,7 +104,7 @@ export const VendorReviewPage: React.FC = () => {
           {status.stage === 'AWAITING_APPROVAL' && (
             <Link
               to="/queue"
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-teal-400 hover:bg-teal-300 text-slate-950 text-xs font-semibold shadow-md transition"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold shadow-md transition"
             >
               <ShieldCheck className="w-4 h-4" /> Go to Approval Action
             </Link>
@@ -114,10 +114,10 @@ export const VendorReviewPage: React.FC = () => {
 
       {/* Multi-Agent Progress Tracker (Active during non-terminal or complete) */}
       {!isFailed && (
-        <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between text-xs font-mono uppercase text-slate-400">
             <span>Autonomous Workflow Stage Pipeline</span>
-            <span className="text-teal-400 font-semibold">
+            <span className="text-teal-600 font-semibold">
               {status.stage === 'COMPLETE' ? 'Investigation Complete' : `Executing: ${status.stage}`}
             </span>
           </div>
@@ -134,17 +134,17 @@ export const VendorReviewPage: React.FC = () => {
                   className={cn(
                     'p-3 rounded-lg border flex flex-col justify-between text-left transition-all',
                     isCurrent
-                      ? 'bg-teal-500/10 border-teal-500/60 ring-1 ring-teal-500/30 text-white'
+                      ? 'bg-teal-50 border-teal-300 ring-1 ring-teal-400/30 text-slate-900'
                       : isPast
-                      ? 'bg-slate-800/40 border-slate-700/60 text-slate-300'
-                      : 'bg-slate-950/30 border-slate-800/40 text-slate-400 opacity-60'
+                      ? 'bg-slate-50 border-slate-200 text-slate-600'
+                      : 'bg-white border-slate-100 text-slate-400 opacity-60'
                   )}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <Icon
                       className={cn(
                         'w-4 h-4',
-                        isCurrent ? 'text-teal-400 animate-pulse' : isPast ? 'text-emerald-400' : 'text-slate-400'
+                        isCurrent ? 'text-teal-500 animate-pulse' : isPast ? 'text-emerald-500' : 'text-slate-300'
                       )}
                     />
                     <span className="text-[10px] font-mono text-slate-400">0{idx + 1}</span>
@@ -162,24 +162,24 @@ export const VendorReviewPage: React.FC = () => {
         </div>
       )}
 
-      {/* Failure Cases Rendered Distinctly (POC §8.3) */}
+      {/* Failure Cases Rendered Distinctly */}
       {isFailed && (
-        <div className="bg-rose-950/40 border border-rose-500/50 rounded-xl p-6 shadow-xl space-y-4">
+        <div className="bg-rose-50 border border-rose-200 rounded-xl p-6 shadow-sm space-y-4">
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-rose-500/20 border border-rose-500/40 text-rose-400">
+            <div className="p-2 rounded-lg bg-rose-100 border border-rose-200 text-rose-500">
               <AlertOctagon className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">Investigation Terminated (POC §8.3 Exception)</h2>
-              <p className="text-sm text-rose-300 mt-1">
+              <h2 className="text-lg font-bold text-slate-900">Investigation Terminated (Regulatory Protocol §8.3)</h2>
+              <p className="text-sm text-rose-600 mt-1">
                 {status.failureReason || 'The workflow encountered an unrecoverable regulatory or validation stop condition.'}
               </p>
             </div>
           </div>
 
-          <div className="p-4 rounded-lg bg-slate-950/60 border border-rose-900/60 text-xs font-mono text-slate-300 space-y-2">
-            <div className="text-slate-400 font-semibold uppercase">Encountered Failure State:</div>
-            <p className="text-rose-200">
+          <div className="p-4 rounded-lg bg-white border border-rose-200 text-xs font-mono text-slate-600 space-y-2">
+            <div className="text-slate-500 font-semibold uppercase">Encountered Failure State:</div>
+            <p className="text-rose-600">
               {status.failureReason?.includes('Vendor record not found')
                 ? '• Vendor record could not be matched in official SEC EDGAR, D&B, or State Licensing databases. Pipeline halted.'
                 : status.failureReason?.includes('Max revision limit')
@@ -191,7 +191,7 @@ export const VendorReviewPage: React.FC = () => {
           <div className="pt-2 flex gap-3">
             <Link
               to="/submit"
-              className="px-4 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-600 transition"
+              className="px-4 py-2 text-xs font-semibold rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition"
             >
               Submit New Request
             </Link>
@@ -203,46 +203,46 @@ export const VendorReviewPage: React.FC = () => {
       {isCompleteOrReview && report && (
         <div className="space-y-8">
           {/* Executive Summary & Recommendation Banner */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-md space-y-4">
-            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-teal-400 border-b border-slate-800 pb-3">
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
+            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-teal-600 border-b border-slate-100 pb-3">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Report Writer Synthesis (POC §4 Step 8)</span>
+              <span>Report Writer Synthesis (Multi-Agent Synthesis Engine)</span>
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-base font-semibold text-white">Executive Case Summary</h2>
-              <p className="text-sm text-slate-300 leading-relaxed">{report.vendorSummary}</p>
+              <h2 className="text-base font-semibold text-slate-900">Executive Case Summary</h2>
+              <p className="text-sm text-slate-600 leading-relaxed">{report.vendorSummary}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              <div className="p-4 rounded-lg bg-slate-950/50 border border-slate-800 text-xs space-y-1.5">
-                <span className="font-semibold text-teal-300 uppercase font-mono text-[11px] block">
+              <div className="p-4 rounded-lg bg-teal-50 border border-teal-200 text-xs space-y-1.5">
+                <span className="font-semibold text-teal-700 uppercase font-mono text-[11px] block">
                   Strategic Recommendation:
                 </span>
-                <p className="text-slate-200 leading-relaxed">{report.recommendation}</p>
+                <p className="text-slate-700 leading-relaxed">{report.recommendation}</p>
               </div>
 
-              <div className="p-4 rounded-lg bg-slate-950/50 border border-slate-800 text-xs space-y-1.5">
-                <span className="font-semibold text-slate-300 uppercase font-mono text-[11px] block">
+              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-1.5">
+                <span className="font-semibold text-slate-600 uppercase font-mono text-[11px] block">
                   Risk Assessment Rationale:
                 </span>
-                <p className="text-slate-300 leading-relaxed">{report.riskExplanation}</p>
+                <p className="text-slate-600 leading-relaxed">{report.riskExplanation}</p>
               </div>
             </div>
 
             {/* Flagged Contract Clauses */}
             {report.flaggedContractClauses.length > 0 && (
               <div className="pt-2 space-y-2">
-                <span className="text-xs font-semibold text-slate-300 uppercase font-mono">
+                <span className="text-xs font-semibold text-slate-600 uppercase font-mono">
                   Flagged Contract Clauses:
                 </span>
                 <div className="space-y-1.5">
                   {report.flaggedContractClauses.map((clause, i) => (
                     <div
                       key={i}
-                      className="p-2.5 rounded-lg bg-slate-800/40 border border-slate-700/60 text-xs text-slate-300 flex items-start gap-2"
+                      className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-xs text-slate-700 flex items-start gap-2"
                     >
-                      <FileWarning className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                      <FileWarning className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                       <span>{clause}</span>
                     </div>
                   ))}

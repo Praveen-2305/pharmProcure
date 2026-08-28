@@ -36,39 +36,39 @@ export const Sidebar: React.FC = () => {
 
   const quickCases = [
     {
-      id: 'seed-clean-biogen',
-      label: 'Clean Pass (BioGen)',
+      id: 'PR-2026-8801-BIO',
+      label: 'BioGen Diagnostics',
       tag: 'Low Risk',
-      tagColor: 'text-emerald-400 border-emerald-800 bg-emerald-950/40',
+      tagColor: 'text-emerald-700 border-emerald-300 bg-emerald-50',
     },
     {
-      id: 'seed-contradiction-medisupply',
-      label: 'Contradiction Case',
+      id: 'PR-2026-8802-MSI',
+      label: 'MediSupply Global',
       tag: 'Flagged',
-      tagColor: 'text-rose-400 border-rose-800 bg-rose-950/40',
+      tagColor: 'text-rose-700 border-rose-300 bg-rose-50',
     },
     {
-      id: 'seed-indeterminate-phytochem',
-      label: 'Indeterminate Price',
-      tag: 'Missing Ref',
-      tagColor: 'text-cyan-400 border-cyan-800 bg-cyan-950/40',
+      id: 'PR-2026-8803-PCT',
+      label: 'PhytoChem Research',
+      tag: 'Custom Price',
+      tagColor: 'text-cyan-700 border-cyan-300 bg-cyan-50',
     },
     {
-      id: 'seed-exceeds-ceiling-nanopharma',
-      label: 'Exceeds Ceiling',
-      tag: 'Over Budget',
-      tagColor: 'text-amber-400 border-amber-800 bg-amber-950/40',
+      id: 'PR-2026-8804-NPH',
+      label: 'NanoPharma Corp',
+      tag: 'Over Ceiling',
+      tagColor: 'text-amber-700 border-amber-300 bg-amber-50',
     },
     {
-      id: 'seed-failure-missing-vendor',
-      label: 'Failed Vendor Lookup',
+      id: 'PR-2026-8805-UKN',
+      label: 'Apex BioLogistics',
       tag: 'Terminated',
-      tagColor: 'text-slate-400 border-slate-700 bg-slate-800/40',
+      tagColor: 'text-slate-600 border-slate-300 bg-slate-100',
     },
   ];
 
   return (
-    <aside className="w-64 border-r border-slate-800 bg-slate-900/60 flex flex-col justify-between shrink-0 min-h-[calc(100vh-4rem)]">
+    <aside className="w-64 border-r border-slate-200 bg-white flex flex-col justify-between shrink-0 min-h-[calc(100vh-4rem)]">
       <div className="p-4 space-y-6">
         <div>
           <div className="px-3 mb-2 text-[10px] font-mono uppercase tracking-wider text-slate-400">
@@ -85,12 +85,12 @@ export const Sidebar: React.FC = () => {
                     cn(
                       'flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-all group',
                       isActive
-                        ? 'bg-teal-500/10 text-teal-300 border border-teal-500/30 shadow-sm'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent'
+                        ? 'bg-teal-50 text-teal-700 border border-teal-200 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-transparent'
                     )
                   }
                 >
-                  <Icon className="w-4 h-4 shrink-0 transition-colors group-hover:text-teal-400" />
+                  <Icon className="w-4 h-4 shrink-0 transition-colors group-hover:text-teal-500" />
                   <div className="flex flex-col text-left">
                     <span className="font-semibold">{item.label}</span>
                     <span className="text-[10px] text-slate-400 font-normal leading-tight">
@@ -103,11 +103,11 @@ export const Sidebar: React.FC = () => {
           </nav>
         </div>
 
-        {/* Quick Seed Review Benchmarks */}
-        <div className="pt-2 border-t border-slate-800/80">
+        {/* Priority Case Ledger */}
+        <div className="pt-2 border-t border-slate-200">
           <div className="px-3 mb-2 flex items-center justify-between">
             <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
-              Demo Scenarios
+              Recent Case Files
             </span>
             <Layers className="w-3 h-3 text-slate-400" />
           </div>
@@ -120,8 +120,8 @@ export const Sidebar: React.FC = () => {
                   cn(
                     'flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-colors group',
                     isActive
-                      ? 'bg-slate-800 text-white font-medium border border-slate-700'
-                      : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/40'
+                      ? 'bg-slate-100 text-slate-900 font-medium border border-slate-200'
+                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
                   )
                 }
               >
@@ -140,9 +140,9 @@ export const Sidebar: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-4 border-t border-slate-800 text-[11px] text-slate-400 bg-slate-950/40 space-y-1">
-        <div className="flex items-center gap-1.5 font-medium text-slate-400">
-          <Layers className="w-3.5 h-3.5 text-teal-400" />
+      <div className="p-4 border-t border-slate-200 text-[11px] text-slate-500 bg-slate-50 space-y-1">
+        <div className="flex items-center gap-1.5 font-medium text-slate-600">
+          <Layers className="w-3.5 h-3.5 text-teal-500" />
           <span>LangGraph Architecture</span>
         </div>
         <p className="text-[10px] leading-relaxed text-slate-400">

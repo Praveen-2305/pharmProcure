@@ -72,18 +72,18 @@ export const SubmitRequestForm: React.FC = () => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 text-left">
       {generalError && (
-        <div className="p-4 rounded-lg bg-rose-950/50 border border-rose-500/40 text-rose-300 text-sm flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+        <div className="p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-rose-500" />
           <div>
             <p className="font-semibold">Workflow Submission Error</p>
-            <p className="text-xs text-rose-200 mt-0.5">{generalError}</p>
+            <p className="text-xs text-rose-600 mt-0.5">{generalError}</p>
           </div>
         </div>
       )}
 
       {/* Investigation Plan Selector */}
       <div className="space-y-2">
-        <label className="block text-xs font-mono uppercase tracking-wider text-slate-400">
+        <label className="block text-xs font-mono uppercase tracking-wider text-slate-500">
           Investigation Plan Depth
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -93,15 +93,15 @@ export const SubmitRequestForm: React.FC = () => {
             className={cn(
               'flex items-start gap-3 p-3.5 rounded-lg border text-left transition-all',
               investigationPlan === 'LIGHT'
-                ? 'bg-teal-500/10 border-teal-500/50 text-white ring-1 ring-teal-500/30'
-                : 'bg-slate-800/40 border-slate-700/60 text-slate-400 hover:bg-slate-800/80 hover:text-slate-200'
+                ? 'bg-teal-50 border-teal-300 text-slate-900 ring-1 ring-teal-400/40'
+                : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-700'
             )}
           >
-            <Zap className={cn('w-5 h-5 mt-0.5', investigationPlan === 'LIGHT' ? 'text-teal-400' : 'text-slate-400')} />
+            <Zap className={cn('w-5 h-5 mt-0.5', investigationPlan === 'LIGHT' ? 'text-teal-500' : 'text-slate-400')} />
             <div>
               <div className="text-sm font-semibold flex items-center gap-2">
                 Light Investigation
-                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-500">
                   Fast
                 </span>
               </div>
@@ -117,15 +117,15 @@ export const SubmitRequestForm: React.FC = () => {
             className={cn(
               'flex items-start gap-3 p-3.5 rounded-lg border text-left transition-all',
               investigationPlan === 'FULL'
-                ? 'bg-teal-500/10 border-teal-500/50 text-white ring-1 ring-teal-500/30'
-                : 'bg-slate-800/40 border-slate-700/60 text-slate-400 hover:bg-slate-800/80 hover:text-slate-200'
+                ? 'bg-teal-50 border-teal-300 text-slate-900 ring-1 ring-teal-400/40'
+                : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-700'
             )}
           >
-            <ShieldCheck className={cn('w-5 h-5 mt-0.5', investigationPlan === 'FULL' ? 'text-teal-400' : 'text-slate-400')} />
+            <ShieldCheck className={cn('w-5 h-5 mt-0.5', investigationPlan === 'FULL' ? 'text-teal-500' : 'text-slate-400')} />
             <div>
               <div className="text-sm font-semibold flex items-center gap-2">
                 Full Hybrid Investigation
-                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-teal-950 border border-teal-800 text-teal-300">
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-teal-100 border border-teal-200 text-teal-700">
                   Recommended
                 </span>
               </div>
@@ -140,8 +140,8 @@ export const SubmitRequestForm: React.FC = () => {
       {/* Vendor Name & Deal Size */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className="space-y-1.5">
-          <label htmlFor="vendorName" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono">
-            Vendor Legal Entity Name <span className="text-rose-400">*</span>
+          <label htmlFor="vendorName" className="block text-xs font-semibold text-slate-600 uppercase tracking-wider font-mono">
+            Vendor Legal Entity Name <span className="text-rose-500">*</span>
           </label>
           <input
             id="vendorName"
@@ -150,18 +150,18 @@ export const SubmitRequestForm: React.FC = () => {
             value={vendorName}
             onChange={(e) => setVendorName(e.target.value)}
             className={cn(
-              'w-full px-3.5 py-2.5 rounded-lg bg-slate-800/80 border text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:ring-2 transition',
+              'w-full px-3.5 py-2.5 rounded-lg bg-slate-50 border text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 transition',
               errors.vendorName
-                ? 'border-rose-500 focus:ring-rose-500/30'
-                : 'border-slate-700 focus:border-teal-500 focus:ring-teal-500/20'
+                ? 'border-rose-400 focus:ring-rose-200'
+                : 'border-slate-200 focus:border-teal-400 focus:ring-teal-100'
             )}
           />
-          {errors.vendorName && <p className="text-xs text-rose-400">{errors.vendorName}</p>}
+          {errors.vendorName && <p className="text-xs text-rose-500">{errors.vendorName}</p>}
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor="dealSize" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono">
-            Quoted Deal Size ($ USD) <span className="text-rose-400">*</span>
+          <label htmlFor="dealSize" className="block text-xs font-semibold text-slate-600 uppercase tracking-wider font-mono">
+            Quoted Deal Size ($ USD) <span className="text-rose-500">*</span>
           </label>
           <div className="relative">
             <span className="absolute left-3.5 top-2.5 text-slate-400 text-sm font-mono">$</span>
@@ -174,34 +174,34 @@ export const SubmitRequestForm: React.FC = () => {
               value={dealSize}
               onChange={(e) => setDealSize(e.target.value)}
               className={cn(
-                'w-full pl-8 pr-3.5 py-2.5 rounded-lg bg-slate-800/80 border text-slate-100 placeholder-slate-500 text-sm font-mono focus:outline-none focus:ring-2 transition',
+                'w-full pl-8 pr-3.5 py-2.5 rounded-lg bg-slate-50 border text-slate-800 placeholder-slate-400 text-sm font-mono focus:outline-none focus:ring-2 transition',
                 errors.dealSize
-                  ? 'border-rose-500 focus:ring-rose-500/30'
-                  : 'border-slate-700 focus:border-teal-500 focus:ring-teal-500/20'
+                  ? 'border-rose-400 focus:ring-rose-200'
+                  : 'border-slate-200 focus:border-teal-400 focus:ring-teal-100'
               )}
             />
           </div>
-          {errors.dealSize && <p className="text-xs text-rose-400">{errors.dealSize}</p>}
+          {errors.dealSize && <p className="text-xs text-rose-500">{errors.dealSize}</p>}
         </div>
       </div>
 
       {/* Contract Upload */}
       <div className="space-y-1.5">
-        <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono">
+        <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider font-mono">
           Contract / RFP Document <span className="text-slate-400 font-normal font-sans">(Optional PDF/DOCX)</span>
         </label>
-        <div className="border-2 border-dashed border-slate-700 hover:border-slate-600 rounded-lg p-4 text-center bg-slate-800/30 transition">
+        <div className="border-2 border-dashed border-slate-200 hover:border-teal-300 rounded-lg p-4 text-center bg-slate-50 transition">
           {contractFile ? (
-            <div className="flex items-center justify-between px-3 py-2 bg-slate-800 rounded-md border border-slate-700">
-              <div className="flex items-center gap-2 text-sm text-slate-200">
-                <FileText className="w-4 h-4 text-teal-400" />
+            <div className="flex items-center justify-between px-3 py-2 bg-white rounded-md border border-slate-200">
+              <div className="flex items-center gap-2 text-sm text-slate-700">
+                <FileText className="w-4 h-4 text-teal-500" />
                 <span className="font-mono text-xs truncate max-w-[250px]">{contractFile.name}</span>
                 <span className="text-xs text-slate-400">({(contractFile.size / 1024).toFixed(0)} KB)</span>
               </div>
               <button
                 type="button"
                 onClick={() => setContractFile(null)}
-                className="text-xs text-rose-400 hover:text-rose-300 underline"
+                className="text-xs text-rose-500 hover:text-rose-400 underline"
               >
                 Remove
               </button>
@@ -209,8 +209,8 @@ export const SubmitRequestForm: React.FC = () => {
           ) : (
             <label className="cursor-pointer flex flex-col items-center justify-center gap-1.5">
               <Upload className="w-6 h-6 text-slate-400" />
-              <div className="text-xs text-slate-300">
-                <span className="text-teal-400 font-semibold hover:underline">Click to upload document</span> or drag & drop
+              <div className="text-xs text-slate-500">
+                <span className="text-teal-600 font-semibold hover:underline">Click to upload document</span> or drag & drop
               </div>
               <p className="text-[11px] text-slate-400">Master Service Agreements, RFP Responses, or Certificates</p>
               <input
@@ -228,8 +228,8 @@ export const SubmitRequestForm: React.FC = () => {
 
       {/* Procurement Details */}
       <div className="space-y-1.5">
-        <label htmlFor="procurementDetails" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono">
-          Scope of Procurement & Details <span className="text-rose-400">*</span>
+        <label htmlFor="procurementDetails" className="block text-xs font-semibold text-slate-600 uppercase tracking-wider font-mono">
+          Scope of Procurement & Details <span className="text-rose-500">*</span>
         </label>
         <textarea
           id="procurementDetails"
@@ -238,19 +238,19 @@ export const SubmitRequestForm: React.FC = () => {
           value={procurementDetails}
           onChange={(e) => setProcurementDetails(e.target.value)}
           className={cn(
-            'w-full px-3.5 py-2.5 rounded-lg bg-slate-800/80 border text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:ring-2 transition leading-relaxed',
+            'w-full px-3.5 py-2.5 rounded-lg bg-slate-50 border text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 transition leading-relaxed',
             errors.procurementDetails
-              ? 'border-rose-500 focus:ring-rose-500/30'
-              : 'border-slate-700 focus:border-teal-500 focus:ring-teal-500/20'
+              ? 'border-rose-400 focus:ring-rose-200'
+              : 'border-slate-200 focus:border-teal-400 focus:ring-teal-100'
           )}
         />
         {errors.procurementDetails && (
-          <p className="text-xs text-rose-400">{errors.procurementDetails}</p>
+          <p className="text-xs text-rose-500">{errors.procurementDetails}</p>
         )}
       </div>
 
       {/* Action Footer */}
-      <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
+      <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
         <p className="text-xs text-slate-400 font-mono">
           Initiates autonomous multi-agent LangGraph workflow
         </p>
@@ -258,15 +258,15 @@ export const SubmitRequestForm: React.FC = () => {
           type="submit"
           disabled={isSubmitting}
           className={cn(
-            'inline-flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold text-slate-950 transition-all shadow-md',
+            'inline-flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-md',
             isSubmitting
-              ? 'bg-teal-700 cursor-not-allowed opacity-70'
-              : 'bg-teal-400 hover:bg-teal-300 shadow-teal-950/40 hover:shadow-teal-900/60'
+              ? 'bg-teal-400 cursor-not-allowed opacity-70 text-white'
+              : 'bg-teal-600 hover:bg-teal-500 text-white shadow-teal-200 hover:shadow-teal-300'
           )}
         >
           {isSubmitting ? (
             <>
-              <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               <span>Launching Investigation...</span>
             </>
           ) : (
