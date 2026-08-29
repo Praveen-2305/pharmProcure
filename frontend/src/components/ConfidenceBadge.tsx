@@ -1,6 +1,8 @@
 import React from 'react';
 import { cn } from '../lib/utils';
-import { Database, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Database } from 'lucide-react';
+import { Badge } from './ui/badge';
+import { Progress } from './ui/progress';
 
 interface ConfidenceBadgeProps {
   score: number; // 0.0 to 1.0
@@ -15,61 +17,30 @@ export const ConfidenceBadge: React.FC<ConfidenceBadgeProps> = ({
   showProgress = false,
   size = 'md',
 }) => {
-  // Score normalization: 0 - 100%
   const percentage = Math.round(Math.min(Math.max(score, 0), 1) * 100);
 
-  // Decoupled palette: using indigo, cyan, slate (Strictly avoiding Green/Amber/Red risk severity tokens)
   const getBadgeStyle = () => {
-    if (percentage >= 85) {
-      return {
-        bg: 'bg-indigo-50 border-indigo-200 text-indigo-800',
-        bar: 'bg-indigo-500',
-        badgeText: 'Robust Evidence',
-      };
-    }
-    if (percentage >= 70) {
-      return {
-        bg: 'bg-cyan-50 border-cyan-200 text-cyan-800',
-        bar: 'bg-cyan-500',
-        badgeText: 'Adequate Evidence',
-      };
-    }
-    return {
-      bg: 'bg-slate-100 border-slate-200 text-slate-600',
-      bar: 'bg-slate-400',
-      badgeText: 'Sparse Evidence',
-    };
+    if (percentage >= 85) return { variant: 'default' as const, badgeText: 'Robust' };
+    if (percentage >= 70) return { variant: 'secondary' as const, badgeText: 'Adequate' };
+    return { variant: 'outline' as const, badgeText: 'Sparse' };
   };
 
   const style = getBadgeStyle();
 
   return (
     <div
-      className={cn(
-        'inline-flex flex-col gap-1 rounded-lg border px-3 py-1.5 shadow-sm',
-        style.bg,
-        className
-      )}
-      title="Evidence completeness score indicates the breadth and depth of cross-verified source documents, independent of risk severity."
+      className={cn('flex flex-col gap-2', className)}
+      title="Evidence completeness score indicates the breadth and depth of cross-verified source documents."
     >
-      <div className="flex items-center justify-between gap-2.5">
-        <div className="flex items-center gap-1.5 text-xs font-medium tracking-wide">
-          <Database className="w-3.5 h-3.5 opacity-70" />
-          <span className="text-slate-500">Evidence Completeness:</span>
-          <span className="font-mono font-semibold text-slate-800">{percentage}%</span>
-        </div>
-        <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-500">
+      <div className="flex items-center gap-2">
+        <Database className="size-3.5 text-muted-foreground" />
+        <span className="text-sm font-medium text-foreground">{percentage}%</span>
+        <Badge variant={style.variant} className="text-xs rounded-sm px-1.5 py-0.5">
           {style.badgeText}
-        </span>
+        </Badge>
       </div>
-
       {showProgress && (
-        <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-          <div
-            className={cn('h-full rounded-full transition-all duration-500', style.bar)}
-            style={{ width: `${percentage}%` }}
-          />
-        </div>
+        <Progress value={percentage} className="h-1.5 max-w-[120px]" />
       )}
     </div>
   );

@@ -14,11 +14,11 @@ interface AuthContextType {
 }
 
 const defaultUser: User = {
-  id: 'usr-9042',
-  name: 'Elena Rostova',
+  id: 'usr_01H8X',
+  name: 'Aria Vance',
   email: 'e.rostova@autonosource.internal',
   role: 'Procurement Officer',
-  avatarInitials: 'ER',
+  avatarInitials: 'AV',
 };
 
 const AuthContext = createContext<AuthContextType>({

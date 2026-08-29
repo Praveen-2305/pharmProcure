@@ -8,23 +8,34 @@ import { formatCurrency, formatDate } from '../../lib/utils';
 import {
   LayoutDashboard,
   Search,
-  Filter,
-  ArrowUpRight,
-  ShieldCheck,
-  AlertOctagon,
-  CheckCircle2,
-  Clock,
-  Layers,
+  ArrowRight,
   FilePlus2,
   SlidersHorizontal,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 export const DashboardPage: React.FC = () => {
   const [items, setItems] = useState<ProcurementItemSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('ALL');
+
+  useEffect(() => {
+    document.title = "Executive Dashboard | AutonoSource";
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -54,208 +65,204 @@ export const DashboardPage: React.FC = () => {
   });
 
   return (
-    <div className="max-w-6xl mx-auto p-6 md:p-8 space-y-6 text-left">
+    <div className="max-w-[1400px] mx-auto p-6 md:p-8 space-y-6 text-left">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-teal-600 mb-1">
-            <LayoutDashboard className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-2 text-sm font-semibold text-primary mb-1">
+            <LayoutDashboard className="size-4" />
             <span>Audit Trail & Governance Log</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Procurement Cases & Intelligence Log
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">
+            Procurement Cases
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Auditable archive of all multi-agent risk assessments, cross-source fusion citations, and executive determinations.
-          </p>
         </div>
 
-        <Link
-          to="/submit"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold shadow-md transition"
-        >
-          <FilePlus2 className="w-4 h-4" />
+        <Link to="/submit" className={cn(buttonVariants({ variant: 'default' }), "gap-2")}>
+          <FilePlus2 className="size-4" />
           <span>New Investigation</span>
         </Link>
       </div>
 
       {/* Metrics Summary Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-[10px] font-mono text-slate-400 uppercase block">Total Case Audits</span>
-          <span className="text-xl font-bold text-slate-900 font-mono mt-1 block">{items.length}</span>
-        </div>
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-[10px] font-mono text-teal-600 uppercase block">Completed Reviews</span>
-          <span className="text-xl font-bold text-teal-700 font-mono mt-1 block">
-            {items.filter((i) => i.status.stage === 'COMPLETE').length}
-          </span>
-        </div>
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-[10px] font-mono text-amber-600 uppercase block">Awaiting Sign-off</span>
-          <span className="text-xl font-bold text-amber-700 font-mono mt-1 block">
-            {items.filter((i) => i.status.stage === 'AWAITING_APPROVAL').length}
-          </span>
-        </div>
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-[10px] font-mono text-rose-600 uppercase block">Terminated / Failed</span>
-          <span className="text-xl font-bold text-rose-700 font-mono mt-1 block">
-            {items.filter((i) => i.status.stage === 'FAILED').length}
-          </span>
-        </div>
+        <Card className="shadow-sm">
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground">Total Case Audits</CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <span className="text-2xl font-bold text-foreground block">{items.length}</span>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm">
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground">Completed Reviews</CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <span className="text-2xl font-bold text-foreground block">
+              {items.filter((i) => i.status.stage === 'COMPLETE').length}
+            </span>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm">
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground">Awaiting Sign-off</CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <span className="text-2xl font-bold text-foreground block">
+              {items.filter((i) => i.status.stage === 'AWAITING_APPROVAL').length}
+            </span>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm">
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground">Terminated / Failed</CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <span className="text-2xl font-bold text-destructive block">
+              {items.filter((i) => i.status.stage === 'FAILED').length}
+            </span>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-          <input
-            type="text"
+          <Search className="size-4 text-muted-foreground absolute left-3 top-2.5" />
+          <Input
             placeholder="Search by vendor name or ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-xs focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
+            className="pl-9"
           />
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
-          <span className="text-xs text-slate-400 flex items-center gap-1 font-mono shrink-0">
-            <SlidersHorizontal className="w-3 h-3" /> Filter:
+          <span className="text-sm text-muted-foreground flex items-center gap-1.5 shrink-0">
+            <SlidersHorizontal className="size-4" /> Filter:
           </span>
           {['ALL', 'COMPLETE', 'AWAITING_APPROVAL', 'IN_PROGRESS', 'FAILED'].map((stg) => (
-            <button
+            <Button
               key={stg}
+              variant={stageFilter === stg ? "default" : "secondary"}
+              size="sm"
               onClick={() => setStageFilter(stg)}
-              className={cn(
-                'px-2.5 py-1 rounded-md text-[11px] font-mono transition uppercase whitespace-nowrap',
-                stageFilter === stg
-                  ? 'bg-teal-50 text-teal-700 border border-teal-300 font-semibold'
-                  : 'text-slate-500 hover:text-slate-800 bg-slate-50 border border-slate-200 hover:border-slate-300'
-              )}
+              className="text-xs capitalize"
             >
-              {stg.replace('_', ' ')}
-            </button>
+              {stg === 'ALL' ? 'All' : stg.replace('_', ' ').toLowerCase()}
+            </Button>
           ))}
         </div>
       </div>
 
       {/* Audit Log Table */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-mono uppercase text-[10px]">
-              <tr>
-                <th className="px-5 py-3.5">Vendor & Case ID</th>
-                <th className="px-4 py-3.5">Deal Size</th>
-                <th className="px-4 py-3.5">Workflow Stage</th>
-                <th className="px-4 py-3.5">Risk Severity</th>
-                <th className="px-4 py-3.5">Evidence Quality</th>
-                <th className="px-4 py-3.5">Created</th>
-                <th className="px-4 py-3.5 text-right">Audit Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
+      <Card className="border-border shadow-sm flex flex-col bg-card">
+        <div className="overflow-y-auto max-h-[600px] w-full rounded-xl">
+          <Table className="min-w-[1000px] [&_th]:px-6 [&_th]:py-4 [&_td]:px-6 [&_td]:py-5">
+            <TableHeader className="bg-muted/50 sticky top-0 z-10 backdrop-blur-md shadow-sm">
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="font-semibold text-sm text-muted-foreground h-12">Vendor</TableHead>
+                <TableHead className="font-semibold text-sm text-muted-foreground h-12">Deal Size</TableHead>
+                <TableHead className="font-semibold text-sm text-muted-foreground h-12">Status</TableHead>
+                <TableHead className="font-semibold text-sm text-muted-foreground h-12">Risk</TableHead>
+                <TableHead className="font-semibold text-sm text-muted-foreground h-12">Evidence</TableHead>
+                <TableHead className="font-semibold text-sm text-muted-foreground h-12">Date</TableHead>
+                <TableHead className="text-right font-semibold text-sm text-muted-foreground h-12">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {loading ? (
-                <tr>
-                  <td colSpan={7} className="px-5 py-10 text-center text-slate-400 font-mono">
-                    Loading case ledger...
-                  </td>
-                </tr>
+                <TableRow>
+                  <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="size-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      Loading cases...
+                    </div>
+                  </TableCell>
+                </TableRow>
               ) : filteredItems.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-5 py-10 text-center text-slate-400">
-                    No cases match the selected filter query.
-                  </td>
-                </tr>
+                <TableRow>
+                  <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                    No cases match the selected filter.
+                  </TableCell>
+                </TableRow>
               ) : (
                 filteredItems.map((item) => {
                   const risk = item.report?.riskAssessment.overallRisk;
                   const confidence = item.report?.riskAssessment.confidenceScore;
 
                   return (
-                    <tr key={item.procurementId} className="hover:bg-slate-50 transition">
-                      <td className="px-5 py-4">
-                        <div className="font-semibold text-slate-900 text-sm">{item.vendorName}</div>
-                        <div className="font-mono text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5">
-                          <span>{item.procurementId}</span>
-                          <span className="px-1 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-500">
+                    <TableRow key={item.procurementId} className="hover:bg-muted/20">
+                      <TableCell>
+                        <div className="font-semibold text-foreground text-sm">{item.vendorName}</div>
+                        <div className="text-xs text-muted-foreground flex items-center gap-2 mt-1.5">
+                          <div className={cn(
+                            "size-1.5 rounded-full",
+                            item.status.investigationPlan === 'FULL' ? "bg-orange-500" : "bg-orange-300/60 dark:bg-orange-800/50"
+                          )} />
+                          <span className={cn(
+                            "text-xs",
+                            item.status.investigationPlan === 'FULL' ? "font-semibold text-foreground" : "font-medium text-muted-foreground"
+                          )}>
                             {item.status.investigationPlan}
                           </span>
                         </div>
-                      </td>
+                      </TableCell>
 
-                      <td className="px-4 py-4 font-mono font-medium text-slate-700">
+                      <TableCell className="font-medium text-foreground text-sm">
                         {formatCurrency(item.dealSize)}
-                      </td>
+                      </TableCell>
 
-                      <td className="px-4 py-4">
-                        <span
-                          className={cn(
-                            'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono border',
-                            item.status.stage === 'COMPLETE'
-                              ? 'bg-teal-50 border-teal-200 text-teal-700'
-                              : item.status.stage === 'AWAITING_APPROVAL'
-                              ? 'bg-amber-50 border-amber-200 text-amber-700'
-                              : item.status.stage === 'FAILED'
-                              ? 'bg-rose-50 border-rose-200 text-rose-700'
-                              : 'bg-slate-100 border-slate-200 text-slate-500 animate-pulse'
-                          )}
+                      <TableCell>
+                        <Badge
+                          variant={
+                            item.status.stage === 'COMPLETE' ? 'default'
+                            : item.status.stage === 'AWAITING_APPROVAL' ? 'secondary'
+                            : item.status.stage === 'FAILED' ? 'destructive'
+                            : 'outline'
+                          }
+                          className="font-medium text-[11px] uppercase tracking-wider px-2.5 py-0.5"
                         >
-                          <span
-                            className={cn(
-                              'w-1.5 h-1.5 rounded-full',
-                              item.status.stage === 'COMPLETE'
-                                ? 'bg-teal-500'
-                                : item.status.stage === 'AWAITING_APPROVAL'
-                                ? 'bg-amber-500'
-                                : item.status.stage === 'FAILED'
-                                ? 'bg-rose-500'
-                                : 'bg-indigo-500'
-                            )}
-                          />
-                          {item.status.stage}
-                        </span>
-                      </td>
+                          {item.status.stage.replace('_', ' ')}
+                        </Badge>
+                      </TableCell>
 
-                      <td className="px-4 py-4">
+                      <TableCell>
                         {risk ? (
                           <RiskLevelTag level={risk} size="sm" />
                         ) : item.status.stage === 'FAILED' ? (
-                          <span className="text-slate-400 font-mono text-[11px]">N/A (Terminated)</span>
+                          <span className="text-muted-foreground text-xs italic">Terminated</span>
                         ) : (
-                          <span className="text-slate-400 font-mono text-[11px]">In Analysis</span>
+                          <span className="text-muted-foreground text-xs italic">Analyzing...</span>
                         )}
-                      </td>
+                      </TableCell>
 
-                      <td className="px-4 py-4">
+                      <TableCell>
                         {confidence !== undefined ? (
                           <ConfidenceBadge score={confidence} size="sm" />
                         ) : (
-                          <span className="text-slate-400 font-mono text-[11px]">Pending</span>
+                          <span className="text-muted-foreground text-xs italic">Pending</span>
                         )}
-                      </td>
+                      </TableCell>
 
-                      <td className="px-4 py-4 text-slate-400 font-mono text-[11px]">
+                      <TableCell className="text-muted-foreground text-xs">
                         {formatDate(item.createdAt)}
-                      </td>
+                      </TableCell>
 
-                      <td className="px-4 py-4 text-right">
-                        <Link
-                          to={`/review/${item.procurementId}`}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-teal-600 text-xs font-semibold border border-slate-200 transition"
-                        >
-                          <span>Review</span>
-                          <ArrowUpRight className="w-3.5 h-3.5" />
+                      <TableCell className="text-right">
+                        <Link to={`/review/${item.procurementId}`} className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "h-8 gap-1.5 font-medium hover:bg-primary/5 hover:text-primary transition-colors")}>
+                          Review <ArrowRight className="size-3.5" />
                         </Link>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   );
                 })
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

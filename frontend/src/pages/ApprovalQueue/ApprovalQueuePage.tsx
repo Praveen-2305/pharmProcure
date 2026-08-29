@@ -4,8 +4,11 @@ import { approvalApi } from '../../api/client';
 import { ApprovalActions } from './ApprovalActions';
 import { RiskLevelTag } from '../../components/RiskLevelTag';
 import { ConfidenceBadge } from '../../components/ConfidenceBadge';
-import { formatCurrency, formatDate } from '../../lib/utils';
-import { CheckSquare, ArrowRight, ShieldAlert, Sparkles, Inbox } from 'lucide-react';
+import { formatCurrency, formatDate, cn } from '../../lib/utils';
+import { CheckSquare, ArrowRight, Inbox } from 'lucide-react';
+import { Card, CardContent } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import { Button, buttonVariants } from '../../components/ui/button';
 
 interface PendingApprovalItem {
   procurementId: string;
@@ -34,115 +37,112 @@ export const ApprovalQueuePage: React.FC = () => {
   };
 
   useEffect(() => {
+    document.title = "Approval Queue | AutonoSource";
     loadPending();
   }, []);
 
   const handleDecisionSubmitted = (procurementId: string) => {
-    // Optimistically remove from queue
     setItems((prev) => prev.filter((item) => item.procurementId !== procurementId));
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6 md:p-8 space-y-6 text-left">
+    <div className="max-w-7xl mx-auto p-6 md:p-8 space-y-6 text-left">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-teal-600 mb-1">
-            <CheckSquare className="w-3.5 h-3.5" />
-            <span>Human-in-the-loop Governance</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">
             Executive Approval Queue
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Review completed multi-agent risk assessments and issue auditable procurement determinations.
           </p>
         </div>
 
-        <div className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-mono text-slate-600 shadow-sm">
-          Pending Authorization: <strong className="text-teal-600">{items.length}</strong>
-        </div>
+        <Badge variant="secondary" className="px-3 py-1.5 rounded-lg text-xs shadow-sm border text-muted-foreground">
+          Pending Authorization: <strong className="text-foreground ml-1">{items.length}</strong>
+        </Badge>
       </div>
 
       {/* Queue List */}
       {loading ? (
         <div className="p-12 text-center">
-          <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-xs font-mono text-slate-400 mt-3">Loading pending authorizations...</p>
+          <div className="size-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-xs text-muted-foreground mt-3">Loading pending authorizations...</p>
         </div>
       ) : items.length === 0 ? (
-        <div className="p-12 rounded-xl bg-white border border-slate-200 text-center space-y-3 shadow-sm">
-          <Inbox className="w-10 h-10 text-slate-300 mx-auto" />
-          <h3 className="text-base font-semibold text-slate-700">Queue is Clear</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto">
+        <Card className="p-12 text-center shadow-sm">
+          <Inbox className="size-10 text-muted-foreground/50 mx-auto mb-3" />
+          <h3 className="text-base font-semibold text-foreground">Queue is Clear</h3>
+          <p className="text-xs text-muted-foreground max-w-sm mx-auto mb-4">
             All submitted cases have been adjudicated or are currently being processed by autonomous worker agents.
           </p>
-          <div className="pt-2">
-            <Link
-              to="/submit"
-              className="inline-flex items-center gap-2 text-xs font-semibold text-teal-600 hover:text-teal-500 transition"
-            >
-              Submit a new procurement case <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </div>
+          <Link to="/submit" className={cn(buttonVariants({ variant: "default", size: "sm" }), "gap-2")}>
+            Submit a new procurement case <ArrowRight className="size-4" />
+          </Link>
+        </Card>
       ) : (
         <div className="space-y-4">
           {items.map((item) => (
-            <div
-              key={item.procurementId}
-              className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4 hover:border-slate-300 hover:shadow-md transition"
-            >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-3">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-mono text-slate-400">{item.procurementId}</span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-500">
-                      Plan: {item.investigationPlan}
-                    </span>
-                    <span className="text-xs text-slate-400">• {formatDate(item.submittedAt)}</span>
+            <Card key={item.procurementId} className="hover:border-primary/40 transition-colors duration-150 shadow-sm overflow-hidden">
+              <CardContent className="p-6 space-y-4">
+                {/* Header Row */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3.5 border-b border-border/80">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge variant="secondary" className="text-[10px] font-medium px-2 py-0.5 rounded-md">
+                        Plan: {item.investigationPlan}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">• {formatDate(item.submittedAt)}</span>
+                      <span className="text-[11px] font-mono text-muted-foreground/75 bg-muted/50 px-1.5 py-0.5 rounded border border-border/40">
+                        {item.procurementId}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-bold text-foreground tracking-tight">
+                      {item.vendorName}
+                    </h3>
                   </div>
-                  <h3 className="text-base font-bold text-slate-900">{item.vendorName}</h3>
-                </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="text-right">
-                    <span className="text-[10px] uppercase font-mono text-slate-400 block">Deal Size:</span>
-                    <span className="text-sm font-bold font-mono text-slate-800">
-                      {formatCurrency(item.dealSize)}
-                    </span>
+                  <div className="flex items-center gap-3.5 self-start md:self-center">
+                    <div className="text-right">
+                      <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Deal Size</div>
+                      <div className="text-base font-bold text-foreground leading-none mt-0.5">
+                        {formatCurrency(item.dealSize)}
+                      </div>
+                    </div>
+                    <div className="h-8 w-px bg-border/60 hidden sm:block" />
+                    <RiskLevelTag level={item.overallRisk} size="md" />
                   </div>
-                  <RiskLevelTag level={item.overallRisk} size="md" />
                 </div>
-              </div>
 
-              {/* Summary and Confidence */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                <div className="md:col-span-2 text-xs text-slate-600 leading-relaxed">
-                  {item.summary}
+                {/* AI Assessment Inner Container */}
+                <div className="bg-muted/30 dark:bg-zinc-900/40 p-4 rounded-xl border border-border/60 space-y-2 min-h-[85px] flex flex-col justify-between">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-foreground uppercase tracking-wider">
+                      <span className="size-2 rounded-full bg-primary" />
+                      Executive Summary Findings
+                    </div>
+                    <ConfidenceBadge score={item.confidenceScore} size="sm" />
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {item.summary}
+                  </p>
                 </div>
-                <div className="flex md:justify-end">
-                  <ConfidenceBadge score={item.confidenceScore} size="sm" />
+
+                {/* Actions Footer */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+                  <Link to={`/review/${item.procurementId}`} className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-2 rounded-lg font-medium border-border/80")}>
+                    Inspect Casefile & Evidence
+                    <ArrowRight className="size-3.5" />
+                  </Link>
+
+                  <ApprovalActions
+                    procurementId={item.procurementId}
+                    vendorName={item.vendorName}
+                    onDecisionSubmitted={() => handleDecisionSubmitted(item.procurementId)}
+                  />
                 </div>
-              </div>
-
-              {/* Actions Footer */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
-                <Link
-                  to={`/review/${item.procurementId}`}
-                  className="inline-flex items-center gap-1.5 text-xs text-teal-600 hover:text-teal-500 font-medium transition"
-                >
-                  <span>Inspect Complete Casefile & Evidence</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-
-                <ApprovalActions
-                  procurementId={item.procurementId}
-                  vendorName={item.vendorName}
-                  onDecisionSubmitted={() => handleDecisionSubmitted(item.procurementId)}
-                />
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}

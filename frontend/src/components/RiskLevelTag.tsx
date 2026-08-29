@@ -1,7 +1,8 @@
 import React from 'react';
 import { RiskLevel } from '../api/types';
+import { Badge } from './ui/badge';
+import { BadgeCheck, AlertTriangle, AlertOctagon } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { ShieldCheck, AlertTriangle, AlertOctagon } from 'lucide-react';
 
 interface RiskLevelTagProps {
   level: RiskLevel;
@@ -18,50 +19,50 @@ export const RiskLevelTag: React.FC<RiskLevelTagProps> = ({
 }) => {
   const config = {
     LOW: {
-      bg: 'bg-emerald-50 border-emerald-200 text-emerald-800',
-      icon: ShieldCheck,
+      variant: 'secondary' as const,
+      icon: BadgeCheck,
       label: 'Low Risk',
-      dot: 'bg-emerald-500',
+      colorClass: 'text-foreground',
     },
     MEDIUM: {
-      bg: 'bg-amber-50 border-amber-200 text-amber-800',
+      variant: 'outline' as const,
       icon: AlertTriangle,
       label: 'Medium Risk',
-      dot: 'bg-amber-500',
+      colorClass: 'text-foreground',
     },
     HIGH: {
-      bg: 'bg-rose-50 border-rose-200 text-rose-800',
+      variant: 'destructive' as const,
       icon: AlertOctagon,
       label: 'High Risk',
-      dot: 'bg-rose-500',
+      colorClass: '',
     },
   }[level] || {
-    bg: 'bg-slate-100 border-slate-200 text-slate-600',
+    variant: 'secondary' as const,
     icon: AlertTriangle,
     label: level,
-    dot: 'bg-slate-400',
+    colorClass: 'text-muted-foreground',
   };
 
   const IconComponent = config.icon;
 
   const sizeClasses = {
-    sm: 'px-2 py-0.5 text-xs gap-1',
-    md: 'px-2.5 py-1 text-xs tracking-wide uppercase font-semibold gap-1.5',
-    lg: 'px-3.5 py-1.5 text-sm font-semibold gap-2',
+    sm: 'px-2 py-0.5 text-[11px] gap-1.5',
+    md: 'px-2.5 py-1 text-xs gap-1.5',
+    lg: 'px-3 py-1.5 text-sm gap-2',
   }[size];
 
   return (
-    <span
+    <Badge
+      variant={config.variant}
       className={cn(
-        'inline-flex items-center rounded-md border font-medium transition-colors shadow-sm',
-        config.bg,
+        'font-semibold tracking-tight',
+        config.colorClass,
         sizeClasses,
         className
       )}
     >
-      <span className={cn('w-1.5 h-1.5 rounded-full animate-pulse', config.dot)} />
-      {showIcon && <IconComponent className={cn(size === 'sm' ? 'w-3 h-3' : 'w-3.5 h-3.5')} />}
-      <span>{config.label}</span>
-    </span>
+      {showIcon && <IconComponent className={cn(size === 'sm' ? 'size-3.5' : 'size-4')} />}
+      {config.label}
+    </Badge>
   );
 };

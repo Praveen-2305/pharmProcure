@@ -2,20 +2,19 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
-  FilePlus2,
-  CheckSquare,
-  FileText,
-  AlertOctagon,
-  HelpCircle,
-  Layers,
-  ChevronRight,
+  PlusCircle,
+  ClipboardCheck,
+  Workflow,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { Badge } from '../ui/badge';
+import { buttonVariants } from '../ui/button';
 
-export const Sidebar: React.FC = () => {
+export const Sidebar: React.FC<{ isOpen?: boolean }> = ({ isOpen = true }) => {
   const navItems = [
     {
-      to: '/',
+      to: '/dashboard',
       label: 'Audit Dashboard',
       icon: LayoutDashboard,
       description: 'Historical cases & audit trail',
@@ -23,13 +22,13 @@ export const Sidebar: React.FC = () => {
     {
       to: '/submit',
       label: 'Submit Request',
-      icon: FilePlus2,
+      icon: PlusCircle,
       description: 'New vendor investigation',
     },
     {
       to: '/queue',
       label: 'Approval Queue',
-      icon: CheckSquare,
+      icon: ClipboardCheck,
       description: 'Pending human authorization',
     },
   ];
@@ -38,78 +37,74 @@ export const Sidebar: React.FC = () => {
     {
       id: 'PR-2026-8801-BIO',
       label: 'BioGen Diagnostics',
-      tag: 'Low Risk',
-      tagColor: 'text-emerald-700 border-emerald-300 bg-emerald-50',
+      variant: 'secondary' as const,
     },
     {
       id: 'PR-2026-8802-MSI',
       label: 'MediSupply Global',
-      tag: 'Flagged',
-      tagColor: 'text-rose-700 border-rose-300 bg-rose-50',
+      variant: 'secondary' as const,
     },
     {
       id: 'PR-2026-8803-PCT',
       label: 'PhytoChem Research',
-      tag: 'Custom Price',
-      tagColor: 'text-cyan-700 border-cyan-300 bg-cyan-50',
+      variant: 'secondary' as const,
     },
     {
       id: 'PR-2026-8804-NPH',
       label: 'NanoPharma Corp',
-      tag: 'Over Ceiling',
-      tagColor: 'text-amber-700 border-amber-300 bg-amber-50',
+      variant: 'secondary' as const,
     },
     {
       id: 'PR-2026-8805-UKN',
       label: 'Apex BioLogistics',
-      tag: 'Terminated',
-      tagColor: 'text-slate-600 border-slate-300 bg-slate-100',
+      variant: 'secondary' as const,
     },
   ];
 
   return (
-    <aside className="w-64 border-r border-slate-200 bg-white flex flex-col justify-between shrink-0 min-h-[calc(100vh-4rem)]">
-      <div className="p-4 space-y-6">
+    <div
+      className={cn(
+        "transition-all duration-300 ease-out shrink-0 h-full overflow-hidden",
+        isOpen ? "w-[320px] min-w-[300px] max-w-[500px] resize-x opacity-100 translate-x-0" : "w-0 min-w-0 opacity-0 -translate-x-12 !resize-none"
+      )}
+    >
+      <aside className="w-full border-r bg-background flex flex-col justify-between h-full overflow-y-auto overflow-x-hidden">
+        <div className="p-5 space-y-6 w-full">
         <div>
-          <div className="px-3 mb-2 text-[10px] font-mono uppercase tracking-wider text-slate-400">
+          <div className="px-3 mb-4 text-[15px] font-semibold text-foreground tracking-tight">
             Workflows
           </div>
           <nav className="space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className={({ isActive }) =>
-                    cn(
-                      'flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-all group',
-                      isActive
-                        ? 'bg-teal-50 text-teal-700 border border-teal-200 shadow-sm'
-                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-transparent'
-                    )
-                  }
-                >
-                  <Icon className="w-4 h-4 shrink-0 transition-colors group-hover:text-teal-500" />
-                  <div className="flex flex-col text-left">
-                    <span className="font-semibold">{item.label}</span>
-                    <span className="text-[10px] text-slate-400 font-normal leading-tight">
-                      {item.description}
-                    </span>
-                  </div>
-                </NavLink>
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    className={({ isActive }) =>
+                      cn(
+                        "w-full flex items-center gap-3 px-3 py-2 text-[15px] rounded-lg font-medium transition-colors duration-150",
+                        isActive
+                          ? "bg-secondary text-foreground font-semibold shadow-xs border border-border/40"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                      )
+                    }
+                  >
+                    <Icon className="size-4.5 shrink-0" />
+                    <span className="whitespace-nowrap">{item.label}</span>
+                  </NavLink>
               );
             })}
           </nav>
         </div>
 
         {/* Priority Case Ledger */}
-        <div className="pt-2 border-t border-slate-200">
-          <div className="px-3 mb-2 flex items-center justify-between">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+        <div className="pt-6 border-t">
+          <div className="px-3 mb-4 flex items-center justify-between">
+            <span className="text-[15px] font-semibold text-foreground tracking-tight">
               Recent Case Files
             </span>
-            <Layers className="w-3 h-3 text-slate-400" />
+            <Workflow className="size-4 text-muted-foreground" />
           </div>
           <div className="space-y-1">
             {quickCases.map((qc) => (
@@ -118,37 +113,27 @@ export const Sidebar: React.FC = () => {
                 to={`/review/${qc.id}`}
                 className={({ isActive }) =>
                   cn(
-                    'flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-colors group',
+                    "w-full flex items-center justify-between gap-2 px-3 py-2 text-[14px] rounded-lg font-medium transition-colors duration-150",
                     isActive
-                      ? 'bg-slate-100 text-slate-900 font-medium border border-slate-200'
-                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+                      ? "bg-secondary text-foreground font-semibold shadow-xs border border-border/40"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
                   )
                 }
               >
-                <div className="truncate max-w-[130px]">{qc.label}</div>
-                <span
-                  className={cn(
-                    'text-[9px] font-mono px-1.5 py-0.5 rounded border uppercase',
-                    qc.tagColor
-                  )}
-                >
-                  {qc.tag}
-                </span>
+                <span className="truncate flex-1 text-left">{qc.label}</span>
               </NavLink>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="p-4 border-t border-slate-200 text-[11px] text-slate-500 bg-slate-50 space-y-1">
-        <div className="flex items-center gap-1.5 font-medium text-slate-600">
-          <Layers className="w-3.5 h-3.5 text-teal-500" />
-          <span>LangGraph Architecture</span>
+      <div className="p-4 border-t text-sm bg-muted/20">
+        <div className="flex items-center gap-2.5 font-semibold text-foreground whitespace-nowrap">
+          <Workflow className="size-4 text-primary shrink-0" />
+          <span className="truncate">Autonomous Agent Orchestrator</span>
         </div>
-        <p className="text-[10px] leading-relaxed text-slate-400">
-          Planner → Executor → Risk Scorer → Critic Loop → Report Writer → Approval.
-        </p>
       </div>
-    </aside>
+      </aside>
+    </div>
   );
 };
