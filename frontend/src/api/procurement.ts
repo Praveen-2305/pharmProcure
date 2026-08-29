@@ -4,12 +4,22 @@ import {
   WorkflowStatus,
   ProcurementItemSummary,
 } from './types';
+import { httpClient } from './httpClient';
+import { ApiError } from './errors';
+
+export interface RequestOptions {
+  signal?: AbortSignal;
+  timeout?: number;
+}
 
 export interface ProcurementAPI {
-  submitRequest(request: SubmitProcurementRequest): Promise<{ procurementId: string; status: WorkflowStatus }>;
-  getStatus(procurementId: string): Promise<WorkflowStatus>;
-  getReport(procurementId: string): Promise<ProcurementReport | null>;
-  getAllProcurements(): Promise<ProcurementItemSummary[]>;
+  submitRequest(
+    request: SubmitProcurementRequest,
+    options?: RequestOptions
+  ): Promise<{ procurementId: string; status: WorkflowStatus }>;
+  getStatus(procurementId: string, options?: RequestOptions): Promise<WorkflowStatus>;
+  getReport(procurementId: string, options?: RequestOptions): Promise<ProcurementReport | null>;
+  getAllProcurements(options?: RequestOptions): Promise<ProcurementItemSummary[]>;
 }
 
 // In-memory store for mock execution
@@ -565,10 +575,9 @@ export const mockProcurementAPI: ProcurementAPI = {
   },
 };
 
-// HTTP Implementation calling FastAPI endpoints
+// HTTP Implementation calling FastAPI endpoints via centralized HttpClient
 export const httpProcurementAPI: ProcurementAPI = {
-  async submitRequest(request: SubmitProcurementRequest) {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+  async submitRequest(request: SubmitProcurementRequest, options?: RequestOptions) {
     const formData = new FormData();
     formData.append('vendorName', request.vendorName);
     formData.append('dealSize', request.dealSize.toString());
@@ -580,41 +589,29 @@ export const httpProcurementAPI: ProcurementAPI = {
       formData.append('contractDocument', request.contractDocument);
     }
 
-    const res = await fetch(`${baseUrl}/procurement/submit`, {
-      method: 'POST',
-      body: formData,
-    });
-    if (!res.ok) {
-      throw new Error(`Failed to submit procurement: ${res.statusText}`);
-    }
-    return res.json();
+    return httpClient.post<{ procurementId: string; status: WorkflowStatus }>(
+      '/procurement/submit',
+      formData,
+      options
+    );
   },
 
-  async getStatus(procurementId: string): Promise<WorkflowStatus> {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-    const res = await fetch(`${baseUrl}/procurement/${procurementId}/status`);
-    if (!res.ok) {
-      throw new Error(`Failed to fetch status: ${res.statusText}`);
-    }
-    return res.json();
+  async getStatus(procurementId: string, options?: RequestOptions): Promise<WorkflowStatus> {
+    return httpClient.get<WorkflowStatus>(`/procurement/${encodeURIComponent(procurementId)}/status`, options);
   },
 
-  async getReport(procurementId: string): Promise<ProcurementReport | null> {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-    const res = await fetch(`${baseUrl}/procurement/${procurementId}/report`);
-    if (!res.ok) {
-      if (res.status === 404) return null;
-      throw new Error(`Failed to fetch report: ${res.statusText}`);
+  async getReport(procurementId: string, options?: RequestOptions): Promise<ProcurementReport | null> {
+    try {
+      return await httpClient.get<ProcurementReport>(`/procurement/${encodeURIComponent(procurementId)}/report`, options);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 404) {
+        return null;
+      }
+      throw err;
     }
-    return res.json();
   },
 
-  async getAllProcurements(): Promise<ProcurementItemSummary[]> {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-    const res = await fetch(`${baseUrl}/procurement/all`);
-    if (!res.ok) {
-      throw new Error(`Failed to fetch procurements: ${res.statusText}`);
-    }
-    return res.json();
+  async getAllProcurements(options?: RequestOptions): Promise<ProcurementItemSummary[]> {
+    return httpClient.get<ProcurementItemSummary[]>('/procurement/all', options);
   },
 };

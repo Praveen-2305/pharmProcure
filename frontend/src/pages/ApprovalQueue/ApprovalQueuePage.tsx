@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { approvalApi } from '../../api/client';
+import { approvalApi, normalizeError } from '../../api/client';
 import { ApprovalActions } from './ApprovalActions';
 import { RiskLevelTag } from '../../components/RiskLevelTag';
 import { ConfidenceBadge } from '../../components/ConfidenceBadge';
 import { formatCurrency, formatDate, cn } from '../../lib/utils';
-import { CheckSquare, ArrowRight, Inbox } from 'lucide-react';
+import { CheckSquare, ArrowRight, Inbox, AlertCircle } from 'lucide-react';
 import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Button, buttonVariants } from '../../components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert';
 
 interface PendingApprovalItem {
   procurementId: string;
@@ -24,13 +25,16 @@ interface PendingApprovalItem {
 export const ApprovalQueuePage: React.FC = () => {
   const [items, setItems] = useState<PendingApprovalItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadPending = async () => {
     try {
+      setError(null);
       const data = await approvalApi.getPendingApprovals();
       setItems(data);
-    } catch (err) {
-      console.error(err);
+    } catch (err: unknown) {
+      const apiErr = normalizeError(err);
+      setError(apiErr.message || 'Failed to load pending approvals.');
     } finally {
       setLoading(false);
     }
@@ -62,6 +66,19 @@ export const ApprovalQueuePage: React.FC = () => {
           Pending Authorization: <strong className="text-foreground ml-1">{items.length}</strong>
         </Badge>
       </div>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Queue Error</AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
+            <span>{error}</span>
+            <Button variant="outline" size="xs" onClick={loadPending} className="ml-4">
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Queue List */}
       {loading ? (

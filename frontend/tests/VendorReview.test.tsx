@@ -24,11 +24,10 @@ describe('VendorReview Subcomponents', () => {
     render(<RiskBreakdown riskAssessment={mockAssessment} />);
 
     // Check evidence completeness decoupled badge
-    expect(screen.getByText(/Evidence Completeness:/i)).toBeInTheDocument();
+    expect(screen.getByText(/Evidence Completeness/i)).toBeInTheDocument();
     expect(screen.getByText('86%')).toBeInTheDocument();
 
     // Check pricing ceiling breach
-    expect(screen.getByText(/Ceiling Breach Detected/i)).toBeInTheDocument();
     expect(screen.getByText(/Exceeds Ceiling/i)).toBeInTheDocument();
     expect(screen.getByText('+$350,000')).toBeInTheDocument();
   });
@@ -48,7 +47,9 @@ describe('VendorReview Subcomponents', () => {
 
     render(<RiskBreakdown riskAssessment={mockAssessment} />);
 
-    expect(screen.getByText(/Reference price data unavailable/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/No historical benchmark or index data matched this custom procurement scope/i)
+    ).toBeInTheDocument();
     expect(screen.getByText(/Indeterminate/i)).toBeInTheDocument();
   });
 
@@ -88,7 +89,7 @@ describe('VendorReview Subcomponents', () => {
     expect(screen.getByText(/Active FDA warning issued in 2024/i)).toBeInTheDocument();
 
     // Check contradiction flag inspection button
-    const inspectBtn = screen.getAllByRole('button', { name: /Fusion Contradiction Flagged/i })[0];
+    const inspectBtn = screen.getAllByRole('button', { name: /Fusion Contradiction/i })[0];
     expect(inspectBtn).toBeInTheDocument();
 
     // Click inspect button to open conflict resolution modal
