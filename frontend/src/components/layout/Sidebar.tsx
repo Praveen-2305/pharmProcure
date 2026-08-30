@@ -128,9 +128,18 @@ export const Sidebar: React.FC<{ isOpen?: boolean }> = ({ isOpen = true }) => {
       </div>
 
       <div className="p-4 border-t text-sm bg-muted/20">
-        <div className="flex items-center gap-2.5 font-semibold text-foreground whitespace-nowrap">
-          <Workflow className="size-4 text-primary shrink-0" />
-          <span className="truncate">Autonomous Agent Orchestrator</span>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 font-semibold text-foreground whitespace-nowrap min-w-0">
+            <Workflow className="size-4 text-primary shrink-0" />
+            <span className="truncate text-xs font-medium">Agent Orchestrator</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/20 px-2 py-0.5 rounded-full shrink-0">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+            </span>
+            <span>Live</span>
+          </div>
         </div>
       </div>
       </aside>
