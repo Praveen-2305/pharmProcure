@@ -18,11 +18,15 @@ export const Header: React.FC<{ onMenuClick?: () => void }> = ({ onMenuClick }) 
         </Button>
         
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="size-7 rounded bg-primary flex items-center justify-center group-hover:scale-105 transition-transform duration-150">
+          <div className="size-7 rounded bg-primary flex items-center justify-center group-hover:scale-105 transition-transform duration-150 shadow-xs">
             <Command className="size-4 text-primary-foreground" />
           </div>
           <span className="text-base font-bold tracking-tight text-foreground flex items-center gap-1.5">
             AutonoSource
+            <span className="hidden md:inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary border border-primary/20">
+              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              v1.0
+            </span>
           </span>
         </Link>
 
