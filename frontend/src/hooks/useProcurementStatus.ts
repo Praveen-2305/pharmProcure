@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { WorkflowStatus, ProcurementReport } from '../api/types';
+import { WorkflowStatus, ProcurementReport, WorkflowStage } from '../api/types';
 import { procurementApi, normalizeError, ApiError } from '../api/client';
 
 export function useProcurementStatus(procurementId?: string) {
@@ -9,7 +9,7 @@ export function useProcurementStatus(procurementId?: string) {
   const [error, setError] = useState<string | null>(null);
   const [apiError, setApiError] = useState<ApiError | null>(null);
 
-  const isTerminal = (stage?: string) =>
+  const isTerminal = (stage?: WorkflowStage) =>
     stage === 'COMPLETE' || stage === 'AWAITING_APPROVAL' || stage === 'FAILED';
 
   const fetchData = useCallback(
@@ -48,7 +48,7 @@ export function useProcurementStatus(procurementId?: string) {
     [procurementId]
   );
 
-  const statusStageRef = useRef<string | undefined>(status?.stage);
+  const statusStageRef = useRef<WorkflowStage | undefined>(status?.stage);
   statusStageRef.current = status?.stage;
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export function useProcurementStatus(procurementId?: string) {
     loading,
     error,
     apiError,
-    refetch: () => fetchData(),
+    refetch: fetchData,
     isTerminal: status ? isTerminal(status.stage) : false,
   };
 }
