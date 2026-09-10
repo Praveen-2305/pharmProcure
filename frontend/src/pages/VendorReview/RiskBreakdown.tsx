@@ -7,8 +7,6 @@ import {
   ShieldAlert,
   FileCheck2,
   TrendingUp,
-  AlertCircle,
-  HelpCircle,
   Scale,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
@@ -39,6 +37,9 @@ export const RiskBreakdown: React.FC<RiskBreakdownProps> = ({ riskAssessment }) 
           </CardHeader>
           <CardContent className="p-5 pt-0">
             <RiskLevelTag level={overallRisk} size="lg" />
+            <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+              Synthesized risk profile evaluating Financial Solvency, Regulatory Compliance, Contractual Liability, and Category Benchmark Ceilings.
+            </p>
           </CardContent>
         </Card>
 
