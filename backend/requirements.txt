@@ -10,3 +10,7 @@ networkx
 pymongo
 tavily-python
 python-dotenv
+pymupdf4llm
+pymupdf
+sentence-transformers
+einops
