@@ -64,15 +64,19 @@ Implemented in [`backend/app/rag/fusion.py`](file:///media/kamalesh/KAMALESH/PRO
 
 ### Step 1: Score Normalization
 Each retriever outputs scores on different numerical scales:
-- **Vector Score ($S_{vec}$):** Cosine similarity between query embedding and chunk vector:
-  $$\hat{S}_{vec} = \frac{S_{vec} - S_{min}}{S_{max} - S_{min}}$$
-- **Graph Score ($S_{graph}$):** Inversely proportional to the shortest path distance from the vendor node to the regulatory standard:
-  $$S_{graph} = \frac{1}{1 + \text{path\_length}}$$
+- **Vector Score (`S_vec`):** Cosine similarity between query embedding and chunk vector:
+  ```
+  normalized_vector_score = (S_vec - S_min) / (S_max - S_min)
+  ```
+- **Graph Score (`S_graph`):** Inversely proportional to the shortest path distance from the vendor node to the regulatory standard:
+  ```
+  graph_score = 1 / (1 + path_length)
+  ```
 
 ### Step 2: Legal Source Priority Hierarchy & Weighting
-In legal disputes, private contract terms do not hold equal weight with statutory legislation. AutonoSource enforces an authoritative priority hierarchy ($W_s$):
+In legal disputes, private contract terms do not hold equal weight with statutory legislation. AutonoSource enforces an authoritative priority hierarchy (`W_s`):
 
-| Source Classification | Priority Weight ($W_s$) | Legal Rationale |
+| Source Classification | Priority Weight (`W_s`) | Legal Rationale |
 | :--- | :---: | :--- |
 | **Primary Legislation / Act** | `1.20` | Drugs and Cosmetics Act 1940; statutory law superseding all private terms. |
 | **Statutory Regulatory Graph** | `1.00` | Verified CDSCO manufacturing standards (Schedule M, WHO TRS 1025). |
@@ -80,7 +84,9 @@ In legal disputes, private contract terms do not hold equal weight with statutor
 | **Vector Store (Vendor RFP / Claims)** | `0.60` | Vendor self-declarations; lowest authority in compliance disputes. |
 
 The final combined score for each retrieved fact is calculated as:
-$$\text{final\_score} = \text{retriever\_score} \times W_s$$
+```
+final_score = retriever_score * W_s
+```
 
 ### Step 3: Contradiction Detection Algorithm
 When facts from Vector and Graph touch the same entity or operational constraint, semantic and numerical contradiction checks are applied:
@@ -96,8 +102,10 @@ When facts from Vector and Graph touch the same entity or operational constraint
    - **Resolution:** The regulatory notice prevails; the vendor claim is flagged as an unresolved discrepancy.
 
 ### Step 4: Overall Confidence Scoring
-Overall confidence ($C$) is computed from evidence completeness, penalized for unresolved contradictions:
-$$C = \text{clamp}\left(\frac{1}{N} \sum_{i=1}^N \text{final\_score}_i - (0.15 \times \text{has\_contradictions}), 0.10, 1.00\right)$$
+Overall confidence (`C`) is computed from evidence completeness, penalized for unresolved contradictions:
+```
+confidence = clamp(mean(final_scores) - (0.15 * has_contradictions), 0.10, 1.00)
+```
 
 ---
 
@@ -110,7 +118,9 @@ Located in [`backend/app/db/pricing.py`](file:///media/kamalesh/KAMALESH/PROJECT
 3. **Evaluation Statuses:**
    - **`WITHIN_CEILING`:** Quoted price <= statutory ceiling price.
    - **`EXCEEDS_CEILING`:** Quoted price > statutory ceiling price. Automatically triggers `HIGH` overall risk.
-     $$\text{excess\_amount} = \text{quoted\_price} - \text{ceiling\_price}$$
+     ```
+     excess_amount = quoted_price - ceiling_price
+     ```
    - **`INDETERMINATE`:** Novel or custom synthesis formulation not listed in Schedule I. Applies a `-0.15` penalty to overall confidence.
 
 ---

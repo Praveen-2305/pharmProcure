@@ -78,7 +78,7 @@ class WorkflowState(TypedDict, total=False):
   Your objective is to analyze the proposed deal and determine an optimal investigation scope.
   
   Vendor: {vendor_name}
-  Deal Size: ${deal_size:,.2f}
+  Deal Size: USD {deal_size:,.2f}
   Category: {category}
   Details: {details}
   
@@ -121,7 +121,9 @@ class WorkflowState(TypedDict, total=False):
      - `INDETERMINATE`: Category has no published statutory ceiling.
   5. **Overall Risk:** Maximum severity across all 4 dimensions.
   6. **Confidence Score Calculation:**
-     $$C = \text{base\_fusion\_confidence} - (0.15 \times \text{is\_indeterminate}) - (0.10 \times \text{has\_adverse\_external\_signals})$$
+     ```
+     confidence = base_fusion_confidence - (0.15 * is_indeterminate) - (0.10 * has_adverse_external_signals)
+     ```
 
 ---
 

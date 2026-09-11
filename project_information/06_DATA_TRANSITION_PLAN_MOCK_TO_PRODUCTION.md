@@ -83,7 +83,7 @@ The platform spans 6 critical data layers. The table below contrasts the current
 ### Phase 4: Full Production Cutover & Observability (Weeks 10 – 12)
 1. **Validation & Shadow Testing:**
    - Run parallel evaluations: Compare audit scores generated under mock data vs. live enterprise data for historical cases.
-   - Ensure risk scoring variance is $< 5\%$ unless explained by newly uncovered live regulatory violations.
+   - Ensure risk scoring variance is < 5% unless explained by newly uncovered live regulatory violations.
 2. **Observability & Tracing:**
    - Instrument LangGraph nodes with OpenTelemetry, Langfuse, or Arize Phoenix to trace token spend, latency, and retrieval quality.
 3. **CI/CD Integration:**

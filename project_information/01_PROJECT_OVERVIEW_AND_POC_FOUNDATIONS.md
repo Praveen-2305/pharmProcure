@@ -85,11 +85,11 @@ AutonoSource is pre-seeded with 5 realistic, diverse vendor scenarios designed t
 
 | Case ID | Vendor Name | Deal Size | Risk Profile | Key Findings & Scenario Nuance |
 | :--- | :--- | :---: | :---: | :--- |
-| **`PR-2026-8801-BIO`** | **BioGen Diagnostics Inc.** | $450,000 | **LOW** | **Clean Baseline:** Prime credit (780), Schedule M certified, valid CDSCO Form 28-D license, WHO cold chain adherence, price within NPPA ceiling ($420k < $450k). Approved. |
-| **`PR-2026-9042-GLO`** | **Global Pharma Logistics Ltd.** | $580,000 | **HIGH** | **Statutory Price Breach:** Quoted deal ($580k) exceeds NPPA ceiling ($500k) by $80k. Manual logging clause conflicts with WHO TRS 1025 continuous logger rules. Awaiting Executive Escalation. |
-| **`PR-2026-7731-APX`** | **Apex BioLogistics Pvt. Ltd.** | $350,000 | **MEDIUM** | **Cold-Chain Contradiction:** SLA Clause 2.2.4 permits ambient 15°C-25°C transit, contradicting WHO TRS 1025 (2°C-8°C). Critic triggers 3 revision loops. Conditional Approval with clause amendment. |
-| **`PR-2026-6102-NOV`** | **Nova Biologics & Vaccines Ltd.** | $750,000 | **LOW** | **Vaccine Prequalification:** WHO prequalified facility, 100% active IoT GPS tracking, balanced 2.0x indemnity liability cap. Quoted at statutory ceiling. Approved. |
-| **`PR-2026-5540-MED`** | **MediSynth Specialty Formulations** | $220,000 | **MEDIUM** | **Indeterminate Pricing:** Proprietary custom synthesis intermediate not indexed in Schedule I DPCO. Confidence penalized to 0.68 due to missing market ceiling benchmark. |
+| **`PR-2026-8801-BIO`** | **BioGen Diagnostics Inc.** | USD 450,000 | **LOW** | **Clean Baseline:** Prime credit (780), Schedule M certified, valid CDSCO Form 28-D license, WHO cold chain adherence, price within NPPA ceiling (USD 420k < USD 450k). Approved. |
+| **`PR-2026-9042-GLO`** | **Global Pharma Logistics Ltd.** | USD 580,000 | **HIGH** | **Statutory Price Breach:** Quoted deal (USD 580k) exceeds NPPA ceiling (USD 500k) by USD 80k. Manual logging clause conflicts with WHO TRS 1025 continuous logger rules. Awaiting Executive Escalation. |
+| **`PR-2026-7731-APX`** | **Apex BioLogistics Pvt. Ltd.** | USD 350,000 | **MEDIUM** | **Cold-Chain Contradiction:** SLA Clause 2.2.4 permits ambient 15°C-25°C transit, contradicting WHO TRS 1025 (2°C-8°C). Critic triggers 3 revision loops. Conditional Approval with clause amendment. |
+| **`PR-2026-6102-NOV`** | **Nova Biologics & Vaccines Ltd.** | USD 750,000 | **LOW** | **Vaccine Prequalification:** WHO prequalified facility, 100% active IoT GPS tracking, balanced 2.0x indemnity liability cap. Quoted at statutory ceiling. Approved. |
+| **`PR-2026-5540-MED`** | **MediSynth Specialty Formulations** | USD 220,000 | **MEDIUM** | **Indeterminate Pricing:** Proprietary custom synthesis intermediate not indexed in Schedule I DPCO. Confidence penalized to 0.68 due to missing market ceiling benchmark. |
 
 ---
 
@@ -97,6 +97,6 @@ AutonoSource is pre-seeded with 5 realistic, diverse vendor scenarios designed t
 
 1. **Stateful Graph Execution:** 100% deterministic routing across LangGraph nodes (`PLANNING` -> `EXECUTING` -> `SCORING` -> `CRITIQUING` -> `WRITING_REPORT` -> `AWAITING_APPROVAL`).
 2. **Deterministic Pricing Auditing:** 100% of quotes with DPCO catalog entries checked deterministically, tagging transactions as `WITHIN_CEILING`, `EXCEEDS_CEILING`, or `INDETERMINATE`.
-3. **Contradiction Resolution:** Automatically resolves conflicting statements by prioritizing statutory legislation ($W=1.20$) and verified graph ontology ($W=1.00$) over vendor self-declarations ($W=0.60$).
+3. **Contradiction Resolution:** Automatically resolves conflicting statements by prioritizing statutory legislation (weight = 1.20) and verified graph ontology (weight = 1.00) over vendor self-declarations (weight = 0.60).
 4. **Critic Loop Convergence:** Re-triggers evidence gathering when confidence < 0.80, with a bounded ceiling of 3 revisions to prevent infinite loops.
 5. **Human Governance Gate:** Zero automated PO releases; all deals require explicit human authorization recorded with auditable timestamps.
