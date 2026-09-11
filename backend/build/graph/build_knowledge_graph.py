@@ -14,16 +14,12 @@ backend_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 if backend_root not in sys.path:
     sys.path.insert(0, backend_root)
 
-DATA_DIR = os.path.join(backend_root, "data")
 DB_GRAPH_DIR = os.path.join(backend_root, "database", "graph")
 GRAPH_FILE = os.path.join(DB_GRAPH_DIR, "knowledge_graph.graphml")
 JSON_FILE = os.path.join(DB_GRAPH_DIR, "knowledge_graph.json")
-LEGACY_GRAPH_FILE = os.path.join(DATA_DIR, "knowledge_graph.graphml")
-LEGACY_JSON_FILE = os.path.join(DATA_DIR, "knowledge_graph.json")
 
 def run_graph_build() -> nx.MultiDiGraph:
     os.makedirs(DB_GRAPH_DIR, exist_ok=True)
-    os.makedirs(DATA_DIR, exist_ok=True)
     g = nx.MultiDiGraph()
 
     print("-" * 55)
@@ -83,7 +79,6 @@ def run_graph_build() -> nx.MultiDiGraph:
 
     # Persist as GraphML
     nx.write_graphml(g, GRAPH_FILE)
-    nx.write_graphml(g, LEGACY_GRAPH_FILE)
 
     # Persist as JSON for fast in-memory loading without XML overhead
     graph_data = {
@@ -91,8 +86,6 @@ def run_graph_build() -> nx.MultiDiGraph:
         "edges": [{"source": u, "target": v, **d} for u, v, d in g.edges(data=True)]
     }
     with open(JSON_FILE, "w", encoding="utf-8") as f:
-        json.dump(graph_data, f, indent=2)
-    with open(LEGACY_JSON_FILE, "w", encoding="utf-8") as f:
         json.dump(graph_data, f, indent=2)
 
     print(f"  ✓ Nodes created: {g.number_of_nodes()}")

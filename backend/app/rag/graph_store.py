@@ -11,9 +11,7 @@ import os
 backend_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DEFAULT_GRAPH_PATHS = [
     os.path.join(backend_root, "database", "graph", "knowledge_graph.graphml"),
-    os.path.join(backend_root, "data", "knowledge_graph.graphml"),
-    "backend/database/graph/knowledge_graph.graphml",
-    "backend/data/knowledge_graph.graphml"
+    "backend/database/graph/knowledge_graph.graphml"
 ]
 
 class GraphRAGRetriever:
