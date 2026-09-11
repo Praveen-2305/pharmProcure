@@ -1,0 +1,36 @@
+# MASTER SERVICES & SUPPLY AGREEMENT (PHARMACEUTICAL PRODUCTS)
+
+PARTIES:
+1. BUYER: Apex Healthcare & Life Sciences Network
+2. SUPPLIER / VENDOR: Global Pharma Logistics & Formulation Services Ltd.
+
+EFFECTIVE DATE: January 15, 2026
+
+SECTION 1: PRODUCT SPECIFICATIONS & REGULATORY COMPLIANCE
+1.1 Good Manufacturing Practices (GMP):
+Supplier warrants that all pharmaceutical products, active pharmaceutical ingredients (APIs), and finished dosage formulations delivered hereunder shall be manufactured strictly in accordance with Schedule M of the Drugs and Cosmetics Rules, 1945, and relevant WHO Good Manufacturing Practices guidelines.
+
+1.2 Licensing & Approvals:
+Supplier shall maintain valid manufacturing and distribution licenses issued by the State Licensing Authority (SLA) and Central Drugs Standard Control Organisation (CDSCO) throughout the term of this Agreement. Any revocation, suspension, or show-cause notice from any State or UT Licensing Authority shall be reported to Buyer within 24 hours.
+
+SECTION 2: COLD CHAIN STORAGE & TRANSPORTATION
+2.1 WHO TRS 1025 Standards:
+For temperature-sensitive pharmaceutical products (including biologics, vaccines, and insulin preparations), Supplier shall ensure strict compliance with WHO TRS 1025 Annex 7 standards.
+2.2 Temperature Monitoring:
+All refrigerated consignments (2°C to 8°C) must be monitored with continuous calibrated electronic data loggers. Any temperature excursion exceeding 30 cumulative minutes beyond the specified range constitutes a material breach and grounds for immediate rejection of the shipment at Supplier's sole cost.
+
+SECTION 3: PRICING & STATUTORY CEILINGS
+3.1 DPCO Compliance:
+Supplier warrants that the quoted unit and batch prices do not exceed the ceiling prices fixed by the National Pharmaceutical Pricing Authority (NPPA) under the Drugs (Prices Control) Order, 2013. In the event of any downward revision by NPPA, the contract price shall be adjusted automatically.
+
+SECTION 4: INDEMNITY & LIMITATION OF LIABILITY
+4.1 Liability Cap:
+Except for gross negligence, willful misconduct, or breach of confidentiality, Supplier's aggregate liability arising under this Agreement shall be capped at 1.5 times the total deal value paid under the applicable Purchase Order.
+4.2 Indemnification:
+Supplier agrees to defend, indemnify, and hold harmless Buyer from all claims, regulatory penalties, damages, and legal expenses resulting from counterfeit, adulterated, or non-compliant drugs supplied.
+
+SECTION 5: TERMINATION & DISPUTE RESOLUTION
+5.1 Cure Period:
+Either party may terminate this Agreement upon written notice if the other party breaches any material term and fails to cure such breach within thirty (30) calendar days of receiving written notice.
+5.2 Termination for Convenience:
+Buyer may terminate any active Purchase Order without cause upon sixty (60) days written notice.

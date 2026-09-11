@@ -114,13 +114,19 @@ procurement-agent/
 │   │   ├── graph/                      # NetworkX knowledge_graph.graphml & JSON
 │   │   ├── pricing/                    # NPPA DPCO 2013 statutory price ceilings
 │   │   └── contracts/                  # Active SLA contracts and master agreements
-│   ├── mock_database/                  # Standalone reference test datasets & manifests
+│   ├── mockdata/                       # Standalone reference seed datasets & manifests
 │   │   ├── cases/                      # Pre-seeded test cases & baseline cases.json
 │   │   ├── contracts/                  # Contract SLAs (Apex, Nova, Global Pharma)
 │   │   ├── graph/                      # Entity ontology & relations (entities_and_relations.json)
 │   │   ├── pricing/                    # Official DPCO ceiling benchmarks
 │   │   └── vector/                     # Sample vector points and payloads
-│   ├── rag_storage/                    # Verified regulatory PDFs & reference benchmarks
+│   ├── collected_data/                 # Historical collected reference archive (for viewing/auditing)
+│   │   ├── regulatory_documents/       # Original regulatory PDFs & government advisory alerts
+│   │   ├── pricing/                    # Historical DPCO ceiling price benchmarks
+│   │   ├── contracts/                  # Sample SLAs and pharmaceutical Master Services Agreements
+│   │   ├── graph/                      # Compiled knowledge graph GraphML and JSON
+│   │   └── cases/                      # Historical procurement audit case runs
+│   ├── rag_storage/                    # Active regulatory PDFs & reference benchmarks
 │   │   ├── drug_regulations/           # Drugs & Cosmetics Act 1940 & GDP Guidelines
 │   │   ├── drugs/                      # State Licensing Authorities Directory
 │   │   ├── gmp/                        # Schedule M (Good Manufacturing Practices)

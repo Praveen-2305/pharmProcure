@@ -112,8 +112,9 @@ backend/
 │   ├── rag/                   # Vector chunking & embedding ingestion
 │   └── graph/                 # NetworkX property graph builder
 ├── database/                  # Active persistent storage (relational, vector, graph, pricing, contracts)
-├── mock_database/             # Standalone test fixtures & manifests
-├── rag_storage/               # Source regulatory PDFs (CDSCO, Schedule M, WHO TRS)
+├── mockdata/                  # Standalone reference seed fixtures & manifests
+├── collected_data/            # Historical collected reference archive (for inspection & viewing)
+├── rag_storage/               # Active regulatory PDFs (CDSCO, Schedule M, WHO TRS)
 ├── scripts/                   # CLI runner scripts (pipeline runner, scraper runner)
 ├── app.py                     # Entry point runner
 └── requirements.txt           # Python dependencies

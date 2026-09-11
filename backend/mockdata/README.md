@@ -1,6 +1,6 @@
-# AutonoSource Mock Database Ecosystem
+# AutonoSource Mock Data Ecosystem (`backend/mockdata/`)
 
-This directory contains the complete reference mock database ecosystem for **AutonoSource (pharmProcure)**. It provides structured test data, realistic pharmaceutical vendor case files, statutory pricing benchmarks, knowledge graphs, and contract clauses to power the backend pipeline without requiring external production database servers.
+This directory contains the complete reference mock data ecosystem for **AutonoSource (pharmProcure)**. It provides structured test data, realistic pharmaceutical vendor case files, statutory pricing benchmarks, knowledge graphs, and contract clauses to power the backend pipeline without requiring external production database servers.
 
 ---
 

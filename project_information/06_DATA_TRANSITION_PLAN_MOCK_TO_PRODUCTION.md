@@ -87,7 +87,7 @@ The platform spans 6 critical data layers. The table below contrasts the current
 2. **Observability & Tracing:**
    - Instrument LangGraph nodes with OpenTelemetry, Langfuse, or Arize Phoenix to trace token spend, latency, and retrieval quality.
 3. **CI/CD Integration:**
-   - Retain the entire `backend/mock_database/` and `backend/build/build_all.py` setup in the repository as the primary automated integration test fixture for GitHub Actions / CI pipelines.
+   - Retain the entire `backend/mockdata/` and `backend/build/build_all.py` setup in the repository as the primary automated integration test fixture for GitHub Actions / CI pipelines.
 
 ---
 
