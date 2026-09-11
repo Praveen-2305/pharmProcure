@@ -14,8 +14,8 @@ backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if backend_root not in sys.path:
     sys.path.insert(0, backend_root)
 
-from app.agents.workflow import create_procurement_workflow
-from app.models.schemas import InvestigationPlan, WorkflowStage
+from src.agents.workflow import create_procurement_workflow
+from src.models.schemas import InvestigationPlan, WorkflowStage
 
 def run():
     parser = argparse.ArgumentParser(description="AutonoSource Multi-Agent Pipeline CLI")

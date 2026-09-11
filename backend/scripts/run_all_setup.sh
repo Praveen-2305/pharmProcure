@@ -9,7 +9,7 @@ BACKEND_DIR="$(dirname "$SCRIPT_DIR")"
 
 echo "=== Executing AutonoSource Build Pipeline ==="
 cd "$BACKEND_DIR"
-PYTHONPATH=. python build/run_build.py
+PYTHONPATH=. python build/build_all.py
 
 echo -e "\n=== Setup Completed Successfully! ==="
 
