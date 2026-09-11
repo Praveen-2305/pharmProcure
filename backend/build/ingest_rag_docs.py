@@ -1,6 +1,6 @@
 """
 RAG Ingestion & Vector Embedding Build Module for AutonoSource.
-Scans cleaned documents across all subdirectories of backend/rag_storage/
+Scans cleaned documents across all subdirectories of ingestion/rag/
 (contracts, drug_regulations, gmp, storage, drugs, pricing),
 extracts text, chunks with overlap, and populates the Qdrant vector store.
 """
@@ -14,39 +14,53 @@ backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if backend_root not in sys.path:
     sys.path.insert(0, backend_root)
 
-from app.rag_pipeline.embedding_pipeline import EmbeddingPipeline
-from app.rag_pipeline.vector_store import VectorStore
+from build.embedding_pipeline import EmbeddingPipeline
+from src.rag_pipeline.vector_store import VectorStore
 
-RAG_STORAGE_DIR = os.path.join(backend_root, "rag_storage")
+RAG_STORAGE_DIR = os.path.join(backend_root, "ingestion", "rag_and_graph")
 
 def extract_text_from_pdf(filepath: str) -> str:
-    """Extracts text from PDF file using pypdf if available, else fallback."""
+    """Extracts text from PDF file as Markdown using pymupdf4llm if available, else fallback."""
     try:
-        from pypdf import PdfReader
-        reader = PdfReader(filepath)
-        text = ""
-        for i, page in enumerate(reader.pages):
-            page_text = page.extract_text()
-            if page_text:
-                text += f"\n--- Page {i+1} ---\n" + page_text
-        return text
+        import pymupdf4llm
+        md_text = pymupdf4llm.to_markdown(filepath)
+        return md_text
     except Exception as e:
-        print(f"    [PDF Ingest Note] {os.path.basename(filepath)} ({e}). Extracting text stream.")
-        with open(filepath, "rb") as f:
-            raw = f.read()
-        return raw.decode("latin-1", errors="ignore")[:60000]
+        print(f"    [PDF Ingest Note] {os.path.basename(filepath)} ({e}). Extracting text stream fallback.")
+        try:
+            from pypdf import PdfReader
+            reader = PdfReader(filepath)
+            text = ""
+            for i, page in enumerate(reader.pages):
+                page_text = page.extract_text()
+                if page_text:
+                    text += f"\n--- Page {i+1} ---\n" + page_text
+            return text
+        except:
+            with open(filepath, "rb") as f:
+                raw = f.read()
+            return raw.decode("latin-1", errors="ignore")[:60000]
 
-def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 150) -> List[str]:
-    """Splits document text into overlapping sliding window chunks."""
-    chunks = []
-    start = 0
-    while start < len(text):
-        end = start + chunk_size
-        chunk = text[start:end].strip()
-        if len(chunk) > 40:
-            chunks.append(chunk)
-        start += chunk_size - overlap
-    return chunks
+def chunk_text(text: str, chunk_size: int = 1200, overlap: int = 200) -> List[str]:
+    """Splits document text using semantic Markdown boundaries."""
+    try:
+        from langchain.text_splitter import MarkdownTextSplitter
+        splitter = MarkdownTextSplitter(chunk_size=chunk_size, chunk_overlap=overlap)
+        # LangChain returns Document objects if create_documents is used,
+        # but split_text returns strings.
+        chunks = splitter.split_text(text)
+        return [c.strip() for c in chunks if len(c.strip()) > 40]
+    except ImportError:
+        print("[Warning] langchain not installed, falling back to basic chunking")
+        chunks = []
+        start = 0
+        while start < len(text):
+            end = start + chunk_size
+            chunk = text[start:end].strip()
+            if len(chunk) > 40:
+                chunks.append(chunk)
+            start += chunk_size - overlap
+        return chunks
 
 def run_rag_ingest(vector_store: VectorStore = None) -> int:
     print("-" * 55)
@@ -99,18 +113,18 @@ def run_rag_ingest(vector_store: VectorStore = None) -> int:
             })
 
     # Embed chunks into Qdrant collection
-    print(f"\n  Generating dense 384-dim semantic embeddings for {len(all_chunks_to_embed)} chunks...")
+    print(f"\n  Generating dense 768-dim semantic embeddings for {len(all_chunks_to_embed)} chunks...")
     pipeline.batch_embed_and_index(all_chunks_to_embed[:150]) # index top chunks for fast turnaround
     print(f"  ✓ Embedded and stored in Qdrant collection: '{pipeline.collection_name}'")
 
-    # Persist serialized vector database snapshot into backend/database/vector/
+    # Persist serialized vector database snapshot into processed_data/vector/
     import json
-    db_vector_dir = os.path.join(backend_root, "database", "vector")
+    db_vector_dir = os.path.join(backend_root, "processed_data")
     os.makedirs(db_vector_dir, exist_ok=True)
     embeddings_file = os.path.join(db_vector_dir, "vector_embeddings.json")
     meta_file = os.path.join(db_vector_dir, "collections_metadata.json")
 
-    from app.rag_pipeline.embedding_pipeline import compute_dense_embedding
+    from build.embedding_pipeline import compute_dense_embedding
     vector_dump = []
     for item in all_chunks_to_embed[:100]:
         vector_dump.append({
@@ -126,10 +140,10 @@ def run_rag_ingest(vector_store: VectorStore = None) -> int:
     with open(meta_file, "w", encoding="utf-8") as f:
         json.dump({
             "collection_name": pipeline.collection_name,
-            "vector_size": 384,
+            "vector_size": 768,
             "distance": "COSINE",
             "indexed_chunks_count": len(all_chunks_to_embed),
-            "storage_path": "backend/database/vector"
+            "storage_path": "processed_data"
         }, f, indent=2)
 
     print(f"  ✓ Persisted Vector Snapshot: {embeddings_file}")
