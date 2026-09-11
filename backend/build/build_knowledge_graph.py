@@ -9,12 +9,14 @@ import os
 import sys
 import networkx as nx
 import json
+import glob
+import re
 
 backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if backend_root not in sys.path:
     sys.path.insert(0, backend_root)
 
-DB_GRAPH_DIR = os.path.join(backend_root, "database", "graph")
+DB_GRAPH_KNOWLEDGE_DIR = os.path.join(backend_root, "ingestion", "rag_and_graph")
 GRAPH_FILE = os.path.join(DB_GRAPH_DIR, "knowledge_graph.graphml")
 JSON_FILE = os.path.join(DB_GRAPH_DIR, "knowledge_graph.json")
 
@@ -24,57 +26,70 @@ def run_graph_build() -> nx.MultiDiGraph:
 
     print("-" * 55)
 
-    print("▶ [Build: Graph] Constructing Regulatory & Vendor Knowledge Graph")
+    print("▶ [Build: Graph] Constructing Regulatory & Vendor Knowledge Graph from Markdown")
     print("-" * 55)
 
-    # 1. Regulatory & Statutory Standard Nodes
-    standards = [
-        ("schedule_m_gmp", {"type": "RegulatoryStandard", "title": "Schedule M Good Manufacturing Practices", "authority": "CDSCO"}),
-        ("who_trs1025_annex7", {"type": "StorageStandard", "title": "WHO Cold-Chain Storage Guidelines", "temp_range": "2C-8C"}),
-        ("drugs_cosmetics_act", {"type": "PrimaryLegislation", "title": "Drugs and Cosmetics Act, 1940", "jurisdiction": "India"}),
-        ("nppa_dpco_ceiling", {"type": "PriceRegulation", "title": "Drugs Prices Control Order, 2013", "authority": "NPPA"}),
-        ("form_28d_license", {"type": "License", "category": "Biological Manufacturing"}),
-        ("iot_temperature_logger", {"type": "MonitoringSpec", "frequency": "continuous"}),
-        ("liability_cap_standard", {"type": "ContractNorm", "recommended_multiplier": "1.5x"}),
-    ]
-    for nid, attrs in standards:
+    # 1. Parse Nodes and Edges from Markdown
+    parsed_nodes = []
+    parsed_edges = []
+    
+    if os.path.exists(GRAPH_KNOWLEDGE_DIR):
+        for filepath in glob.glob(os.path.join(GRAPH_KNOWLEDGE_DIR, "*.md")):
+            with open(filepath, 'r', encoding='utf-8') as f:
+                content = f.read()
+                
+            sections = content.split('## Node: ')
+            for section in sections[1:]:
+                lines = section.strip().split('\n')
+                title = lines[0].strip()
+                
+                node_attrs = {"name": title} if "Vendor" in title else {"title": title}
+                node_id = None
+                
+                i = 1
+                while i < len(lines):
+                    line = lines[i].strip()
+                    if line.startswith('### Relationships'):
+                        i += 1
+                        break
+                    if line.startswith('- ID:'):
+                        node_id = line.replace('- ID:', '').strip()
+                    elif line.startswith('- '):
+                        key_val = line[2:].split(':', 1)
+                        if len(key_val) == 2:
+                            key = key_val[0].strip().lower().replace(' ', '_')
+                            val = key_val[1].strip()
+                            try:
+                                if '.' in val: val = float(val)
+                                else: val = int(val)
+                            except: pass
+                            node_attrs[key] = val
+                    i += 1
+                    
+                if node_id:
+                    parsed_nodes.append((node_id, node_attrs))
+                    
+                while i < len(lines):
+                    line = lines[i].strip()
+                    if line.startswith('- ['):
+                        match = re.match(r'- \[(.*?)\] -> (.*?) \((.*?)\)', line)
+                        if match:
+                            rel = match.group(1).strip()
+                            target = match.group(2).strip()
+                            props_str = match.group(3).strip()
+                            props = {}
+                            for prop in props_str.split(','):
+                                k, v = prop.split(':')
+                                k = k.strip().lower().replace(' ', '_')
+                                v = float(v.strip())
+                                props[k] = v
+                            parsed_edges.append((node_id, target, rel, props))
+                    i += 1
+
+    for nid, attrs in parsed_nodes:
         g.add_node(nid, **attrs)
 
-    # 2. Vendor Entity Nodes
-    vendors = [
-        ("biogen_diagnostics", {"type": "Vendor", "name": "BioGen Diagnostics Inc.", "credit_score": 780, "tier": "Tier-1 Manufacturer"}),
-        ("global_pharma", {"type": "Vendor", "name": "Global Pharma Logistics Ltd.", "credit_score": 720, "tier": "Logistics Provider"}),
-        ("apex_biologistics", {"type": "Vendor", "name": "Apex BioLogistics Pvt. Ltd.", "credit_score": 680, "tier": "Regional Distributor"}),
-        ("nova_biologics", {"type": "Vendor", "name": "Nova Biologics & Vaccines Ltd.", "credit_score": 810, "tier": "Prequalified Manufacturer"}),
-        ("medisynth_specialty", {"type": "Vendor", "name": "MediSynth Specialty Formulations Ltd.", "credit_score": 710, "tier": "Specialty Formulations"}),
-    ]
-    for nid, attrs in vendors:
-        g.add_node(nid, **attrs)
-
-    # 3. Directed Relationship Edges with source weights and priorities
-    edges = [
-        ("biogen_diagnostics", "schedule_m_gmp", "COMPLIES_WITH", {"weight": 1.0, "source_priority": 1.0}),
-        ("biogen_diagnostics", "form_28d_license", "HOLDS_LICENSE", {"weight": 1.0, "source_priority": 1.0}),
-        ("biogen_diagnostics", "who_trs1025_annex7", "CERTIFIED_FOR", {"weight": 0.85, "source_priority": 0.85}),
-        
-        ("global_pharma", "nppa_dpco_ceiling", "GOVERNED_BY", {"weight": 1.0, "source_priority": 1.0}),
-        ("global_pharma", "schedule_m_gmp", "AUDITED_AGAINST", {"weight": 0.9, "source_priority": 0.9}),
-        ("global_pharma", "liability_cap_standard", "BOUND_BY", {"weight": 0.85, "source_priority": 0.85}),
-
-        ("apex_biologistics", "schedule_m_gmp", "COMPLIES_WITH", {"weight": 0.9, "source_priority": 0.9}),
-        ("apex_biologistics", "who_trs1025_annex7", "DISPUTED_COMPLIANCE", {"weight": 0.7, "source_priority": 0.7}),
-
-        ("nova_biologics", "who_trs1025_annex7", "MANDATES", {"weight": 1.0, "source_priority": 1.0}),
-        ("nova_biologics", "iot_temperature_logger", "EQUIPPED_WITH", {"weight": 1.0, "source_priority": 1.0}),
-        ("nova_biologics", "nppa_dpco_ceiling", "COMPLIES_WITH", {"weight": 1.0, "source_priority": 1.0}),
-
-        ("medisynth_specialty", "schedule_m_gmp", "COMPLIES_WITH", {"weight": 0.9, "source_priority": 0.9}),
-
-        ("who_trs1025_annex7", "drugs_cosmetics_act", "CITED_IN", {"weight": 1.0, "source_priority": 1.0}),
-        ("schedule_m_gmp", "drugs_cosmetics_act", "DEFINED_IN", {"weight": 1.0, "source_priority": 1.0}),
-    ]
-
-    for src, tgt, rel, props in edges:
+    for src, tgt, rel, props in parsed_edges:
         g.add_edge(src, tgt, relation=rel, **props)
 
     # Persist as GraphML

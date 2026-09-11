@@ -11,8 +11,8 @@ backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if backend_root not in sys.path:
     sys.path.insert(0, backend_root)
 
-from app.db.session import case_store
-from app.db.seed import get_initial_seed_cases
+from src.db.session import case_store
+from src.db.seed import get_initial_seed_cases
 
 def run_database_seed():
     print("-" * 55)
@@ -27,9 +27,9 @@ def run_database_seed():
     all_cases = case_store.get_all()
     pending = case_store.get_pending_approvals()
 
-    # Also dump serialized cases.json ledger into database/relational/
+    # Also dump serialized cases.json ledger into processed_data/relational/
     import json
-    db_rel_dir = os.path.join(backend_root, "database", "relational")
+    db_rel_dir = os.path.join(backend_root, "processed_data")
     os.makedirs(db_rel_dir, exist_ok=True)
     json_path = os.path.join(db_rel_dir, "cases.json")
     with open(json_path, "w", encoding="utf-8") as f:
