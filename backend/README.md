@@ -67,26 +67,50 @@ Rather than relying on single-shot LLM prompts or basic RAG retrieval, the backe
 
 ```
 backend/
-├── src/                       # Core Application Runtime
-│   ├── main.py                # FastAPI app initialization, CORS, and route mounting
-│   ├── config.py              # Environment variables & runtime settings
-│   ├── agents/                # LangGraph agent implementations & prompts
-│   ├── models/                # Pydantic schemas (ProcurementItem, Report, etc.)
-│   ├── db/                    # SQLite session store, case ledger, and seed data
-│   ├── rag_pipeline/          # Fusion engine, Vector store, Graph store
-│   └── routers/               # /procurement and /approval API routes
-├── build/                     # Master idempotent database build & ingestion scripts
-│   ├── build_all.py           # Clean & rebuild all databases
-│   ├── seed_relational.py     # SQLite seeding script
-│   ├── ingest_rag_docs.py     # Nomic Vector chunking & embedding ingestion
-│   └── build_knowledge_graph.py # NetworkX property graph builder
-├── data_collected/            # Stage 1: Raw collection dumping ground (PDFs, Markdown)
-├── mockdata/                  # Stage 2: Template reference directory (Dummy structure)
-├── ingestion/                 # Stage 3: Active staging environment for build scripts
-├── processed_data/            # Stage 4: Output Hub (Flattened SQLite, Vector, Graph databases)
-├── scripts/                   # CLI runner scripts (pipeline runner, scraper runner)
-├── app.py                     # Entry point runner alias
-└── requirements.txt           # Python dependencies
+├── src/                               # Core Application Runtime (Business Logic)
+│   ├── main.py                        # FastAPI application setup, CORS middleware, and route mounting
+│   ├── config.py                      # Global environment variable loader (Qdrant URLs, API keys)
+│   ├── agents/                        # LangGraph AI agent orchestration implementations
+│   │   ├── planner.py                 # Determines the scope (Light vs Full) of the investigation
+│   │   ├── executor.py                # Runs the multi-threaded extraction (Web Scrape + Vector + Graph)
+│   │   ├── scorer.py                  # Standardizes and normalizes extracted risk facts
+│   │   ├── critic.py                  # Resolves contradictions between contracts and regulations
+│   │   ├── writer.py                  # Generates the final 4-Dimensional ProcurementReport
+│   │   ├── workflow.py                # LangGraph StateGraph compiling all agents into a pipeline
+│   │   └── state.py                   # Pydantic state definition for the graph traversal
+│   ├── models/                        # Pydantic schemas shared across agents, APIs, and Frontend
+│   │   └── schemas.py                 # (ProcurementItem, WorkflowStatus, RiskAssessment, etc.)
+│   ├── db/                            # SQLite relational database session and seed logic
+│   │   ├── session.py                 # SQLite connection and CaseStore repository layer
+│   │   ├── pricing.py                 # API layer connecting to the NPPA DPCO Pricing JSON
+│   │   └── seed.py                    # Hardcoded Python definitions for the 5 initial mock cases
+│   ├── rag_pipeline/                  # Advanced information retrieval systems
+│   │   ├── fusion.py                  # Fuses Vector and Graph results; executes priority weighting
+│   │   ├── vector_store.py            # Interfaces with Qdrant for semantic similarity searches
+│   │   ├── graph_store.py             # Interfaces with NetworkX for entity relationship queries
+│   │   └── web_scraper.py             # Tavily integration to extract live vendor news
+│   └── routers/                       # FastAPI REST API controller endpoints
+│       ├── procurement.py             # Endpoints: GET /cases, POST /submit, GET /cases/{id}
+│       └── approval.py                # Endpoints: GET /pending, POST /cases/{id}/approve
+├── build/                             # Master database ingestion and infrastructure creation scripts
+│   ├── build_all.py                   # The orchestrator: Purges old DBs and builds all 4 new DBs
+│   ├── seed_relational.py             # Dumps the Python objects from src/db/seed.py into SQLite
+│   ├── ingest_rag_docs.py             # Chunks Markdown files, embeds with Nomic, uploads to Qdrant
+│   └── build_knowledge_graph.py       # Extracts entities/rules from Markdown and creates GraphML
+├── data_collected/                    # Stage 1: Raw untidy dump of scraped PDFs and text files
+├── mockdata/                          # Stage 2: Valid, clean, perfectly-structured reference examples
+├── ingestion/                         # Stage 3: The active inbox folder that build_all.py reads from
+├── processed_data/                    # Stage 4: Output Hub containing the finalized generated Databases
+│   ├── procurement_cases.db           # (Generated) The SQLite ledger holding all cases
+│   ├── vector_embeddings.json         # (Generated) The Qdrant HNSW semantic vector store
+│   ├── knowledge_graph.graphml        # (Generated) The NetworkX property graph definition
+│   └── pricing_ceiling_catalog.json   # (Generated) The regulatory pricing limits database
+├── scripts/                           # Utility Command Line Interface (CLI) runners
+│   ├── run_agent_pipeline.py          # Standalone CLI tool to test LangGraph without FastAPI
+│   ├── run_all_setup.sh               # Bash script wrapper for initial system setup
+│   └── scrape_vendor_intel.py         # Standalone CLI tool to test Tavily scraping
+├── app.py                             # Alias script to start the Uvicorn web server easily
+└── requirements.txt                   # Locked Python package dependencies (langchain, fastapi, qdrant)
 ```
 
 ---
