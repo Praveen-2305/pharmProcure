@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SubmitProcurementRequest, InvestigationPlan } from '../../api/types';
-import { procurementApi } from '../../api/client';
+import { procurementApi, normalizeError } from '../../api/client';
 import { Upload, AlertCircle, ArrowRight, Target, Zap, FileText } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from '../../components/ui/button';
@@ -70,8 +70,12 @@ export const SubmitRequestForm: React.FC = () => {
 
       const result = await procurementApi.submitRequest(request);
       navigate(`/review/${result.procurementId}`);
-    } catch (err: any) {
-      setGeneralError(err.message || 'Submission failed. Please check inputs and retry.');
+    } catch (err: unknown) {
+      const apiErr = normalizeError(err);
+      if (apiErr.validationErrors) {
+        setErrors((prev) => ({ ...prev, ...apiErr.validationErrors }));
+      }
+      setGeneralError(apiErr.message || 'Submission failed. Please check inputs and retry.');
       setIsSubmitting(false);
     }
   };

@@ -34,7 +34,17 @@ const WORKFLOW_STAGES: Array<{ id: WorkflowStage; label: string; icon: any; desc
 
 export const VendorReviewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { status, report, loading, error } = useProcurementStatus(id);
+  const { status, report, loading, error, refetch } = useProcurementStatus(id);
+  const [isRefetching, setIsRefetching] = React.useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefetching(true);
+    try {
+      await refetch();
+    } finally {
+      setIsRefetching(false);
+    }
+  };
 
   if (loading && !status) {
     return (
@@ -85,8 +95,20 @@ export const VendorReviewPage: React.FC = () => {
           </h1>
         </div>
 
-        {/* Critic Revision Loop Badge */}
+        {/* Header Action Controls */}
         <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isRefetching}
+            className="gap-1.5 shadow-sm text-xs"
+            title="Refresh casefile status"
+          >
+            <RefreshCw className={cn("size-3.5", isRefetching && "animate-spin")} />
+            <span>Refresh</span>
+          </Button>
+
           {status.revisionCount > 0 && (
             <Badge variant="outline" className="gap-1.5 py-1 px-3 rounded-full text-primary border-primary/30 bg-primary/5">
               <RefreshCw className="size-3.5 animate-spin" style={{ animationDuration: '4s' }} />
@@ -118,21 +140,32 @@ export const VendorReviewPage: React.FC = () => {
               {WORKFLOW_STAGES.map((stg, idx) => {
                 const Icon = stg.icon;
                 const isCurrent = status.stage === stg.id;
+                const isCompleted = status.stage === 'COMPLETE' || (currentStageIndex !== -1 && idx < currentStageIndex);
 
                 return (
                   <div key={stg.id} className={cn(
-                    "flex flex-col space-y-3 p-4 rounded-lg border transition-colors",
-                    isCurrent ? "border-primary bg-primary/5 shadow-sm" : "bg-background shadow-sm hover:border-muted-foreground/30"
+                    "flex flex-col justify-between space-y-3 p-4 rounded-lg border transition-all",
+                    isCurrent
+                      ? "border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20"
+                      : isCompleted
+                      ? "border-emerald-500/20 bg-emerald-500/[0.02]"
+                      : "bg-background shadow-sm hover:border-muted-foreground/30"
                   )}>
                     <div className="flex items-center justify-between">
-                      <Icon className={cn("size-5", isCurrent ? "text-primary" : "text-muted-foreground")} />
-                      <Badge variant="outline" className="text-[10px] size-6 flex items-center justify-center p-0 rounded-full bg-muted/50">
-                        {idx + 1}
+                      <Icon className={cn("size-5", isCurrent ? "text-primary animate-pulse" : isCompleted ? "text-emerald-500" : "text-muted-foreground")} />
+                      <Badge variant="outline" className={cn(
+                        "text-[10px] size-6 flex items-center justify-center p-0 rounded-full",
+                        isCompleted ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" : "bg-muted/50"
+                      )}>
+                        {isCompleted ? <CheckCircle2 className="size-3.5" /> : idx + 1}
                       </Badge>
                     </div>
-                    <div>
+                    <div className="space-y-1">
                       <p className={cn("text-sm font-semibold", isCurrent ? "text-primary" : "text-foreground")}>
                         {stg.label}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground leading-snug">
+                        {stg.description}
                       </p>
                     </div>
                   </div>

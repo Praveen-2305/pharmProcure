@@ -1,61 +1,87 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { WorkflowStatus, ProcurementReport } from '../api/types';
-import { procurementApi } from '../api/client';
+import { WorkflowStatus, ProcurementReport, WorkflowStage } from '../api/types';
+import { procurementApi, normalizeError, ApiError } from '../api/client';
 
 export function useProcurementStatus(procurementId?: string) {
   const [status, setStatus] = useState<WorkflowStatus | null>(null);
   const [report, setReport] = useState<ProcurementReport | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<ApiError | null>(null);
 
-  const isTerminal = (stage?: string) =>
+  const isTerminal = (stage?: WorkflowStage) =>
     stage === 'COMPLETE' || stage === 'AWAITING_APPROVAL' || stage === 'FAILED';
 
-  const fetchData = useCallback(async () => {
-    if (!procurementId) return;
+  const fetchData = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!procurementId) return;
 
-    try {
-      const currentStatus = await procurementApi.getStatus(procurementId);
-      setStatus(currentStatus);
+      try {
+        const currentStatus = await procurementApi.getStatus(procurementId, { signal });
+        if (signal?.aborted) return;
+        setStatus(currentStatus);
 
-      // If in report-ready stage, retrieve report
-      if (
-        currentStatus.stage === 'COMPLETE' ||
-        currentStatus.stage === 'AWAITING_APPROVAL' ||
-        currentStatus.stage === 'WRITING_REPORT'
-      ) {
-        const reportData = await procurementApi.getReport(procurementId);
-        setReport(reportData);
+        // If in report-ready stage, retrieve report
+        if (
+          currentStatus.stage === 'COMPLETE' ||
+          currentStatus.stage === 'AWAITING_APPROVAL' ||
+          currentStatus.stage === 'WRITING_REPORT'
+        ) {
+          const reportData = await procurementApi.getReport(procurementId, { signal });
+          if (signal?.aborted) return;
+          setReport(reportData);
+        }
+        setError(null);
+        setApiError(null);
+      } catch (err: unknown) {
+        const normalized = normalizeError(err);
+        if (normalized.isAborted) return;
+
+        setApiError(normalized);
+        setError(normalized.message || 'Failed to fetch status');
+      } finally {
+        if (!signal?.aborted) {
+          setLoading(false);
+        }
       }
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch status');
-    } finally {
-      setLoading(false);
-    }
-  }, [procurementId]);
+    },
+    [procurementId]
+  );
+
+  const statusStageRef = useRef<WorkflowStage | undefined>(status?.stage);
+  statusStageRef.current = status?.stage;
 
   useEffect(() => {
-    setLoading(true);
-    fetchData();
+    if (!procurementId) {
+      setLoading(false);
+      return;
+    }
 
-    // Setup polling for non-terminal stages
+    const abortController = new AbortController();
+    setLoading(true);
+    fetchData(abortController.signal);
+
+    // Polling setup for active progress
     const interval = setInterval(async () => {
-      if (status && isTerminal(status.stage)) {
+      if (statusStageRef.current && isTerminal(statusStageRef.current)) {
         clearInterval(interval);
         return;
       }
-      await fetchData();
+      await fetchData(abortController.signal);
     }, 1500);
 
-    return () => clearInterval(interval);
-  }, [procurementId, fetchData, status?.stage]);
+    return () => {
+      clearInterval(interval);
+      abortController.abort();
+    };
+  }, [procurementId, fetchData]);
 
   return {
     status,
     report,
     loading,
     error,
+    apiError,
     refetch: fetchData,
     isTerminal: status ? isTerminal(status.stage) : false,
   };

@@ -1,32 +1,35 @@
-import { ApprovalDecision, ApprovalRecord, WorkflowStatus } from './types';
-import { mockProcurementAPI } from './procurement';
+import { ApprovalDecision, ApprovalRecord } from './types';
+import { mockProcurementAPI, RequestOptions } from './procurement';
+import { httpClient } from './httpClient';
+import { ApiError } from './errors';
+
+export interface PendingApprovalItem {
+  procurementId: string;
+  vendorName: string;
+  dealSize: number;
+  submittedAt: string;
+  overallRisk: 'LOW' | 'MEDIUM' | 'HIGH';
+  confidenceScore: number;
+  investigationPlan: 'LIGHT' | 'FULL';
+  summary: string;
+}
 
 export interface ApprovalAPI {
-  getPendingApprovals(): Promise<
-    Array<{
-      procurementId: string;
-      vendorName: string;
-      dealSize: number;
-      submittedAt: string;
-      overallRisk: 'LOW' | 'MEDIUM' | 'HIGH';
-      confidenceScore: number;
-      investigationPlan: 'LIGHT' | 'FULL';
-      summary: string;
-    }>
-  >;
+  getPendingApprovals(options?: RequestOptions): Promise<PendingApprovalItem[]>;
   decide(
     procurementId: string,
     decision: ApprovalDecision,
     reason?: string,
-    decidedBy?: string
+    decidedBy?: string,
+    options?: RequestOptions
   ): Promise<{ success: boolean; record: ApprovalRecord }>;
 }
 
 const mockApprovalDecisions: Map<string, ApprovalRecord> = new Map();
 
 export const mockApprovalAPI: ApprovalAPI = {
-  async getPendingApprovals() {
-    const all = await mockProcurementAPI.getAllProcurements();
+  async getPendingApprovals(options?: RequestOptions) {
+    const all = await mockProcurementAPI.getAllProcurements(options);
     // Return items in AWAITING_APPROVAL that haven't been decided yet
     return all
       .filter((item) => item.status.stage === 'AWAITING_APPROVAL' && !mockApprovalDecisions.has(item.procurementId))
@@ -44,9 +47,22 @@ export const mockApprovalAPI: ApprovalAPI = {
       }));
   },
 
-  async decide(procurementId: string, decision: ApprovalDecision, reason?: string, decidedBy = 'Procurement Officer') {
+  async decide(
+    procurementId: string,
+    decision: ApprovalDecision,
+    reason?: string,
+    decidedBy = 'Procurement Officer',
+    options?: RequestOptions
+  ) {
     if ((decision === 'REJECT' || decision === 'REQUEST_MORE_INFO') && (!reason || reason.trim() === '')) {
-      throw new Error(`A justification reason is mandatory for ${decision} decisions.`);
+      throw new ApiError({
+        message: `A justification reason is mandatory for ${decision} decisions.`,
+        status: 400,
+        code: 'VALIDATION_ERROR',
+        validationErrors: {
+          reason: `A justification reason is mandatory for ${decision} decisions.`,
+        },
+      });
     }
 
     const record: ApprovalRecord = {
@@ -59,11 +75,9 @@ export const mockApprovalAPI: ApprovalAPI = {
     mockApprovalDecisions.set(procurementId, record);
 
     // Update status in procurement store
-    const status = await mockProcurementAPI.getStatus(procurementId);
+    const status = await mockProcurementAPI.getStatus(procurementId, options);
     if (status) {
-      if (decision === 'APPROVE') {
-        status.stage = 'COMPLETE';
-      } else if (decision === 'REJECT') {
+      if (decision === 'APPROVE' || decision === 'REJECT') {
         status.stage = 'COMPLETE';
       } else if (decision === 'REQUEST_MORE_INFO') {
         // Re-triggers Executor loop with increased revision count
@@ -77,25 +91,21 @@ export const mockApprovalAPI: ApprovalAPI = {
 };
 
 export const httpApprovalAPI: ApprovalAPI = {
-  async getPendingApprovals() {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-    const res = await fetch(`${baseUrl}/approval/pending`);
-    if (!res.ok) {
-      throw new Error(`Failed to fetch pending approvals: ${res.statusText}`);
-    }
-    return res.json();
+  async getPendingApprovals(options?: RequestOptions): Promise<PendingApprovalItem[]> {
+    return httpClient.get<PendingApprovalItem[]>('/approval/pending', options);
   },
 
-  async decide(procurementId: string, decision: ApprovalDecision, reason?: string, decidedBy = 'Procurement Officer') {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-    const res = await fetch(`${baseUrl}/approval/${procurementId}/decide`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ decision, reason, decidedBy }),
-    });
-    if (!res.ok) {
-      throw new Error(`Failed to submit decision: ${res.statusText}`);
-    }
-    return res.json();
+  async decide(
+    procurementId: string,
+    decision: ApprovalDecision,
+    reason?: string,
+    decidedBy = 'Procurement Officer',
+    options?: RequestOptions
+  ): Promise<{ success: boolean; record: ApprovalRecord }> {
+    return httpClient.post<{ success: boolean; record: ApprovalRecord }>(
+      `/approval/${encodeURIComponent(procurementId)}/decide`,
+      { decision, reason, decidedBy },
+      options
+    );
   },
 };

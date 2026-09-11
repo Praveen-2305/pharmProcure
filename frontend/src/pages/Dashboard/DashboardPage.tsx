@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ProcurementItemSummary } from '../../api/types';
-import { procurementApi } from '../../api/client';
+import { procurementApi, normalizeError } from '../../api/client';
 import { RiskLevelTag } from '../../components/RiskLevelTag';
 import { ConfidenceBadge } from '../../components/ConfidenceBadge';
 import { formatCurrency, formatDate } from '../../lib/utils';
@@ -11,6 +11,7 @@ import {
   ArrowRight,
   FilePlus2,
   SlidersHorizontal,
+  AlertCircle,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -18,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   Table,
   TableBody,
@@ -30,6 +32,7 @@ import {
 export const DashboardPage: React.FC = () => {
   const [items, setItems] = useState<ProcurementItemSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('ALL');
 
@@ -37,18 +40,21 @@ export const DashboardPage: React.FC = () => {
     document.title = "Executive Dashboard | AutonoSource";
   }, []);
 
+  const loadData = async () => {
+    try {
+      setError(null);
+      const data = await procurementApi.getAllProcurements();
+      setItems(data);
+    } catch (err: unknown) {
+      const apiErr = normalizeError(err);
+      setError(apiErr.message || 'Failed to load procurement cases.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await procurementApi.getAllProcurements();
-        setItems(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+    loadData();
   }, []);
 
   const filteredItems = items.filter((item) => {
@@ -83,6 +89,19 @@ export const DashboardPage: React.FC = () => {
           <span>New Investigation</span>
         </Link>
       </div>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Dashboard Error</AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
+            <span>{error}</span>
+            <Button variant="outline" size="xs" onClick={loadData} className="ml-4">
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Metrics Summary Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
