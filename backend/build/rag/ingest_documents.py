@@ -129,7 +129,7 @@ def run_rag_ingest(vector_store: VectorStore = None) -> int:
             "vector_size": 384,
             "distance": "COSINE",
             "indexed_chunks_count": len(all_chunks_to_embed),
-            "storage_path": db_vector_dir
+            "storage_path": "backend/database/vector"
         }, f, indent=2)
 
     print(f"  ✓ Persisted Vector Snapshot: {embeddings_file}")

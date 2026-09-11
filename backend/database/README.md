@@ -39,8 +39,8 @@ While this directory acts as the local and testing persistent hub, the enterpris
 ---
 
 ## 🛠️ Rebuilding the Local Databases
-To perform a complete idempotent clean rebuild for local testing:
+To perform a complete clean build:
 ```bash
 python backend/build/build_all.py
 ```
-This flushes any existing database files and deterministically reconstructs all tables, embeddings, and graphs from scratch.
+This cleans any existing database files and deterministically reconstructs all tables, embeddings, and graphs.

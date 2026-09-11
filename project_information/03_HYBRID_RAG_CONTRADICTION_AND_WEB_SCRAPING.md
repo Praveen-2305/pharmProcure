@@ -45,7 +45,7 @@ In AutonoSource, the knowledge graph represents statutory acts, manufacturing li
    - Edge-weight traversal algorithms
 
 ### 2.2 Storage Formats
-The graph is persisted to disk under [`backend/database/graph/`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/database/graph/):
+The graph is persisted to disk under [`backend/database/graph/`](../backend/database/graph/):
 - **`knowledge_graph.graphml`:** International standard XML-based format for graph data. Can be opened directly in Gephi, Cytoscape, or imported into Neo4j.
 - **`knowledge_graph.json`:** Node-link adjacency list for fast, lightweight loading into memory without XML parsing overhead.
 
@@ -60,7 +60,7 @@ CALL apoc.import.graphml("knowledge_graph.graphml", {})
 
 ## 3. 4-Step Hybrid Fusion & Contradiction Resolution Algorithm
 
-Implemented in [`backend/app/rag/fusion.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/app/rag/fusion.py).
+Implemented in [`backend/app/rag/fusion.py`](../backend/app/rag/fusion.py).
 
 ### Step 1: Score Normalization
 Each retriever outputs scores on different numerical scales:
@@ -111,7 +111,7 @@ confidence = clamp(mean(final_scores) - (0.15 * has_contradictions), 0.10, 1.00)
 
 ## 4. Deterministic Regulated Pricing Subsystem
 
-Located in [`backend/app/db/pricing.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/app/db/pricing.py):
+Located in [`backend/app/db/pricing.py`](../backend/app/db/pricing.py):
 
 1. **Statutory Authority:** Drugs (Prices Control) Order (DPCO), 2013 under Section 3 of the Essential Commodities Act, 1955.
 2. **Catalog Path:** `backend/database/pricing/pricing_ceiling_catalog.json` (16 scheduled drug formulations).
@@ -127,7 +127,7 @@ Located in [`backend/app/db/pricing.py`](file:///media/kamalesh/KAMALESH/PROJECT
 
 ## 5. Web Scraping & Regulatory Docket Crawler
 
-Implemented in [`backend/app/rag/web_scraper.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/app/rag/web_scraper.py):
+Implemented in [`backend/app/rag/web_scraper.py`](../backend/app/rag/web_scraper.py):
 
 1. **Target Search Signals:**
    - **Regulatory Warnings:** Circulars, FDA warning letters, show-cause notices (`"{vendor_name} regulatory warning recall CDSCO FDA"`).
@@ -142,6 +142,6 @@ Implemented in [`backend/app/rag/web_scraper.py`](file:///media/kamalesh/KAMALES
    - **Tier 4 (Clean Verification Baseline):** Negative verification against official judicial and regulatory registries for unknown vendors.
 
 3. **Risk Scorer Integration:**
-   - Scraped regulatory warnings automatically escalate **Compliance Risk** to `HIGH` or `MEDIUM` in [`scorer.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/app/agents/scorer.py).
+   - Scraped regulatory warnings automatically escalate **Compliance Risk** to `HIGH` or `MEDIUM` in [`scorer.py`](../backend/app/agents/scorer.py).
    - Scraped commercial litigation escalates **Financial Risk** and is cited in `financial_rationale`.
    - Scraped sources are cited in `evidence_summary` in the final report.

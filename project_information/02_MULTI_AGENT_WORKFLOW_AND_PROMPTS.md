@@ -30,7 +30,7 @@ graph TD
 
 ## 2. Typed State Schema: `WorkflowState`
 
-The entire state is passed between agents as a typed dictionary (`WorkflowState`) defined in [`backend/app/agents/state.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/app/agents/state.py):
+The entire state is passed between agents as a typed dictionary (`WorkflowState`) defined in [`backend/app/agents/state.py`](../backend/app/agents/state.py):
 
 ```python
 class WorkflowState(TypedDict, total=False):
@@ -72,7 +72,7 @@ class WorkflowState(TypedDict, total=False):
 - **Decision Logic:**
   - If `dealSize > 250,000` OR `category` involves cold-chain / sterile formulations -> selects `FULL` (thorough graph traversal and deep web scraping).
   - If repeat transaction with established vendor under budget -> selects `LIGHT`.
-- **Prompt Template ([`backend/app/prompts/planner_prompt.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/app/prompts/planner_prompt.py)):**
+- **Prompt Template ([`backend/app/prompts/planner_prompt.py`](../backend/app/prompts/planner_prompt.py)):**
   ```python
   PLANNER_SYSTEM_PROMPT = """You are the Senior Procurement Planning Specialist for AutonoSource (pharmProcure).
   Your objective is to analyze the proposed deal and determine an optimal investigation scope.

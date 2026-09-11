@@ -41,7 +41,7 @@ backend/database/
 ## 2. Deep Dive: The 5 Specialized Database Subsystems
 
 ### 2.1 Relational Database (`backend/database/relational/`)
-- **Technology:** SQLite 3 (`procurement_cases.db`) + in-memory indexing via `CaseStore` ([`session.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/app/db/session.py)).
+- **Technology:** SQLite 3 (`procurement_cases.db`) + in-memory indexing via `CaseStore` ([`session.py`](../backend/app/db/session.py)).
 - **Table Schema (`procurement_cases`):**
   ```sql
   CREATE TABLE IF NOT EXISTS procurement_cases (
@@ -63,7 +63,7 @@ backend/database/
 
 ### 2.2 Vector Database (`backend/database/vector/`)
 - **Technology:** Qdrant Vector Store (`procurement_contracts` collection) operating in-memory or connected to remote Qdrant hosts.
-- **Embedding Pipeline Specs ([`embedding_pipeline.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/app/rag/embedding_pipeline.py)):**
+- **Embedding Pipeline Specs ([`embedding_pipeline.py`](../backend/app/rag/embedding_pipeline.py)):**
   - **Vector Dimension:** `384` dimensions.
   - **Distance Metric:** `Cosine`.
   - **Chunking Strategy:** `1000` character sliding window with `150` characters overlap.
@@ -75,7 +75,7 @@ backend/database/
 ---
 
 ### 2.3 Property Graph Database (`backend/database/graph/`)
-- **Technology:** NetworkX `MultiDiGraph` ([`graph_store.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/app/rag/graph_store.py)).
+- **Technology:** NetworkX `MultiDiGraph` ([`graph_store.py`](../backend/app/rag/graph_store.py)).
 - **Entities & Nodes:**
   - `RegulatoryStandard` (Schedule M GMP, CDSCO authority)
   - `StorageStandard` (WHO TRS 1025 Annex 7, 2°C to 8°C cold chain)
@@ -107,7 +107,7 @@ backend/database/
 
 ## 3. Master All-In-One Build System: `build_all.py`
 
-Implemented in [`backend/build/build_all.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/build/build_all.py).
+Implemented in [`backend/build/build_all.py`](../backend/build/build_all.py).
 
 ### 3.1 Idempotent Clean Rebuild Behavior
 Whenever `build_all.py` is executed:

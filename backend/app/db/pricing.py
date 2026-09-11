@@ -7,21 +7,21 @@ import os
 import json
 from typing import Optional, Dict, Any
 
-PRICING_FILE = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-    "rag_storage",
-    "pricing",
-    "nppa_dpco_ceiling_prices.json"
-)
+backend_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+PRICING_CANDIDATE_FILES = [
+    os.path.join(backend_root, "database", "pricing", "pricing_ceiling_catalog.json"),
+    os.path.join(backend_root, "rag_storage", "pricing", "nppa_dpco_ceiling_prices.json"),
+]
 
 def get_pricing_database() -> Dict[str, Any]:
-    """Loads NPPA/DPCO ceiling prices from storage."""
-    if os.path.exists(PRICING_FILE):
-        try:
-            with open(PRICING_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception as e:
-            print(f"[PricingDB] Error loading pricing JSON: {e}")
+    """Loads NPPA/DPCO ceiling prices from persistent database or storage fallback."""
+    for path in PRICING_CANDIDATE_FILES:
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception as e:
+                print(f"[PricingDB] Error loading pricing JSON from {path}: {e}")
     return {"items": []}
 
 def lookup_ceiling_price(category: str) -> Optional[float]:

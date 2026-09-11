@@ -8,7 +8,7 @@
 
 ## 1. REST API Contract & Specifications
 
-All API endpoints strictly follow camelCase serialization in JSON payloads matching the frontend TypeScript models in [`frontend/src/api/types.ts`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/frontend/src/api/types.ts).
+All API endpoints strictly follow camelCase serialization in JSON payloads matching the frontend TypeScript models in [`frontend/src/api/types.ts`](../frontend/src/api/types.ts).
 
 ### 1.1 Multi-Agent Procurement Endpoints
 
@@ -40,7 +40,7 @@ Initiates an autonomous procurement due diligence audit.
   ```
 
 #### `GET /procurement/{procurement_id}/status`
-Lightweight status endpoint polled every 1.5s by the frontend hook [`useProcurementStatus.ts`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/frontend/src/hooks/useProcurementStatus.ts).
+Lightweight status endpoint polled every 1.5s by the frontend hook [`useProcurementStatus.ts`](../frontend/src/hooks/useProcurementStatus.ts).
 - **Response (200 OK):**
   ```json
   {
@@ -144,8 +144,8 @@ Submits an auditable approval determination.
 - Active visual stage tracker highlighting current agent node in the pipeline.
 - Dynamic Critic Loop badge: `Critic Loop: Revision X of 3` with spinning refresh indicator.
 - Executive Case Summary and Strategic Recommendation banners.
-- 4D Risk Matrix breakdown ([`RiskBreakdown.tsx`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/frontend/src/pages/VendorReview/RiskBreakdown.tsx)).
-- Hybrid Evidence Trail ([`EvidenceTrail.tsx`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/frontend/src/pages/VendorReview/EvidenceTrail.tsx)) displaying facts, retriever scores, source weights, and contradiction flags.
+- 4D Risk Matrix breakdown ([`RiskBreakdown.tsx`](../frontend/src/pages/VendorReview/RiskBreakdown.tsx)).
+- Hybrid Evidence Trail ([`EvidenceTrail.tsx`](../frontend/src/pages/VendorReview/EvidenceTrail.tsx)) displaying facts, retriever scores, source weights, and contradiction flags.
 
 ### 2.4 Approval Queue (`ApprovalQueuePage.tsx`)
 - Dedicated governance interface for compliance officers.
