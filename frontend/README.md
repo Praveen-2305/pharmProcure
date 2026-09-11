@@ -31,7 +31,7 @@ Traditional enterprise procurement software (e.g., legacy SAP or Oracle modules)
 
 ### 2. Why Dedicated Risk Visualization Components?
 Instead of generic text tables, the dashboard utilizes dedicated, reusable domain components:
-* **`ConfidenceBadge.tsx`:** Renders a visual confidence gauge ($0.00$ to $1.00$). If confidence drops below $0.80$, it flags that the Critic agent performed self-validation revision loops.
+* **`ConfidenceBadge.tsx`:** Renders a visual confidence gauge (0.00 to 1.00). If confidence drops below 0.80, it flags that the Critic agent performed self-validation revision loops.
 * **`ContradictionFlag.tsx`:** An alert banner that surfaces explicit conflicts between vendor contracts and statutory standards (e.g., ambient 15°C–25°C transit vs WHO TRS 1025 cold chain mandate of 2°C–8°C).
 * **`RiskLevelTag.tsx`:** Standardized badges for Financial, Compliance, Contractual, and Pricing risk levels.
 
