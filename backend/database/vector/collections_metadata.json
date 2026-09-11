@@ -1,0 +1,7 @@
+{
+  "collection_name": "procurement_contracts",
+  "vector_size": 384,
+  "distance": "COSINE",
+  "indexed_chunks_count": 370,
+  "storage_path": "/media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/database/vector"
+}
