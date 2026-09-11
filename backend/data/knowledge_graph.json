@@ -1,0 +1,178 @@
+{
+  "nodes": [
+    {
+      "id": "schedule_m_gmp",
+      "type": "RegulatoryStandard",
+      "title": "Schedule M Good Manufacturing Practices",
+      "authority": "CDSCO"
+    },
+    {
+      "id": "who_trs1025_annex7",
+      "type": "StorageStandard",
+      "title": "WHO Cold-Chain Storage Guidelines",
+      "temp_range": "2C-8C"
+    },
+    {
+      "id": "drugs_cosmetics_act",
+      "type": "PrimaryLegislation",
+      "title": "Drugs and Cosmetics Act, 1940",
+      "jurisdiction": "India"
+    },
+    {
+      "id": "nppa_dpco_ceiling",
+      "type": "PriceRegulation",
+      "title": "Drugs Prices Control Order, 2013",
+      "authority": "NPPA"
+    },
+    {
+      "id": "form_28d_license",
+      "type": "License",
+      "category": "Biological Manufacturing"
+    },
+    {
+      "id": "iot_temperature_logger",
+      "type": "MonitoringSpec",
+      "frequency": "continuous"
+    },
+    {
+      "id": "liability_cap_standard",
+      "type": "ContractNorm",
+      "recommended_multiplier": "1.5x"
+    },
+    {
+      "id": "biogen_diagnostics",
+      "type": "Vendor",
+      "name": "BioGen Diagnostics Inc.",
+      "credit_score": 780,
+      "tier": "Tier-1 Manufacturer"
+    },
+    {
+      "id": "global_pharma",
+      "type": "Vendor",
+      "name": "Global Pharma Logistics Ltd.",
+      "credit_score": 720,
+      "tier": "Logistics Provider"
+    },
+    {
+      "id": "apex_biologistics",
+      "type": "Vendor",
+      "name": "Apex BioLogistics Pvt. Ltd.",
+      "credit_score": 680,
+      "tier": "Regional Distributor"
+    },
+    {
+      "id": "nova_biologics",
+      "type": "Vendor",
+      "name": "Nova Biologics & Vaccines Ltd.",
+      "credit_score": 810,
+      "tier": "Prequalified Manufacturer"
+    },
+    {
+      "id": "medisynth_specialty",
+      "type": "Vendor",
+      "name": "MediSynth Specialty Formulations Ltd.",
+      "credit_score": 710,
+      "tier": "Specialty Formulations"
+    }
+  ],
+  "edges": [
+    {
+      "source": "schedule_m_gmp",
+      "target": "drugs_cosmetics_act",
+      "relation": "DEFINED_IN",
+      "weight": 1.0,
+      "source_priority": 1.0
+    },
+    {
+      "source": "who_trs1025_annex7",
+      "target": "drugs_cosmetics_act",
+      "relation": "CITED_IN",
+      "weight": 1.0,
+      "source_priority": 1.0
+    },
+    {
+      "source": "biogen_diagnostics",
+      "target": "schedule_m_gmp",
+      "relation": "COMPLIES_WITH",
+      "weight": 1.0,
+      "source_priority": 1.0
+    },
+    {
+      "source": "biogen_diagnostics",
+      "target": "form_28d_license",
+      "relation": "HOLDS_LICENSE",
+      "weight": 1.0,
+      "source_priority": 1.0
+    },
+    {
+      "source": "biogen_diagnostics",
+      "target": "who_trs1025_annex7",
+      "relation": "CERTIFIED_FOR",
+      "weight": 0.85,
+      "source_priority": 0.85
+    },
+    {
+      "source": "global_pharma",
+      "target": "nppa_dpco_ceiling",
+      "relation": "GOVERNED_BY",
+      "weight": 1.0,
+      "source_priority": 1.0
+    },
+    {
+      "source": "global_pharma",
+      "target": "schedule_m_gmp",
+      "relation": "AUDITED_AGAINST",
+      "weight": 0.9,
+      "source_priority": 0.9
+    },
+    {
+      "source": "global_pharma",
+      "target": "liability_cap_standard",
+      "relation": "BOUND_BY",
+      "weight": 0.85,
+      "source_priority": 0.85
+    },
+    {
+      "source": "apex_biologistics",
+      "target": "schedule_m_gmp",
+      "relation": "COMPLIES_WITH",
+      "weight": 0.9,
+      "source_priority": 0.9
+    },
+    {
+      "source": "apex_biologistics",
+      "target": "who_trs1025_annex7",
+      "relation": "DISPUTED_COMPLIANCE",
+      "weight": 0.7,
+      "source_priority": 0.7
+    },
+    {
+      "source": "nova_biologics",
+      "target": "who_trs1025_annex7",
+      "relation": "MANDATES",
+      "weight": 1.0,
+      "source_priority": 1.0
+    },
+    {
+      "source": "nova_biologics",
+      "target": "iot_temperature_logger",
+      "relation": "EQUIPPED_WITH",
+      "weight": 1.0,
+      "source_priority": 1.0
+    },
+    {
+      "source": "nova_biologics",
+      "target": "nppa_dpco_ceiling",
+      "relation": "COMPLIES_WITH",
+      "weight": 1.0,
+      "source_priority": 1.0
+    },
+    {
+      "source": "medisynth_specialty",
+      "target": "schedule_m_gmp",
+      "relation": "COMPLIES_WITH",
+      "weight": 0.9,
+      "source_priority": 0.9
+    }
+  ]
+}
