@@ -3,7 +3,7 @@
 **Document Version:** 2.1.0  
 **Target Audience:** Autonomous Agents, AI Engineers, Workflow Developers  
 **Framework:** LangGraph Stateful Agent Graph | Google Gemini LLM / Deterministic Python Engine  
-**Implementation Source:** `backend/app/agents/` & `backend/app/prompts/`  
+**Implementation Source:** `backend/src/agents/` & `backend/src/prompts/`  
 
 ---
 
@@ -30,7 +30,7 @@ graph TD
 
 ## 2. Typed State Schema: `WorkflowState`
 
-The entire state is passed between agents as a typed dictionary (`WorkflowState`) defined in [`backend/app/agents/state.py`](../backend/app/agents/state.py):
+The entire state is passed between agents as a typed dictionary (`WorkflowState`) defined in [`backend/src/agents/state.py`](../backend/src/agents/state.py):
 
 ```python
 class WorkflowState(TypedDict, total=False):
@@ -67,12 +67,12 @@ class WorkflowState(TypedDict, total=False):
 
 ## 3. Detailed Agent Node Specifications
 
-### 3.1 Planner Agent (`backend/app/agents/planner.py`)
+### 3.1 Planner Agent (`backend/src/agents/planner.py`)
 - **Primary Goal:** Deconstructs procurement requests and schedules an appropriate investigation plan (`LIGHT` or `FULL`).
 - **Decision Logic:**
   - If `dealSize > 250,000` OR `category` involves cold-chain / sterile formulations -> selects `FULL` (thorough graph traversal and deep web scraping).
   - If repeat transaction with established vendor under budget -> selects `LIGHT`.
-- **Prompt Template ([`backend/app/prompts/planner_prompt.py`](../backend/app/prompts/planner_prompt.py)):**
+- **Prompt Template ([`backend/src/prompts/planner_prompt.py`](../backend/src/prompts/planner_prompt.py)):**
   ```python
   PLANNER_SYSTEM_PROMPT = """You are the Senior Procurement Planning Specialist for AutonoSource (pharmProcure).
   Your objective is to analyze the proposed deal and determine an optimal investigation scope.
@@ -91,7 +91,7 @@ class WorkflowState(TypedDict, total=False):
 
 ---
 
-### 3.2 Executor Agent (`backend/app/agents/executor.py`)
+### 3.2 Executor Agent (`backend/src/agents/executor.py`)
 - **Primary Goal:** Gathers multi-source evidence across four distinct dimensions:
   1. **Structured Data:** Financial audit status, Altman Z-score, credit score, historical deals count, FDA 483 citations.
   2. **Regulated Price Reference Data:** Queries `lookup_ceiling_price(category)` against the DPCO 2013 index.
@@ -100,7 +100,7 @@ class WorkflowState(TypedDict, total=False):
 
 ---
 
-### 3.3 Risk Scorer Agent (`backend/app/agents/scorer.py`)
+### 3.3 Risk Scorer Agent (`backend/src/agents/scorer.py`)
 - **Primary Goal:** Computes the 4-Dimensional Risk Assessment and calculates confidence.
 - **Evaluation Rules:**
   1. **Financial Risk:**
@@ -127,7 +127,7 @@ class WorkflowState(TypedDict, total=False):
 
 ---
 
-### 3.4 Critic Agent (`backend/app/agents/critic.py`)
+### 3.4 Critic Agent (`backend/src/agents/critic.py`)
 - **Primary Goal:** Audits evidence completeness and resolves low-confidence edge cases.
 - **Decision Rules:**
   ```python
@@ -146,7 +146,7 @@ class WorkflowState(TypedDict, total=False):
 
 ---
 
-### 3.5 Report Writer Agent (`backend/app/agents/writer.py`)
+### 3.5 Report Writer Agent (`backend/src/agents/writer.py`)
 - **Primary Goal:** Synthesizes the finalized, auditable `ProcurementReport`.
 - **Output Fields:**
   - `vendorSummary`: High-level business overview.

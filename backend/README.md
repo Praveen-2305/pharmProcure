@@ -28,32 +28,30 @@ Rather than relying on single-shot LLM prompts or basic RAG retrieval, the backe
 ```
 
 ### The 5 Agent Nodes:
-1. **Planner Agent (`app/agents/planner.py`):** Assesses vendor relationship history and transaction scale to dynamically assign a `LIGHT` (low-value, known supplier) or `FULL` (high-value, new or critical supplier) investigative roadmap.
-2. **Executor Agent (`app/agents/executor.py`):** Gathers multi-source evidence across:
-   - Persistent relational case ledger (`backend/database/relational/`)
-   - Official NPPA DPCO statutory price ceilings (`backend/database/pricing/`)
-   - Hybrid RAG (Qdrant vector embeddings + NetworkX property graph)
-   - Live external regulatory search & web due diligence (`app/rag/web_scraper.py`)
-3. **Risk Scorer Agent (`app/agents/scorer.py`):** Quantifies evidence across 4 distinct dimensions:
+1. **Planner Agent (`src/agents/planner.py`):** Assesses vendor relationship history and transaction scale to dynamically assign a `LIGHT` (low-value, known supplier) or `FULL` (high-value, new or critical supplier) investigative roadmap.
+2. **Executor Agent (`src/agents/executor.py`):** Gathers multi-source evidence across:
+   - Persistent relational case ledger (`processed_data/procurement_cases.db`)
+   - Official NPPA DPCO statutory price ceilings (`processed_data/pricing_ceiling_catalog.json`)
+   - Hybrid RAG (Qdrant 768-dim Nomic vector embeddings + NetworkX property graph)
+   - Live external regulatory search & web due diligence (`src/agents/web_scraper.py`)
+3. **Risk Scorer Agent (`src/agents/scorer.py`):** Quantifies evidence across 4 distinct dimensions:
    - **Financial Risk:** Liquidity, credit rating, debt-to-equity.
    - **Compliance Risk:** CDSCO Drugs & Cosmetics Act 1940, Schedule M GMP certification, cold chain transit compliance.
    - **Contractual Risk:** Liability caps, indemnity obligations, auto-renewals.
    - **Pricing Risk:** Mathematical comparison against NPPA DPCO statutory ceiling benchmarks.
    - **Confidence Scoring:** Computes an aggregated score adjusted by contradiction penalties.
-4. **Critic Agent (`app/agents/critic.py`):** Evaluates evidence completeness and confidence. If confidence is < 0.80 and revisions < 3, instructs the Executor on what additional evidence or clarification to seek.
-5. **Report Writer Agent (`app/agents/writer.py`):** Compiles evidence, flagged clauses, contradiction trails, and recommendations into an executive dossier (`ProcurementReport`).
+4. **Critic Agent (`src/agents/critic.py`):** Evaluates evidence completeness and confidence. If confidence is < 0.80 and revisions < 3, instructs the Executor on what additional evidence or clarification to seek.
+5. **Report Writer Agent (`src/agents/writer.py`):** Compiles evidence, flagged clauses, contradiction trails, and recommendations into an executive dossier (`ProcurementReport`).
 
 ---
 
 ## ❓ Architectural Decisions: Why Did We Choose This?
 
-### 1. Why LangGraph over a Monolithic LLM Prompt?
-* **Investigative Depth:** Evaluating a pharmaceutical supplier requires sequential dependency: discovering a temperature clause in an SLA immediately requires verifying WHO TRS 1025 guidelines. A single prompt cannot dynamically backtrack or plan new evidence gathering based on mid-flight discoveries.
-* **Self-Critique & Error Correction:** The Critic node acts as an automated quality gate, forcing the system to re-investigate when confidence is low rather than guessing.
-* **Determinism & Auditability:** State transitions are logged in an immutable state machine, satisfying GxP and regulatory audit requirements.
+### 1. Advanced PDF Extraction
+* **pymupdf4llm:** Standard PDF extractors destroy tables and legal hierarchy. We utilize `pymupdf4llm` to extract rich Markdown directly from PDFs, giving our LLM perfect structural context for RAG.
 
-### 2. Why Hybrid RAG (Qdrant Vector + NetworkX Knowledge Graph)?
-* **Dense Vectors (Qdrant):** Outstanding at semantic similarity across unstructured natural language clauses (e.g. finding limitation of liability phrasing regardless of wording).
+### 2. Why Hybrid RAG (Nomic Embeddings + NetworkX Knowledge Graph)?
+* **Dense Vectors (Nomic 768-dim):** We utilize `nomic-embed-text-v1.5` for state-of-the-art semantic similarity matching across unstructured legal clauses.
 * **Property Graphs (NetworkX):** Essential for non-Euclidean legal hierarchies. A vector store cannot traverse relationships like:  
   ```
   Drugs and Cosmetics Act 1940 ➔ Schedule M GMP ➔ Form 28D License ➔ Vendor Organization
@@ -61,29 +59,7 @@ Rather than relying on single-shot LLM prompts or basic RAG retrieval, the backe
 * **Dual Retrieval:** By querying both simultaneously, we capture semantic meaning *and* structural regulatory authority.
 
 ### 3. Why an Explicit 4-Step Fusion Algorithm with Contradiction Detection?
-Standard RAG systems fail when retrieved documents disagree:
-* **The Problem:** A vendor SLA states *"Ambient transit permitted at 15°C to 25°C for under 48 hours"*, while WHO TRS 1025 Annex 7 mandates *"Continuous cold chain at 2°C to 8°C"*. A naive LLM summary often blends these into a hallucinated compromise.
-* **Our Solution:** The Fusion Engine (`app/rag/fusion.py`):
-  1. Normalizes retriever scores to `[0.0, 1.0]`.
-  2. Weights scores by document legal priority (e.g. Statute = 1.0, WHO = 0.85, Vendor Draft = 0.60).
-  3. Clusters facts by slot and flags direct numerical / condition contradictions.
-  4. Penalizes the final confidence score and retains explicit `conflicts_with` pointers for the executive audit report.
-
-### 4. Why Deterministic Pricing Checks against NPPA DPCO?
-* In India, selling essential medicines above the DPCO ceiling is a criminal offense under the Essential Commodities Act, 1955.
-* LLMs frequently make arithmetic errors with drug unit conversions and dosages. Our Scorer verifies quotes via deterministic mathematics:  
-  ```
-  excess_amount = max(0.0, quoted_price - ceiling_price)
-  ```
-
-### 5. Why SQLite + In-Memory Store for Local POC?
-* Enables zero-setup, instant execution out-of-the-box without requiring users to configure external database servers.
-* Designed with clean repository abstractions so switching to **PostgreSQL 16+** in production is purely an environment configuration change (`DATA_MODE=production`).
-
-### 6. Why FastAPI?
-* Native async architecture for non-blocking LangGraph invocations and web scraping.
-* Automatic OpenAPI/Swagger documentation generation at `/docs`.
-* Pydantic schemas enforce type safety and seamless camelCase serialization for the React frontend.
+* **Our Solution:** The Fusion Engine (`src/rag_pipeline/fusion.py`) normalizes scores, applies legal priority weighting, clusters facts, and explicitly flags contradictions before passing context to the LLM.
 
 ---
 
@@ -91,32 +67,25 @@ Standard RAG systems fail when retrieved documents disagree:
 
 ```
 backend/
-├── app/
+├── src/                       # Core Application Runtime
 │   ├── main.py                # FastAPI app initialization, CORS, and route mounting
 │   ├── config.py              # Environment variables & runtime settings
 │   ├── agents/                # LangGraph agent implementations & prompts
-│   │   ├── planner.py         # Strategy tiering
-│   │   ├── executor.py        # Multi-source evidence gathering
-│   │   ├── scorer.py          # 4-dimensional risk scoring
-│   │   ├── critic.py          # Quality critique & revision loops
-│   │   ├── writer.py          # Executive dossier synthesis
-│   │   ├── workflow.py        # StateGraph definition & edge conditions
-│   │   └── prompts/           # Specialized system prompts
 │   ├── models/                # Pydantic schemas (ProcurementItem, Report, etc.)
 │   ├── db/                    # SQLite session store, case ledger, and seed data
-│   ├── rag/                   # Fusion engine, Vector store, Graph store, Web scraper
+│   ├── rag_pipeline/          # Fusion engine, Vector store, Graph store
 │   └── routers/               # /procurement and /approval API routes
-├── build/                     # Master idempotent database build & ingestion engine
-│   ├── build_all.py           # Clean & rebuild all 5 database layers
-│   ├── database/              # SQLite seeding script
-│   ├── rag/                   # Vector chunking & embedding ingestion
-│   └── graph/                 # NetworkX property graph builder
-├── database/                  # Active persistent storage (relational, vector, graph, pricing, contracts)
-├── mockdata/                  # Standalone reference seed fixtures & manifests
-├── collected_data/            # Historical collected reference archive (for inspection & viewing)
-├── rag_storage/               # Active regulatory PDFs (CDSCO, Schedule M, WHO TRS)
+├── build/                     # Master idempotent database build & ingestion scripts
+│   ├── build_all.py           # Clean & rebuild all databases
+│   ├── seed_relational.py     # SQLite seeding script
+│   ├── ingest_rag_docs.py     # Nomic Vector chunking & embedding ingestion
+│   └── build_knowledge_graph.py # NetworkX property graph builder
+├── data_collected/            # Stage 1: Raw collection dumping ground (PDFs, Markdown)
+├── mockdata/                  # Stage 2: Template reference directory (Dummy structure)
+├── ingestion/                 # Stage 3: Active staging environment for build scripts
+├── processed_data/            # Stage 4: Output Hub (Flattened SQLite, Vector, Graph databases)
 ├── scripts/                   # CLI runner scripts (pipeline runner, scraper runner)
-├── app.py                     # Entry point runner
+├── app.py                     # Entry point runner alias
 └── requirements.txt           # Python dependencies
 ```
 
@@ -128,11 +97,12 @@ backend/
 ```bash
 python build/build_all.py
 ```
+*(Note: First run will require an internet connection to download the Nomic embedding model weights).*
 
 ### 2. Start the Development Server
 ```bash
 python app.py
-# Or: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+# Or: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 * Interactive API Documentation: `http://localhost:8000/docs`
 

@@ -3,7 +3,7 @@
 **Document Version:** 2.1.0  
 **Target Audience:** AI Researchers, Search Engineers, Compliance Architects  
 **Core Technologies:** Qdrant Vector Store, NetworkX Property Graph, Reciprocal Rank Fusion (RRF), Tavily / HTTP Web Scraper  
-**Implementation Source:** `backend/app/rag/`  
+**Implementation Source:** `backend/src/rag_pipeline/`  
 
 ---
 
@@ -18,7 +18,7 @@ AutonoSource implements a hybrid retrieval paradigm combining unstructured seman
                     ▼                                         ▼
          [Vector Store Retriever]                  [Graph RAG Retriever]
          - Technology: Qdrant                      - Technology: NetworkX
-         - Dimension: 384-dim Dense                - Schema: MultiDiGraph
+         - Dimension: 768-dim Dense                - Schema: MultiDiGraph
          - Chunks: Contracts & Standards           - Nodes: Vendors, Acts, SLAs
          - Metric: Cosine Similarity               - Traversal: Shortest Path
                     │                                         │
@@ -45,7 +45,7 @@ In AutonoSource, the knowledge graph represents statutory acts, manufacturing li
    - Edge-weight traversal algorithms
 
 ### 2.2 Storage Formats
-The graph is persisted to disk under [`backend/database/graph/`](../backend/database/graph/):
+The graph is persisted to disk under [`backend/processed_data/`](../backend/processed_data/):
 - **`knowledge_graph.graphml`:** International standard XML-based format for graph data. Can be opened directly in Gephi, Cytoscape, or imported into Neo4j.
 - **`knowledge_graph.json`:** Node-link adjacency list for fast, lightweight loading into memory without XML parsing overhead.
 
@@ -60,7 +60,7 @@ CALL apoc.import.graphml("knowledge_graph.graphml", {})
 
 ## 3. 4-Step Hybrid Fusion & Contradiction Resolution Algorithm
 
-Implemented in [`backend/app/rag/fusion.py`](../backend/app/rag/fusion.py).
+Implemented in [`backend/src/rag_pipeline/fusion.py`](../backend/src/rag_pipeline/fusion.py).
 
 ### Step 1: Score Normalization
 Each retriever outputs scores on different numerical scales:
@@ -111,10 +111,10 @@ confidence = clamp(mean(final_scores) - (0.15 * has_contradictions), 0.10, 1.00)
 
 ## 4. Deterministic Regulated Pricing Subsystem
 
-Located in [`backend/app/db/pricing.py`](../backend/app/db/pricing.py):
+Located in [`backend/src/db/pricing.py`](../backend/src/db/pricing.py):
 
 1. **Statutory Authority:** Drugs (Prices Control) Order (DPCO), 2013 under Section 3 of the Essential Commodities Act, 1955.
-2. **Catalog Path:** `backend/database/pricing/pricing_ceiling_catalog.json` (16 scheduled drug formulations).
+2. **Catalog Path:** `backend/processed_data/pricing_ceiling_catalog.json` (16 scheduled drug formulations).
 3. **Evaluation Statuses:**
    - **`WITHIN_CEILING`:** Quoted price <= statutory ceiling price.
    - **`EXCEEDS_CEILING`:** Quoted price > statutory ceiling price. Automatically triggers `HIGH` overall risk.
@@ -127,7 +127,7 @@ Located in [`backend/app/db/pricing.py`](../backend/app/db/pricing.py):
 
 ## 5. Web Scraping & Regulatory Docket Crawler
 
-Implemented in [`backend/app/rag/web_scraper.py`](../backend/app/rag/web_scraper.py):
+Implemented in [`backend/src/rag_pipeline/web_scraper.py`](../backend/src/rag_pipeline/web_scraper.py):
 
 1. **Target Search Signals:**
    - **Regulatory Warnings:** Circulars, FDA warning letters, show-cause notices (`"{vendor_name} regulatory warning recall CDSCO FDA"`).
@@ -142,6 +142,6 @@ Implemented in [`backend/app/rag/web_scraper.py`](../backend/app/rag/web_scraper
    - **Tier 4 (Clean Verification Baseline):** Negative verification against official judicial and regulatory registries for unknown vendors.
 
 3. **Risk Scorer Integration:**
-   - Scraped regulatory warnings automatically escalate **Compliance Risk** to `HIGH` or `MEDIUM` in [`scorer.py`](../backend/app/agents/scorer.py).
+   - Scraped regulatory warnings automatically escalate **Compliance Risk** to `HIGH` or `MEDIUM` in [`scorer.py`](../backend/src/agents/scorer.py).
    - Scraped commercial litigation escalates **Financial Risk** and is cited in `financial_rationale`.
    - Scraped sources are cited in `evidence_summary` in the final report.

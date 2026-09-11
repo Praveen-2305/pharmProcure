@@ -14,8 +14,8 @@ The platform spans 6 critical data layers. The table below contrasts the current
 
 | Data Layer | Current Mock Implementation | Target Original Production Architecture | Primary Challenges & Migration Strategy |
 | :--- | :--- | :--- | :--- |
-| **1. Relational Case Ledger & Approvals** | SQLite 3 (`procurement_cases.db`) + in-memory `CaseStore` cache (`app/db/session.py`) | **PostgreSQL 16+** on AWS RDS / Azure Database for PostgreSQL with PgBouncer connection pooling, SQLAlchemy ORM, and Alembic migrations. | • **Concurrency:** Implement row-level locking (`SELECT ... FOR UPDATE`) for human approval actions.<br>• **Auditability:** Enable immutable audit ledger tables capturing who approved what, timestamp, and role. |
-| **2. Vector Store & RAG Ingestion** | Local in-memory Qdrant client (`:memory:`) or serialized JSON embeddings (`vector_embeddings.json`) using 384-dim `all-MiniLM-L6-v2`. | **Distributed Qdrant Cloud Cluster** (or Milvus/pgvector) with HNSW indexing, utilizing domain-specific embeddings (e.g., `text-embedding-3-large` 1536-dim or `PubMedBERT`). | • **Scale:** Ingesting thousands of multi-page agreements.<br>• **Ingestion Pipeline:** Deploy automated OCR/chunking pipeline using Unstructured.io or AWS Textract triggered by S3 uploads. |
+| **1. Relational Case Ledger & Approvals** | SQLite 3 (`procurement_cases.db`) + in-memory `CaseStore` cache (`src/db/session.py`) | **PostgreSQL 16+** on AWS RDS / Azure Database for PostgreSQL with PgBouncer connection pooling, SQLAlchemy ORM, and Alembic migrations. | • **Concurrency:** Implement row-level locking (`SELECT ... FOR UPDATE`) for human approval actions.<br>• **Auditability:** Enable immutable audit ledger tables capturing who approved what, timestamp, and role. |
+| **2. Vector Store & RAG Ingestion** | Local in-memory Qdrant client (`:memory:`) or serialized JSON embeddings (`vector_embeddings.json`) using 768-dim `all-MiniLM-L6-v2`. | **Distributed Qdrant Cloud Cluster** (or Milvus/pgvector) with HNSW indexing, utilizing domain-specific embeddings (e.g., `text-embedding-3-large` 1536-dim or `PubMedBERT`). | • **Scale:** Ingesting thousands of multi-page agreements.<br>• **Ingestion Pipeline:** Deploy automated OCR/chunking pipeline using Unstructured.io or AWS Textract triggered by S3 uploads. |
 | **3. Regulatory & Legal Knowledge Graph** | NetworkX in-memory `MultiDiGraph` serialized to GraphML (`knowledge_graph.graphml`) and JSON. | **Neo4j Enterprise Cluster** (or Amazon Neptune) with Cypher query language, APOC procedures, and Neo4j Bloom graph exploration. | • **Entity Resolution:** Automated entity linking from unstructured regulatory notices to existing vendor and drug nodes.<br>• **GraphRAG:** Replace NetworkX BFS with optimized Cypher path queries. |
 | **4. Statutory Pricing Benchmark DB** | Static JSON file (`pricing_ceiling_catalog.json`) modeling 16 DPCO regulated formulations. | **PostgreSQL / TimescaleDB Master Pricing DB** populated by automated daily ETL scraping of official **NPPA DPCO Gazettes** and WPI revisions, integrated with SAP/Oracle ERP pricing masters. | • **Dynamic Ceilings:** Automatically adjust ceilings based on annual Wholesale Price Index (WPI) revisions.<br>• **SKU Mapping:** Multi-lingual and brand-to-generic formulation mapping. |
 | **5. Contracts, SLAs & Master Agreements** | Markdown and plain text sample files (`Apex_BioLogistics_SLA.md`, `NovaVaccines_ColdChain_Agreement.md`). | Direct API webhooks to **Enterprise CLM Platforms** (Icertis, DocuSign CLM, Ironclad, SAP Ariba Contracts) and secure cloud DMS (SharePoint, Box). | • **Legacy Scans:** OCR processing of signed PDF scans.<br>• **Redlining & Versions:** Tracking amendment addenda and clause variations across revisions. |
@@ -102,7 +102,7 @@ class Settings(BaseSettings):
     DATA_MODE: str = "mock"  # Options: 'mock', 'production'
 
     # Relational Storage
-    DATABASE_URL: str = "sqlite:///backend/database/relational/procurement_cases.db"
+    DATABASE_URL: str = "sqlite:///backend/processed_data/procurement_cases.db"
 
     # Vector Database
     QDRANT_HOST: str = ":memory:"
@@ -126,7 +126,7 @@ class Settings(BaseSettings):
 settings = Settings()
 ```
 
-### 2. Relational Repository Adapter (`backend/app/db/session.py`)
+### 2. Relational Repository Adapter (`backend/src/db/session.py`)
 ```python
 if settings.DATA_MODE == "production":
     # Connect to PostgreSQL via SQLAlchemy / asyncpg engine
@@ -134,10 +134,10 @@ if settings.DATA_MODE == "production":
     engine = create_async_engine(settings.DATABASE_URL, pool_size=20, max_overflow=10)
 else:
     # Use existing lightweight SQLite / CaseStore
-    SQLITE_PATH = "backend/database/relational/procurement_cases.db"
+    SQLITE_PATH = "backend/processed_data/procurement_cases.db"
 ```
 
-### 3. Vector Store Adapter (`backend/app/rag/vector_store.py`)
+### 3. Vector Store Adapter (`backend/src/rag_pipeline/vector_store.py`)
 ```python
 if settings.DATA_MODE == "production" and settings.QDRANT_HOST != ":memory:":
     client = QdrantClient(

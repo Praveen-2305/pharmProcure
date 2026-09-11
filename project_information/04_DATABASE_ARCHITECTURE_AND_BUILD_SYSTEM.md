@@ -1,81 +1,45 @@
 # AutonoSource (pharmProcure) — Multi-Database Architecture & Build System
 
-**Document Version:** 2.1.0  
-**Storage Hub:** `backend/database/`  
+**Document Version:** 3.0.0  
+**Storage Hub:** `backend/processed_data/`  
 **Build Orchestrator:** `backend/build/build_all.py`  
 **Audience:** Backend Engineers, Database Administrators, Autonomous Agents  
 
 ---
 
-## 1. Unified Multi-Database Hub (`backend/database/`)
+## 1. Unified Multi-Database Hub (`backend/processed_data/`)
 
-AutonoSource consolidates all persistence and static reference layers into a clean, modular structure under `backend/database/`:
+AutonoSource consolidates all persistence and static reference layers into a clean, flat, modular structure under `backend/processed_data/`. The directory has been flattened from previous versions to eliminate redundant nested folders:
 
 ```
-backend/database/
-├── relational/             # SQLite database & serialized case audit ledger
-│   ├── procurement_cases.db# SQLite table storing active and historical procurement cases
-│   ├── cases.json          # Pre-seeded JSON snapshot of the 5 baseline case studies
-│   └── README.md
-├── vector/                 # Dense 384-dimensional vector database snapshot
-│   ├── vector_embeddings.json  # Serialized vector embeddings & text chunk payloads
-│   ├── collections_metadata.json# Qdrant collection parameters and index statistics
-│   └── README.md
-├── graph/                  # NetworkX Property Graph database
-│   ├── knowledge_graph.graphml # Canonical XML GraphML format (Gephi / Neo4j compatible)
-│   ├── knowledge_graph.json    # Fast node-link JSON format
-│   └── README.md
-├── pricing/                # Regulated price ceiling database
-│   ├── pricing_ceiling_catalog.json# NPPA DPCO 2013 scheduled ceiling catalog (16 items)
-│   └── README.md
-├── contracts/              # Reference legal contracts and SLA agreements
-│   ├── Apex_BioLogistics_SLA.md
-│   ├── NovaVaccines_ColdChain_Agreement.md
-│   ├── sample_pharma_msa.txt
-│   └── README.md
-└── README.md               # Master database hub documentation
+backend/processed_data/
+├── procurement_cases.db        # SQLite table storing active and historical procurement cases
+├── cases.json                  # Pre-seeded JSON snapshot of the baseline case studies
+├── vector_embeddings.json      # Serialized vector embeddings & markdown chunks payload
+├── collections_metadata.json   # Qdrant collection parameters and HNSW index statistics
+├── knowledge_graph.graphml     # Canonical XML GraphML format (Gephi / Neo4j compatible)
+├── knowledge_graph.json        # Fast node-link JSON format
+└── pricing_ceiling_catalog.json# NPPA DPCO 2013 scheduled ceiling catalog
 ```
 
 ---
 
-## 2. Deep Dive: The 5 Specialized Database Subsystems
+## 2. Deep Dive: The Specialized Database Subsystems
 
-### 2.1 Relational Database (`backend/database/relational/`)
-- **Technology:** SQLite 3 (`procurement_cases.db`) + in-memory indexing via `CaseStore` ([`session.py`](../backend/app/db/session.py)).
-- **Table Schema (`procurement_cases`):**
-  ```sql
-  CREATE TABLE IF NOT EXISTS procurement_cases (
-      procurement_id TEXT PRIMARY KEY,
-      vendor_name TEXT NOT NULL,
-      deal_size REAL NOT NULL,
-      status_json TEXT NOT NULL,
-      report_json TEXT,
-      approval_json TEXT,
-      created_at TEXT NOT NULL
-  );
-  ```
-- **Operational Flow:**
-  - On startup, `CaseStore` loads existing cases from SQLite. If the table is empty, it automatically seeds the 5 canonical case studies.
-  - Every case submission via `POST /procurement/submit` or approval decision via `POST /approval/{id}/decide` is persisted immediately to SQLite.
-  - Also exports a serialized `cases.json` ledger for external reporting and review.
-
----
-
-### 2.2 Vector Database (`backend/database/vector/`)
-- **Technology:** Qdrant Vector Store (`procurement_contracts` collection) operating in-memory or connected to remote Qdrant hosts.
-- **Embedding Pipeline Specs ([`embedding_pipeline.py`](../backend/app/rag/embedding_pipeline.py)):**
-  - **Vector Dimension:** `384` dimensions.
+### 2.1 Vector Database (Qdrant & Nomic Embeddings)
+- **Technology:** Qdrant Vector Store (`procurement_contracts` collection) operating in-memory or remote.
+- **Embedding Pipeline Specs ([`embedding_pipeline.py`](../backend/build/embedding_pipeline.py)):**
+  - **Embedding Model:** `nomic-ai/nomic-embed-text-v1.5` (via `sentence-transformers` & `einops`)
+  - **Vector Dimension:** `768` dimensions.
   - **Distance Metric:** `Cosine`.
-  - **Chunking Strategy:** `1000` character sliding window with `150` characters overlap.
-  - **Chunk Count:** `370` verified chunks indexed across all regulatory standards and contracts.
-- **Serialization:**
-  - `vector_embeddings.json`: Serialized snapshot of document chunks with sample embedding vectors and metadata.
-  - `collections_metadata.json`: Index parameters (collection name, vector size, distance metric).
+  - **Retrieval Index:** **HNSW** (Hierarchical Navigable Small World) explicitly configured (`m=16, ef_construct=100`) for high-speed, high-accuracy retrieval.
+- **Chunking Strategy:** 
+  - Utilizes LangChain's **`MarkdownTextSplitter`** (1200 chunk size, 200 overlap) to intelligently preserve semantic boundaries derived from `pymupdf4llm` extractions (headers, paragraphs, tables) rather than arbitrarily slicing text.
 
 ---
 
-### 2.3 Property Graph Database (`backend/database/graph/`)
-- **Technology:** NetworkX `MultiDiGraph` ([`graph_store.py`](../backend/app/rag/graph_store.py)).
+### 2.2 Property Graph Database (NetworkX)
+- **Technology:** NetworkX `MultiDiGraph`.
 - **Entities & Nodes:**
   - `RegulatoryStandard` (Schedule M GMP, CDSCO authority)
   - `StorageStandard` (WHO TRS 1025 Annex 7, 2°C to 8°C cold chain)
@@ -90,18 +54,30 @@ backend/database/
 
 ---
 
-### 2.4 Regulated Pricing Catalog (`backend/database/pricing/`)
-- **Technology:** JSON Catalog (`pricing_ceiling_catalog.json`).
-- **Statutory Authority:** NPPA DPCO 2013 under Section 3 of Essential Commodities Act, 1955.
-- **Formulations Covered:** 16 critical drugs including Paracetamol, Amoxicillin, Metformin, Ciprofloxacin, Azithromycin, Insulin Glargine, Enoxaparin, Remdesivir, and Trastuzumab.
+### 2.3 Relational Database (SQLite)
+- **Technology:** SQLite 3 (`procurement_cases.db`) + in-memory indexing via `CaseStore` ([`session.py`](../backend/src/db/session.py)).
+- **Table Schema (`procurement_cases`):**
+  ```sql
+  CREATE TABLE IF NOT EXISTS procurement_cases (
+      procurement_id TEXT PRIMARY KEY,
+      vendor_name TEXT NOT NULL,
+      deal_size REAL NOT NULL,
+      status_json TEXT NOT NULL,
+      report_json TEXT,
+      approval_json TEXT,
+      created_at TEXT NOT NULL
+  );
+  ```
+- **Operational Flow:**
+  - On startup, `CaseStore` loads existing cases from SQLite. 
+  - Every case submission via `POST /procurement/submit` is persisted immediately to SQLite.
 
 ---
 
-### 2.5 Contracts Registry (`backend/database/contracts/`)
-- **Contents:** Verified sample pharmaceutical agreements used for evaluation:
-  - `Apex_BioLogistics_SLA.md`: Cold-chain distribution agreement containing controversial ambient clause 2.2.4.
-  - `NovaVaccines_ColdChain_Agreement.md`: High-compliance vaccine agreement mandating IoT active tracking.
-  - `sample_pharma_msa.txt`: Master Services Agreement with balanced indemnification and 30-day cure period.
+### 2.4 Regulated Pricing Catalog (JSON)
+- **Technology:** JSON Catalog (`pricing_ceiling_catalog.json`).
+- **Statutory Authority:** NPPA DPCO 2013 under Section 3 of Essential Commodities Act, 1955.
+- **Formulations Covered:** 16 critical drugs including Paracetamol, Amoxicillin, Metformin, Ciprofloxacin, Azithromycin, Insulin Glargine, Enoxaparin, Remdesivir, and Trastuzumab.
 
 ---
 
@@ -111,23 +87,15 @@ Implemented in [`backend/build/build_all.py`](../backend/build/build_all.py).
 
 ### 3.1 Idempotent Clean Rebuild Behavior
 Whenever `build_all.py` is executed:
-1. **Automatic Purge:** Detects if `backend/database/` already exists, purges old generated databases to prevent stale data drift.
-2. **Re-creation:** Fresh subdirectories (`relational/`, `vector/`, `graph/`, `pricing/`, `contracts/`) are created.
-3. **Sequential Pipeline Execution:**
-   - Runs `build/database/seed_database.py` -> initializes SQLite database and dumps `cases.json`.
-   - Runs `build/rag/ingest_documents.py` -> chunks 9 source documents, generates 370 embeddings, populates Qdrant.
-   - Runs `build/graph/build_knowledge_graph.py` -> constructs 12 nodes, 14 edges, outputs GraphML and JSON.
-   - Copies DPCO pricing benchmarks to `database/pricing/`.
-   - Indexes reference contracts to `database/contracts/`.
-   - Generates database documentation.
+1. **Automatic Purge:** Detects if `backend/processed_data/` already exists, purges old generated databases to prevent stale data drift.
+2. **Sequential, Data-Dependent Pipeline Execution:**
+   - **Step 1: RAG Vector Database Build:** Chunks documents using Markdown semantics, embeds them using Nomic 768-dim, and initializes the Qdrant HNSW index.
+   - **Step 2: Knowledge Graph Database Build:** Constructs the graph ontology depending on entities extracted during the RAG phase.
+   - **Step 3: Relational Database Build:** Seeds the SQLite database and dumps `cases.json` relying on fully formed structured data.
+   - **Step 4: Pricing Database Build:** Copies the NPPA pricing catalogs.
 
 ### 3.2 Command-Line Execution
 ```bash
-# Clean and rebuild all 5 databases at once
+# Clean and rebuild all databases at once (Respects dependency order)
 python backend/build/build_all.py
-
-# Or run individual modules:
-python backend/build/database/seed_database.py
-python backend/build/rag/ingest_documents.py
-python backend/build/graph/build_knowledge_graph.py
 ```
