@@ -12,8 +12,9 @@ node_modules/
 frontend/node_modules/
 dist/
 frontend/dist/
-build/
 frontend/build/
+!backend/build/
+
 .pnpm-store/
 .yarn/
 
