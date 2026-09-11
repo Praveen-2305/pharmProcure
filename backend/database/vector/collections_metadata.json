@@ -1,7 +1,0 @@
-{
-  "collection_name": "procurement_contracts",
-  "vector_size": 384,
-  "distance": "COSINE",
-  "indexed_chunks_count": 512,
-  "storage_path": "backend/database/vector"
-}
