@@ -33,10 +33,10 @@ The core technological differentiator of this platform is how it handles unstruc
 
 ### ⚡ The 4-Step Fusion Mechanism:
 If the Vector and Graph retrievers return conflicting information, the system does *not* hallucinate or silently guess. It executes an explicit 4-step fusion algorithm:
-1. **Score Normalization:** Scales retriever similarity & path scores to $[0, 1]$.
-2. **Source Weighting:** Multiplies scores by document priority ($\text{weighted\_score} = \text{score} \times \text{source\_priority}$).
+1. **Score Normalization:** Scales retriever similarity & path scores to `[0.0, 1.0]`.
+2. **Source Weighting:** Multiplies scores by document priority (`weighted_score = score * source_priority`).
 3. **Contradiction Detection:** Clusters facts by query-slot and detects numeric or term conflicts (e.g. ambient 15°C–25°C transit vs statutory 2°C–8°C cold chain).
-4. **Confidence Penalty:** Computes $\text{overall\_confidence} = \text{base\_confidence} \times (1 - \text{contradiction\_penalty})$, retaining runner-up facts with explicit `conflicts_with` pointers.
+4. **Confidence Penalty:** Computes `overall_confidence = base_confidence * (1 - contradiction_penalty)`, retaining runner-up facts with explicit `conflicts_with` pointers.
 
 ---
 
@@ -56,7 +56,7 @@ If the Vector and Graph retrievers return conflicting information, the system do
    - Hybrid RAG (Qdrant vector store + NetworkX property graph)
    - External web due diligence (`web_scraper.py` checking CDSCO, FDA warning letters, and MCA court records)
 3. **Risk Scorer Agent (`scorer.py`):** Evaluates evidence across the 4 risk dimensions, applies statutory pricing variance checks, incorporates adverse regulatory citations, and computes a unified **Confidence Score**.
-4. **Critic Agent (`critic.py`):** Reviews evidence completeness. If confidence is $< 0.80$ and $\text{revision\_count} < 3$, triggers a targeted revision loop with updated investigation instructions for the Executor.
+4. **Critic Agent (`critic.py`):** Reviews evidence completeness. If confidence is < 0.80 and revision_count < 3, triggers a targeted revision loop with updated investigation instructions for the Executor.
 5. **Report Writer Agent (`writer.py`):** Compiles findings, flagged clauses, contradiction trails, and recommendations into a structured executive report.
 6. **Human-in-the-Loop (`/approval/*`):** Presents recommendations to a human procurement officer for final review (`APPROVED`, `REJECTED`, or `ESCALATED`).
 
