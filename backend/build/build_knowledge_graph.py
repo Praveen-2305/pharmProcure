@@ -17,6 +17,7 @@ if backend_root not in sys.path:
     sys.path.insert(0, backend_root)
 
 DB_GRAPH_KNOWLEDGE_DIR = os.path.join(backend_root, "ingestion", "rag_and_graph")
+DB_GRAPH_DIR = os.path.join(backend_root, "processed_data")
 GRAPH_FILE = os.path.join(DB_GRAPH_DIR, "knowledge_graph.graphml")
 JSON_FILE = os.path.join(DB_GRAPH_DIR, "knowledge_graph.json")
 
@@ -33,8 +34,11 @@ def run_graph_build() -> nx.MultiDiGraph:
     parsed_nodes = []
     parsed_edges = []
     
-    if os.path.exists(GRAPH_KNOWLEDGE_DIR):
-        for filepath in glob.glob(os.path.join(GRAPH_KNOWLEDGE_DIR, "*.md")):
+    if os.path.exists(DB_GRAPH_KNOWLEDGE_DIR):
+        print(f"  Scanning for markdown extraction files in: {DB_GRAPH_KNOWLEDGE_DIR}")
+        md_files = glob.glob(os.path.join(DB_GRAPH_KNOWLEDGE_DIR, "*.md"))
+        print(f"  Found {len(md_files)} markdown files for entity extraction.")
+        for filepath in md_files:
             with open(filepath, 'r', encoding='utf-8') as f:
                 content = f.read()
                 

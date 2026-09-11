@@ -1,0 +1,371 @@
+[
+  {
+    "procurementId": "PR-2026-5540-MED",
+    "vendorName": "MediSynth Specialty Formulations Ltd.",
+    "dealSize": 220000.0,
+    "status": {
+      "procurementId": "PR-2026-5540-MED",
+      "stage": "AWAITING_APPROVAL",
+      "investigationPlan": "FULL",
+      "revisionCount": 1,
+      "maxRevisions": 3,
+      "failureReason": null
+    },
+    "report": {
+      "vendorSummary": "MediSynth provides custom targeted oncology formulation intermediates.",
+      "financialAssessment": "Adequate liquidity, credit score 710.",
+      "complianceFindings": "GMP certified laboratory.",
+      "flaggedContractClauses": [
+        "Clause 5.1: Specialized custom synthesis non-standard terms."
+      ],
+      "evidenceSummary": "NPPA database does not contain statutory ceiling price for this proprietary formulation.",
+      "fusedContext": {
+        "facts": [
+          {
+            "factId": "fact_med_1",
+            "text": "Custom specialty formulation intermediate not indexed in Schedule I DPCO 2013.",
+            "source": "vector",
+            "retrieverScore": 0.82,
+            "sourceWeight": 1.0,
+            "finalScore": 0.82,
+            "isPrimary": true,
+            "contradictionFlag": false,
+            "conflictsWith": null
+          }
+        ],
+        "overallConfidence": 0.68,
+        "fallbackToVectorOnly": false
+      },
+      "riskAssessment": {
+        "financialRisk": {
+          "level": "LOW",
+          "rationale": "Clean financial audit."
+        },
+        "complianceRisk": {
+          "level": "LOW",
+          "rationale": "Standard state manufacturing license in good standing."
+        },
+        "contractRisk": {
+          "level": "MEDIUM",
+          "rationale": "Custom formulation warranty limitations."
+        },
+        "pricingRisk": {
+          "status": "INDETERMINATE",
+          "ceilingPrice": null,
+          "quotedPrice": 220000.0,
+          "excessAmount": null
+        },
+        "overallRisk": "MEDIUM",
+        "confidenceScore": 0.68
+      },
+      "riskExplanation": "Pricing risk is INDETERMINATE due to lack of statutory ceiling index, reducing overall confidence.",
+      "recommendation": "BENCHMARK AUDIT: Conduct market rate cross-comparison before releasing PO."
+    },
+    "approval": null,
+    "createdAt": "2026-09-11T14:43:30.215521+00:00"
+  },
+  {
+    "procurementId": "PR-2026-7731-APX",
+    "vendorName": "Apex BioLogistics & Diagnostic Supplies Pvt. Ltd.",
+    "dealSize": 350000.0,
+    "status": {
+      "procurementId": "PR-2026-7731-APX",
+      "stage": "AWAITING_APPROVAL",
+      "investigationPlan": "FULL",
+      "revisionCount": 2,
+      "maxRevisions": 3,
+      "failureReason": null
+    },
+    "report": {
+      "vendorSummary": "Apex BioLogistics supplies RT-PCR molecular reagent packs and refrigerated transport.",
+      "financialAssessment": "Moderate liquidity ratio (Credit score: 680). 2024 commercial transit dispute noted.",
+      "complianceFindings": "Schedule M certified facility. Secondary transit clause permits ambient 15\u00b0C to 25\u00b0C.",
+      "flaggedContractClauses": [
+        "Clause 2.2.4: Permitted 15\u00b0C to 25\u00b0C ambient transport for regional delivery under 48 hours.",
+        "Clause 4.1: Strict 1.0x liability limitation cap."
+      ],
+      "evidenceSummary": "Contradiction flagged between SLA Clause 2.2.4 (15\u00b0C-25\u00b0C) and WHO TRS 1025 (2\u00b0C-8\u00b0C).",
+      "fusedContext": {
+        "facts": [
+          {
+            "factId": "fact_apx_1",
+            "text": "WHO TRS 1025 Annex 7: Storage & transit must remain strictly at 2\u00b0C to 8\u00b0C.",
+            "source": "vector",
+            "retrieverScore": 0.96,
+            "sourceWeight": 0.85,
+            "finalScore": 0.816,
+            "isPrimary": true,
+            "contradictionFlag": true,
+            "conflictsWith": "fact_apx_2"
+          },
+          {
+            "factId": "fact_apx_2",
+            "text": "SLA Clause 2.2.4: Ambient passive containers maintaining 15\u00b0C to 25\u00b0C permitted.",
+            "source": "graph",
+            "retrieverScore": 0.89,
+            "sourceWeight": 0.6,
+            "finalScore": 0.534,
+            "isPrimary": false,
+            "contradictionFlag": true,
+            "conflictsWith": "fact_apx_1"
+          }
+        ],
+        "overallConfidence": 0.71,
+        "fallbackToVectorOnly": false
+      },
+      "riskAssessment": {
+        "financialRisk": {
+          "level": "MEDIUM",
+          "rationale": "Credit score 680 with historical shipping dispute in 2024."
+        },
+        "complianceRisk": {
+          "level": "MEDIUM",
+          "rationale": "Clause 2.2.4 violates CDSCO cold-chain guidelines for biologics."
+        },
+        "contractRisk": {
+          "level": "MEDIUM",
+          "rationale": "Liability capped at 1.0x with disclaimer of consequential loss."
+        },
+        "pricingRisk": {
+          "status": "WITHIN_CEILING",
+          "ceilingPrice": 350000.0,
+          "quotedPrice": 350000.0,
+          "excessAmount": 0.0
+        },
+        "overallRisk": "MEDIUM",
+        "confidenceScore": 0.71
+      },
+      "riskExplanation": "Medium compliance and contract risk. Reagent integrity at risk if ambient transit clause is accepted.",
+      "recommendation": "CONDITIONAL APPROVAL: Require deletion of Clause 2.2.4 and enforce 2\u00b0C to 8\u00b0C IoT sensors."
+    },
+    "approval": null,
+    "createdAt": "2026-09-11T11:43:30.215521+00:00"
+  },
+  {
+    "procurementId": "PR-2026-9042-GLO",
+    "vendorName": "Global Pharma Logistics & Formulation Services Ltd.",
+    "dealSize": 580000.0,
+    "status": {
+      "procurementId": "PR-2026-9042-GLO",
+      "stage": "AWAITING_APPROVAL",
+      "investigationPlan": "FULL",
+      "revisionCount": 1,
+      "maxRevisions": 3,
+      "failureReason": null
+    },
+    "report": {
+      "vendorSummary": "Global Pharma provides bulk active ingredients and third-party logistics.",
+      "financialAssessment": "Stable financials, credit score 720.",
+      "complianceFindings": "Schedule M GMP compliant. Transit temperature excursion clause flagged.",
+      "flaggedContractClauses": [
+        "Clause 2.2: 30-minute cumulative temperature excursion threshold."
+      ],
+      "evidenceSummary": "Fusion engine resolved temperature specification contradiction in favor of Schedule M.",
+      "fusedContext": {
+        "facts": [
+          {
+            "factId": "fact_glo_1",
+            "text": "WHO TRS 1025 requires strict continuous data logger audit trails.",
+            "source": "vector",
+            "retrieverScore": 0.91,
+            "sourceWeight": 0.85,
+            "finalScore": 0.7735,
+            "isPrimary": true,
+            "contradictionFlag": true,
+            "conflictsWith": "fact_glo_2"
+          },
+          {
+            "factId": "fact_glo_2",
+            "text": "Vendor contract proposed manual temperature logging during transit.",
+            "source": "graph",
+            "retrieverScore": 0.75,
+            "sourceWeight": 0.6,
+            "finalScore": 0.45,
+            "isPrimary": false,
+            "contradictionFlag": true,
+            "conflictsWith": "fact_glo_1"
+          }
+        ],
+        "overallConfidence": 0.74,
+        "fallbackToVectorOnly": false
+      },
+      "riskAssessment": {
+        "financialRisk": {
+          "level": "LOW",
+          "rationale": "Audited clean financial records."
+        },
+        "complianceRisk": {
+          "level": "MEDIUM",
+          "rationale": "Critic detected transit monitoring contradiction."
+        },
+        "contractRisk": {
+          "level": "MEDIUM",
+          "rationale": "Indemnity cap limited to 1.5x deal value."
+        },
+        "pricingRisk": {
+          "status": "EXCEEDS_CEILING",
+          "ceilingPrice": 500000.0,
+          "quotedPrice": 580000.0,
+          "excessAmount": 80000.0
+        },
+        "overallRisk": "HIGH",
+        "confidenceScore": 0.74
+      },
+      "riskExplanation": "Pricing exceeds standard NPPA benchmark by 80,000 INR and transit logging requires escalation.",
+      "recommendation": "EXECUTIVE REVIEW: Quoted deal exceeds statutory ceiling; renegotiate unit rates."
+    },
+    "approval": null,
+    "createdAt": "2026-09-10T23:43:30.215521+00:00"
+  },
+  {
+    "procurementId": "PR-2026-6102-NOV",
+    "vendorName": "Nova Biologics & Vaccines India Ltd.",
+    "dealSize": 750000.0,
+    "status": {
+      "procurementId": "PR-2026-6102-NOV",
+      "stage": "COMPLETE",
+      "investigationPlan": "FULL",
+      "revisionCount": 0,
+      "maxRevisions": 3,
+      "failureReason": null
+    },
+    "report": {
+      "vendorSummary": "Nova Biologics provides pentavalent pediatric vaccine formulations.",
+      "financialAssessment": "Excellent financial stability, credit score 810.",
+      "complianceFindings": "WHO prequalified facility, zero inspection citations, CDSCO Form 28-D verified.",
+      "flaggedContractClauses": [
+        "Clause 4: Automatic batch rejection for any excursion beyond 8.5\u00b0C."
+      ],
+      "evidenceSummary": "Full regulatory compliance verified across Schedule M and National Immunization Standards.",
+      "fusedContext": {
+        "facts": [
+          {
+            "factId": "fact_nov_1",
+            "text": "Contract mandates 100% active IoT sensor tracking on all refrigerated vehicles.",
+            "source": "vector",
+            "retrieverScore": 0.95,
+            "sourceWeight": 0.85,
+            "finalScore": 0.8075,
+            "isPrimary": true,
+            "contradictionFlag": false,
+            "conflictsWith": null
+          }
+        ],
+        "overallConfidence": 0.92,
+        "fallbackToVectorOnly": false
+      },
+      "riskAssessment": {
+        "financialRisk": {
+          "level": "LOW",
+          "rationale": "Prime tier credit profile."
+        },
+        "complianceRisk": {
+          "level": "LOW",
+          "rationale": "WHO prequalified and fully Schedule M compliant."
+        },
+        "contractRisk": {
+          "level": "LOW",
+          "rationale": "Strong buyer-protective indemnity and 2.0x liability cap."
+        },
+        "pricingRisk": {
+          "status": "WITHIN_CEILING",
+          "ceilingPrice": 750000.0,
+          "quotedPrice": 750000.0,
+          "excessAmount": 0.0
+        },
+        "overallRisk": "LOW",
+        "confidenceScore": 0.92
+      },
+      "riskExplanation": "Exemplary compliance and cold-chain controls. Quoted at statutory ceiling.",
+      "recommendation": "APPROVE: Low risk vendor with complete compliance pedigree."
+    },
+    "approval": {
+      "decision": "APPROVE",
+      "reason": "Prequalified vendor with verified cold-chain infrastructure.",
+      "decidedBy": "Senior Director of Medical Procurement",
+      "decidedAt": "2026-09-11T13:43:30.215521+00:00"
+    },
+    "createdAt": "2026-09-10T17:43:30.215521+00:00"
+  },
+  {
+    "procurementId": "PR-2026-8801-BIO",
+    "vendorName": "BioGen Diagnostics Inc.",
+    "dealSize": 450000.0,
+    "status": {
+      "procurementId": "PR-2026-8801-BIO",
+      "stage": "COMPLETE",
+      "investigationPlan": "FULL",
+      "revisionCount": 0,
+      "maxRevisions": 3,
+      "failureReason": null
+    },
+    "report": {
+      "vendorSummary": "BioGen Diagnostics is an established supplier of molecular RT-PCR test kits and reagents.",
+      "financialAssessment": "Audited clean with healthy solvency ratio (Credit score: 780). Deal represents 1.8% of annual turnover.",
+      "complianceFindings": "Schedule M GMP and ISO-9001 certified. Valid state manufacturing license verified with CDSCO.",
+      "flaggedContractClauses": [
+        "Clause 4.1: Liability capped at 1.5x order value with standard mutual indemnity."
+      ],
+      "evidenceSummary": "Parallel Vector RAG and Graph RAG confirmed valid CDSCO licenses and WHO TRS 1025 cold-chain adherence.",
+      "fusedContext": {
+        "facts": [
+          {
+            "factId": "fact_bg_1",
+            "text": "Cold chain storage compliant with WHO TRS 1025 standards (2\u00b0C to 8\u00b0C continuous logging).",
+            "source": "vector",
+            "retrieverScore": 0.94,
+            "sourceWeight": 0.85,
+            "finalScore": 0.799,
+            "isPrimary": true,
+            "contradictionFlag": false,
+            "conflictsWith": null
+          },
+          {
+            "factId": "fact_bg_2",
+            "text": "Graph Node [BioGen]: Valid SLA manufacturing license Form 28-D active through 2028.",
+            "source": "graph",
+            "retrieverScore": 0.88,
+            "sourceWeight": 1.0,
+            "finalScore": 0.88,
+            "isPrimary": true,
+            "contradictionFlag": false,
+            "conflictsWith": null
+          }
+        ],
+        "overallConfidence": 0.89,
+        "fallbackToVectorOnly": false
+      },
+      "riskAssessment": {
+        "financialRisk": {
+          "level": "LOW",
+          "rationale": "Strong credit rating (780) and zero overdue tax liabilities."
+        },
+        "complianceRisk": {
+          "level": "LOW",
+          "rationale": "Zero FDA 483 citations, valid CDSCO manufacturing license."
+        },
+        "contractRisk": {
+          "level": "LOW",
+          "rationale": "Standard pharma MSA terms with balanced 30-day cure period."
+        },
+        "pricingRisk": {
+          "status": "WITHIN_CEILING",
+          "ceilingPrice": 450000.0,
+          "quotedPrice": 420000.0,
+          "excessAmount": 0.0
+        },
+        "overallRisk": "LOW",
+        "confidenceScore": 0.89
+      },
+      "riskExplanation": "Low overall risk profile across all four dimensions. Statutory pricing verified within NPPA ceiling.",
+      "recommendation": "PROCEED with procurement. Final purchase order approved."
+    },
+    "approval": {
+      "decision": "APPROVE",
+      "reason": "All 4D risk criteria satisfied and verified within NPPA ceiling.",
+      "decidedBy": "Chief Procurement Officer",
+      "decidedAt": "2026-09-11T05:43:30.215521+00:00"
+    },
+    "createdAt": "2026-09-09T17:43:30.215521+00:00"
+  }
+]
