@@ -8,9 +8,9 @@ Gathers multi-source evidence:
 """
 
 from app.agents.state import WorkflowState
-from app.rag.hybrid_retriever import HybridRetriever
+from app.rag_pipeline.hybrid_retriever import HybridRetriever
 from app.db.pricing import lookup_ceiling_price
-from app.rag.web_scraper import vendor_scraper
+from app.rag_pipeline.web_scraper import vendor_scraper
 
 # Instantiate shared hybrid retriever
 hybrid_retriever = HybridRetriever()

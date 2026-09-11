@@ -10,12 +10,12 @@ import sys
 import glob
 from typing import List, Dict, Any
 
-backend_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if backend_root not in sys.path:
     sys.path.insert(0, backend_root)
 
-from app.rag.embedding_pipeline import EmbeddingPipeline
-from app.rag.vector_store import VectorStore
+from app.rag_pipeline.embedding_pipeline import EmbeddingPipeline
+from app.rag_pipeline.vector_store import VectorStore
 
 RAG_STORAGE_DIR = os.path.join(backend_root, "rag_storage")
 
@@ -110,7 +110,7 @@ def run_rag_ingest(vector_store: VectorStore = None) -> int:
     embeddings_file = os.path.join(db_vector_dir, "vector_embeddings.json")
     meta_file = os.path.join(db_vector_dir, "collections_metadata.json")
 
-    from app.rag.embedding_pipeline import compute_dense_embedding
+    from app.rag_pipeline.embedding_pipeline import compute_dense_embedding
     vector_dump = []
     for item in all_chunks_to_embed[:100]:
         vector_dump.append({

@@ -12,7 +12,7 @@ backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if backend_root not in sys.path:
     sys.path.insert(0, backend_root)
 
-from app.rag.web_scraper import vendor_scraper
+from app.rag_pipeline.web_scraper import vendor_scraper
 
 import argparse
 

@@ -140,17 +140,17 @@ def main():
     clean_and_recreate_database_folders()
 
     # 1. Relational Database Build
-    from build.database.seed_database import run_database_seed
+    from build.seed_relational import run_database_seed
     run_database_seed()
     print()
 
     # 2. RAG Vector Database Build
-    from build.rag.ingest_documents import run_rag_ingest
+    from build.ingest_rag_docs import run_rag_ingest
     run_rag_ingest()
     print()
 
     # 3. Knowledge Graph Database Build
-    from build.graph.build_knowledge_graph import run_graph_build
+    from build.build_knowledge_graph import run_graph_build
     run_graph_build()
     print()
 

@@ -49,7 +49,7 @@ class VectorRAGRetriever:
         """
         # 1. Query Qdrant Embedding Pipeline
         try:
-            from app.rag.embedding_pipeline import qdrant_pipeline
+            from app.rag_pipeline.embedding_pipeline import qdrant_pipeline
             pipeline_hits = qdrant_pipeline.search(query_text, top_k=top_k)
             if pipeline_hits:
                 return pipeline_hits

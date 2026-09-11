@@ -3,9 +3,9 @@ Orchestrates Parallel Vector RAG & Graph RAG Retrieval with Fusion.
 """
 
 from typing import Dict, Any
-from app.rag.vector_store import VectorRAGRetriever
-from app.rag.graph_store import GraphRAGRetriever
-from app.rag.fusion import HybridRAGFusionEngine
+from app.rag_pipeline.vector_store import VectorRAGRetriever
+from app.rag_pipeline.graph_store import GraphRAGRetriever
+from app.rag_pipeline.fusion import HybridRAGFusionEngine
 
 class HybridRetriever:
     """
