@@ -2,7 +2,7 @@
 
 **Document Version:** 2.1.0  
 **Stack:** React 18 + Vite + TypeScript + Tailwind CSS | FastAPI + Pydantic v2  
-**Implementation Source:** `frontend/src/` & `backend/app/routers/`  
+**Implementation Source:** `frontend/src/` & `backend/src/routers/`  
 
 ---
 

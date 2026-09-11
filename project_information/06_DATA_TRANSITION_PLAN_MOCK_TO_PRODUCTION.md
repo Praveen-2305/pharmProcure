@@ -41,7 +41,7 @@ The platform spans 6 critical data layers. The table below contrasts the current
    - Abstract data operations behind abstract base classes: `ICaseRepository`, `IVectorStore`, `IGraphStore`, `IPricingService`, `IContractService`.
    - The current mock classes become default implementations for `DATA_MODE=mock`.
 2. **Environment Variable Configuration:**
-   - Introduce granular configuration flags in `backend/app/config.py`:
+   - Introduce granular configuration flags in `backend/src/config.py`:
      ```bash
      DATA_MODE=production           # or 'mock'
      DATABASE_URL=postgresql://user:pass@db-host:5432/autonosource
@@ -93,7 +93,7 @@ The platform spans 6 critical data layers. The table below contrasts the current
 
 ## 💻 Codebase Adaptation Guide
 
-### 1. Database Configuration (`backend/app/config.py`)
+### 1. Database Configuration (`backend/src/config.py`)
 ```python
 from pydantic_settings import BaseSettings
 
