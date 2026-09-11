@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+langgraph
+langchain
+langchain-google-genai
+pydantic
+qdrant-client
+chromadb
+networkx
+pymongo
+tavily-python
+python-dotenv
