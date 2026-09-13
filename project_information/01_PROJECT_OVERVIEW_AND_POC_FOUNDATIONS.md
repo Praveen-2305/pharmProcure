@@ -3,37 +3,58 @@
 **Project Title:** AutonoSource — Multi-Agent Procurement Risk & Vendor Intelligence Platform  
 **Target Domain:** Pharmaceutical Supply Chain Due Diligence, Regulatory Governance & Pricing Compliance  
 **Author / Original Architect:** Krishnaprasath SK (B.Tech Computer Science and Business Systems)  
-**Document Status:** Complete & Authoritative Reference (v2.1.0)  
-**Audience:** Incoming AI Agents, System Architects, Compliance Officers, Software Engineers  
+**Document Status:** Complete & Authoritative Reference (v3.0.0)  
+**Audience:** System Architects, Compliance Officers, Software Engineers, Autonomous Agents  
 
 ---
 
 ## 1. Executive Summary & Purpose
 
-Procurement in heavily regulated industries like pharmaceuticals is an investigative, high-stakes discipline. Selecting an unverified vendor, agreeing to a non-compliant contract clause, or procuring drugs above statutory price caps can lead to catastrophic consequences:
+Procurement in heavily regulated industries like pharmaceuticals is an investigative, high-stakes discipline. Selecting an unverified vendor, agreeing to a non-compliant contract clause, or procuring drugs above statutory price caps can lead to severe consequences:
 - **Patient Safety Hazards:** Adulterated active pharmaceutical ingredients (APIs), degraded vaccines due to cold-chain breaches, or substandard reagents.
-- **Regulatory Penalties & Criminal Liability:** Operating with expired or unauthorized manufacturing licenses violates the **Drugs and Cosmetics Act, 1940**.
-- **Price Gouging Sanctions:** Procuring scheduled formulations above published ceiling prices triggers statutory recovery and penalties under the **Drugs (Prices Control) Order (DPCO), 2013** enforced by the **National Pharmaceutical Pricing Authority (NPPA)**.
+- **Regulatory Penalties & Criminal Liability:** Operating with expired or unauthorized manufacturing licenses violates the **Drugs and Cosmetics Act, 1940** and **Drugs and Cosmetics Rules, 1945**.
+- **Price Gouging Sanctions:** Procuring scheduled formulations above published ceiling prices triggers statutory recovery and penalties under the **Drugs (Prices Control) Order (DPCO), 2013** enforced by the **National Pharmaceutical Pricing Authority (NPPA)** in Indian Rupees (INR / ₹).
 - **Commercial Default:** Inadequate vendor liquidity leading to mid-contract supply failure.
 
-The purpose of **AutonoSource** is to demonstrate that procurement evaluation can be transformed from a slow, manual checklist into a stateful, explainable, autonomous multi-agent pipeline powered by **LangGraph**, **FastAPI**, **Qdrant Vector Database**, **NetworkX Property Graph**, and **Google Gemini LLM**.
+The purpose of **AutonoSource** is to demonstrate that procurement evaluation can be transformed from a slow, manual checklist into a stateful, explainable, autonomous multi-agent pipeline powered by **LangGraph**, **FastAPI**, **Qdrant Vector Database**, **NetworkX Property Graph (5,757 nodes)**, **SQLite (6-table schema with 50 registered vendors)**, and **Google Gemini LLM**.
 
-Rather than relying on a naive, single-prompt Large Language Model (LLM), AutonoSource coordinates 5 specialized AI agents operating over a typed workflow state, featuring parallel hybrid retrieval, deterministic pricing checks, autonomous self-critique, and mandatory Human-in-the-Loop governance.
+Rather than relying on a naive, single-prompt Large Language Model (LLM), AutonoSource coordinates specialized AI agents operating over a typed workflow state, featuring parallel hybrid retrieval, deterministic pricing checks in INR, autonomous self-critique, and mandatory Human-in-the-Loop governance.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                               AUTONOSOURCE PLATFORM                                     │
 │                                                                                        │
-│   ┌───────────────┐     ┌────────────────┐     ┌───────────────┐     ┌─────────────┐   │
-│   │ Planner Agent │ ──► │ Executor Agent │ ──► │ Scorer Agent  │ ──► │ Critic Loop │   │
-│   └───────────────┘     └───────┬────────┘     └───────────────┘     └──────┬──────┘   │
-│                                 │                                           │          │
-│                ┌────────────────┴────────────────┐                          │          │
-│                ▼                                 ▼                          ▼          │
-│     [Hybrid RAG Engine]                 [Pricing & External]        [Report Writer]    │
-│     - Qdrant Vector Store               - DPCO 2013 Ceilings                │          │
-│     - NetworkX Property Graph           - Web Scraper Crawler               ▼          │
-│     - Contradiction Resolution          - CDSCO & Court Dockets     [Human Approval]   │
+│                                 ┌───────────────┐                                      │
+│                                 │ Planner Agent │                                      │
+│                                 └───────┬───────┘                                      │
+│                                         │                                              │
+│                        ┌────────────────┴────────────────┐                             │
+│                        ▼                                 ▼                             │
+│               ┌─────────────────┐               ┌─────────────────┐                    │
+│               │    RAG Agent    │               │  Scraper Agent  │                    │
+│               │ - 768-dim Qdrant│               │ - 50-Vendor DB  │                    │
+│               │ - 5,757-Node KG │               │ - DPCO 2013 INR │                    │
+│               │ - 4-Step Fusion │               │ - Web Intel     │                    │
+│               └────────┬────────┘               └────────┬────────┘                    │
+│                        │                                 │                             │
+│                        └────────────────┬────────────────┘                             │
+│                                         ▼                                              │
+│                                 ┌───────────────┐       Confidence < 0.80              │
+│                                 │ Scorer Agent  │ ◄───────────────────────────┐        │
+│                                 └───────┬───────┘                             │        │
+│                                         ▼                                     │        │
+│                                 ┌───────────────┐                             │        │
+│                                 │  Critic Loop  │ ────────────────────────────┘        │
+│                                 └───────┬───────┘   (Max 3 revision loops)             │
+│                                         │                                              │
+│                                         ▼ Confidence >= 0.80                           │
+│                                 ┌───────────────┐                                      │
+│                                 │ Report Writer │                                      │
+│                                 └───────┬───────┘                                      │
+│                                         ▼                                              │
+│                                 ┌───────────────┐                                      │
+│                                 │Human Approval │                                      │
+│                                 └───────────────┘                                      │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -51,7 +72,7 @@ Vendor risk analysis is fundamentally an iterative investigation, not a simple q
 Standard Retrieval-Augmented Generation (RAG) retrieves text passages based on semantic similarity and generates a linear response. In pharmaceutical procurement, this fails because:
 1. **No Relational Ontology:** Vector similarity cannot model statutory hierarchy—for example, that a statutory provision in Schedule M supersedes a private SLA clause.
 2. **No Contradiction Detection:** If a vendor's RFP claims *"100% clean regulatory track record"* while a government inspection database reveals an active warning letter, standard RAG averages the embeddings or outputs contradictory text without resolving which source is legally authoritative.
-3. **No Pricing Governance:** Standard RAG cannot perform deterministic arithmetic or statutory ceiling lookups against published regulatory tariffs.
+3. **No Pricing Governance:** Standard RAG cannot perform deterministic arithmetic or statutory ceiling lookups against published regulatory tariffs under DPCO 2013.
 4. **No Bounded Self-Critique:** Standard RAG cannot inspect its own confidence or autonomously loop back to retrieve additional evidence.
 
 ---
@@ -63,7 +84,7 @@ AutonoSource is explicitly modeled around statutory pharmaceutical standards in 
 ### 3.1 Drugs and Cosmetics Act, 1940 & Rules 1945
 - **Legal Mandate:** Primary statute governing the import, manufacture, distribution, and sale of drugs, cosmetics, and medical devices in India.
 - **Enforcement Body:** Central Drugs Standard Control Organization (CDSCO) and State Licensing Authorities (SLAs).
-- **Core Check:** Requires all biologic manufacturers to hold active Form 28-D manufacturing authorizations.
+- **Core Check:** Requires all biologic and pharmaceutical manufacturers to hold active Form 28/28-D manufacturing authorizations.
 
 ### 3.2 Schedule M (Good Manufacturing Practices - GMP)
 - **Legal Mandate:** CDSCO statutory requirements for pharmaceutical plant premises, quality management systems, environmental controls, sterile areas, water systems, sanitation, and batch documentation.
@@ -75,28 +96,26 @@ AutonoSource is explicitly modeled around statutory pharmaceutical standards in 
 
 ### 3.4 Drugs (Prices Control) Order (DPCO), 2013 & NPPA
 - **Statutory Authority:** Issued under Section 3 of the Essential Commodities Act, 1955 by the National Pharmaceutical Pricing Authority (NPPA).
-- **Compliance Rule:** Enforces mandatory price ceilings on scheduled bulk drugs and formulations. Any procurement deal where the unit price exceeds the ceiling price constitutes an illegal statutory violation.
+- **Compliance Rule:** Enforces mandatory price ceilings in Indian Rupees (INR / ₹) on scheduled bulk drugs and formulations. Any procurement deal where the unit price exceeds the ceiling price constitutes an illegal statutory violation.
 
 ---
 
-## 4. The 5 Canonical Test Case Scenarios
+## 4. The 5 Canonical Test Case Scenarios (Denominated in INR)
 
-AutonoSource is pre-seeded with 5 realistic, diverse vendor scenarios designed to validate all functional paths:
+AutonoSource is pre-seeded with 5 realistic, diverse vendor scenarios matching [`backend/ingestion/sql/cases.json`](../backend/ingestion/sql/cases.json) and SQLite database records:
 
-| Case ID | Vendor Name | Deal Size | Risk Profile | Key Findings & Scenario Nuance |
+| Case ID | Vendor ID & Name | Deal Size (INR) | Risk Profile | Key Findings & Scenario Nuance |
 | :--- | :--- | :---: | :---: | :--- |
-| **`PR-2026-8801-BIO`** | **BioGen Diagnostics Inc.** | USD 450,000 | **LOW** | **Clean Baseline:** Prime credit (780), Schedule M certified, valid CDSCO Form 28-D license, WHO cold chain adherence, price within NPPA ceiling (USD 420k < USD 450k). Approved. |
-| **`PR-2026-9042-GLO`** | **Global Pharma Logistics Ltd.** | USD 580,000 | **HIGH** | **Statutory Price Breach:** Quoted deal (USD 580k) exceeds NPPA ceiling (USD 500k) by USD 80k. Manual logging clause conflicts with WHO TRS 1025 continuous logger rules. Awaiting Executive Escalation. |
-| **`PR-2026-7731-APX`** | **Apex BioLogistics Pvt. Ltd.** | USD 350,000 | **MEDIUM** | **Cold-Chain Contradiction:** SLA Clause 2.2.4 permits ambient 15°C-25°C transit, contradicting WHO TRS 1025 (2°C-8°C). Critic triggers 3 revision loops. Conditional Approval with clause amendment. |
-| **`PR-2026-6102-NOV`** | **Nova Biologics & Vaccines Ltd.** | USD 750,000 | **LOW** | **Vaccine Prequalification:** WHO prequalified facility, 100% active IoT GPS tracking, balanced 2.0x indemnity liability cap. Quoted at statutory ceiling. Approved. |
-| **`PR-2026-5540-MED`** | **MediSynth Specialty Formulations** | USD 220,000 | **MEDIUM** | **Indeterminate Pricing:** Proprietary custom synthesis intermediate not indexed in Schedule I DPCO. Confidence penalized to 0.68 due to missing market ceiling benchmark. |
+| **`PR-2026-8801-BIO`** | `VND-025` BioGen Diagnostics Inc. | ₹3,73,50,000 | **LOW** | **Clean Baseline:** Prime credit (AA), Schedule M certified, valid CDSCO Form MD-9 license, WHO cold chain adherence, price within DPCO ceiling (₹3.54 Cr < ₹3.73 Cr). Approved. |
+| **`PR-2026-9042-GLO`** | `VND-012` Global Pharma Logistics Ltd. | ₹4,81,40,000 | **HIGH** | **Statutory Price Breach:** Quoted deal (₹4.81 Cr) exceeds DPCO ceiling (₹4.15 Cr) by ₹66.4 Lakhs. Manual logging clause conflicts with WHO TRS 1025 continuous logger rules. Awaiting Executive Escalation. |
+| **`PR-2026-7731-APX`** | `VND-003` Apex BioLogistics Pvt. Ltd. | ₹2,90,50,000 | **MEDIUM** | **Cold-Chain Contradiction:** SLA Clause 2.2.4 permits ambient 15°C-25°C transit, contradicting WHO TRS 1025 (2°C-8°C). Critic triggers revision loops. Conditional Approval with clause amendment. |
+| **`PR-2026-6102-NOV`** | `VND-041` Nova Biologics & Vaccines Ltd. | ₹6,22,50,000 | **LOW** | **Vaccine Prequalification:** WHO prequalified facility, 100% active IoT GPS tracking, balanced 2.0x indemnity liability cap. Quoted at statutory ceiling. Approved. |
+| **`PR-2026-5540-MED`** | `VND-019` MediSynth Specialty Formulations | ₹1,82,60,000 | **MEDIUM** | **Indeterminate Pricing:** Custom intermediate not indexed in Schedule I DPCO. Confidence penalized due to missing market ceiling benchmark. |
 
 ---
 
 ## 5. Architectural Evaluation Metrics & Success Criteria
 
-1. **Stateful Graph Execution:** 100% deterministic routing across LangGraph nodes (`PLANNING` -> `EXECUTING` -> `SCORING` -> `CRITIQUING` -> `WRITING_REPORT` -> `AWAITING_APPROVAL`).
-2. **Deterministic Pricing Auditing:** 100% of quotes with DPCO catalog entries checked deterministically, tagging transactions as `WITHIN_CEILING`, `EXCEEDS_CEILING`, or `INDETERMINATE`.
+1. **Stateful Parallel Graph Execution:** 100% deterministic routing across LangGraph nodes (`PLANNING` -> `PARALLEL_RETRIEVAL` -> `SCORING` -> `CRITIQUING` -> `WRITING_REPORT` -> `AWAITING_APPROVAL`).
+2. **Deterministic Pricing Auditing in INR:** 100% of quotes with DPCO catalog entries checked deterministically in Indian Rupees, tagging transactions as `WITHIN_CEILING`, `EXCEEDS_CEILING`, or `INDETERMINATE`.
 3. **Contradiction Resolution:** Automatically resolves conflicting statements by prioritizing statutory legislation (weight = 1.20) and verified graph ontology (weight = 1.00) over vendor self-declarations (weight = 0.60).
-4. **Critic Loop Convergence:** Re-triggers evidence gathering when confidence < 0.80, with a bounded ceiling of 3 revisions to prevent infinite loops.
-5. **Human Governance Gate:** Zero automated PO releases; all deals require explicit human authorization recorded with auditable timestamps.
