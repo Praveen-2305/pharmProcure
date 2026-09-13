@@ -1,0 +1,429 @@
+[
+  {
+    "procurement_id": "PR-2026-8801-BIO",
+    "vendor_id": "VND-025",
+    "vendor_name": "BioGen Diagnostics Inc.",
+    "deal_size": 37350000.0,
+    "currency": "INR",
+    "product_category": "diagnostic_reagents",
+    "status": {
+      "procurement_id": "PR-2026-8801-BIO",
+      "stage": "COMPLETE",
+      "investigation_plan": "LIGHT",
+      "revision_count": 0,
+      "max_revisions": 3,
+      "failure_reason": null
+    },
+    "report": {
+      "vendor_summary": "BioGen Diagnostics is an established supplier of molecular RT-PCR test kits and reagents.",
+      "financial_assessment": "Audited clean with healthy solvency ratio (Credit rating: AA). Deal represents 0.9% of annual turnover.",
+      "compliance_findings": "Schedule M GMP and ISO-13485 certified. Valid CDSCO Form MD-9 license verified.",
+      "flagged_contract_clauses": [
+        "Clause 4.1: Liability capped at 1.5x order value with standard mutual indemnity."
+      ],
+      "evidence_summary": "Parallel Vector RAG and Graph RAG confirmed valid CDSCO licenses and WHO TRS 1025 cold-chain adherence.",
+      "fused_context": {
+        "facts": [
+          {
+            "fact_id": "fact_bg_1",
+            "text": "Cold chain storage compliant with WHO TRS 1025 standards (2°C to 8°C continuous logging).",
+            "source": "vector",
+            "retriever_score": 0.94,
+            "source_weight": 0.85,
+            "final_score": 0.799,
+            "is_primary": true,
+            "contradiction_flag": false,
+            "conflicts_with": null
+          }
+        ],
+        "overall_confidence": 0.94,
+        "fallback_to_vector_only": false
+      },
+      "risk_assessment": {
+        "financial_risk": {
+          "level": "LOW",
+          "rationale": "Strong solvency ratio (2.85) and zero overdue tax liabilities."
+        },
+        "compliance_risk": {
+          "level": "LOW",
+          "rationale": "Zero FDA 483 citations, valid CDSCO manufacturing license."
+        },
+        "contract_risk": {
+          "level": "LOW",
+          "rationale": "Standard pharma MSA terms with balanced 30-day cure period."
+        },
+        "pricing_risk": {
+          "status": "WITHIN_CEILING",
+          "ceiling_price": 37350000.0,
+          "quoted_price": 35480000.0,
+          "excess_amount": 0.0
+        },
+        "overall_risk": "LOW",
+        "confidence_score": 0.94
+      },
+      "risk_explanation": "Low overall risk profile across all four dimensions. Statutory pricing verified within NPPA ceiling in INR.",
+      "recommendation": "PROCEED with procurement. Final purchase order approved."
+    },
+    "approval": {
+      "decision": "APPROVE",
+      "reason": "All 4D risk criteria satisfied and verified within NPPA ceiling in INR.",
+      "decided_at": "2026-09-13T12:00:00Z",
+      "decided_by": "Chief Procurement Officer"
+    },
+    "created_at": "2026-09-13T12:00:00Z"
+  },
+  {
+    "procurement_id": "PR-2026-9102-APX",
+    "vendor_id": "VND-001",
+    "vendor_name": "Apex Pharma Chem Solutions",
+    "deal_size": 26560000.0,
+    "currency": "INR",
+    "product_category": "active_pharmaceutical_ingredients",
+    "status": {
+      "procurement_id": "PR-2026-9102-APX",
+      "stage": "AWAITING_APPROVAL",
+      "investigation_plan": "LIGHT",
+      "revision_count": 0,
+      "max_revisions": 3,
+      "failure_reason": null
+    },
+    "report": {
+      "vendor_summary": "Apex Pharma Chem Solutions is a cGMP active ingredient producer located in Genome Valley, Hyderabad.",
+      "financial_assessment": "Credit rating A, ₹556.1 Cr turnover, healthy solvency ratio 2.20.",
+      "compliance_findings": "Form 25 drug license TS/HYD/2018/25-4819 valid; Schedule M and US-FDA 483 clean.",
+      "flagged_contract_clauses": [],
+      "evidence_summary": "Active bulk API supplier compliant with statutory DPCO ceiling price notifications in INR.",
+      "fused_context": {
+        "facts": [],
+        "overall_confidence": 0.91,
+        "fallback_to_vector_only": false
+      },
+      "risk_assessment": {
+        "financial_risk": {
+          "level": "LOW",
+          "rationale": "High revenue stability and credit score."
+        },
+        "compliance_risk": {
+          "level": "LOW",
+          "rationale": "Schedule M and CDSCO verified."
+        },
+        "contract_risk": {
+          "level": "LOW",
+          "rationale": "Standard terms."
+        },
+        "pricing_risk": {
+          "status": "WITHIN_CEILING",
+          "ceiling_price": 26560000.0,
+          "quoted_price": 25200000.0,
+          "excess_amount": 0.0
+        },
+        "overall_risk": "LOW",
+        "confidence_score": 0.91
+      },
+      "risk_explanation": "Low risk profile across all dimensions.",
+      "recommendation": "PROCEED with procurement authorization."
+    },
+    "approval": null,
+    "created_at": "2026-09-13T13:00:00Z"
+  },
+  {
+    "procurement_id": "PR-2026-9214-MSU",
+    "vendor_id": "VND-026",
+    "vendor_name": "MediSupply Global Logistics",
+    "deal_size": 73870000.0,
+    "currency": "INR",
+    "product_category": "cold_chain_biologics",
+    "status": {
+      "procurement_id": "PR-2026-9214-MSU",
+      "stage": "COMPLETE",
+      "investigation_plan": "FULL",
+      "revision_count": 1,
+      "max_revisions": 3,
+      "failure_reason": "Price exceeds DPCO ceiling and cold-chain temperature excursion alerts."
+    },
+    "report": {
+      "vendor_summary": "MediSupply Global Logistics is an international distributor of temperature-sensitive biologics.",
+      "financial_assessment": "Credit rating BB, solvency ratio 1.15.",
+      "compliance_findings": "Lacks valid Schedule M certification; flagged for +12°C transit temperature breach.",
+      "flagged_contract_clauses": [
+        "Clause 8.2: Disclaims liability for cold-chain excursion during intermodal transit."
+      ],
+      "evidence_summary": "Graph RAG detected contradiction against WHO TRS 1025 cold chain standards; pricing exceeds DPCO ceiling by 13%.",
+      "fused_context": {
+        "facts": [],
+        "overall_confidence": 0.62,
+        "fallback_to_vector_only": false
+      },
+      "risk_assessment": {
+        "financial_risk": {
+          "level": "MEDIUM",
+          "rationale": "Lower solvency ratio."
+        },
+        "compliance_risk": {
+          "level": "HIGH",
+          "rationale": "Critical cold-chain compliance failure."
+        },
+        "contract_risk": {
+          "level": "HIGH",
+          "rationale": "Unacceptable liability waiver for temperature breaches."
+        },
+        "pricing_risk": {
+          "status": "EXCEEDS_CEILING",
+          "ceiling_price": 65000000.0,
+          "quoted_price": 73870000.0,
+          "excess_amount": 8870000.0
+        },
+        "overall_risk": "HIGH",
+        "confidence_score": 0.62
+      },
+      "risk_explanation": "High overall risk: regulatory cold chain failure and statutory price ceiling violation.",
+      "recommendation": "REJECT purchase order."
+    },
+    "approval": {
+      "decision": "REJECT",
+      "reason": "Exceeds statutory DPCO ceiling and violates WHO TRS 1025 cold-chain standards.",
+      "decided_at": "2026-09-13T14:30:00Z",
+      "decided_by": "Chief Procurement Officer"
+    },
+    "created_at": "2026-09-13T14:00:00Z"
+  },
+  {
+    "procurement_id": "PR-2026-9042-GLO",
+    "vendor_id": "VND-027",
+    "vendor_name": "Global Pharma Logistics & Formulation Services Ltd.",
+    "deal_size": 48140000.0,
+    "currency": "INR",
+    "product_category": "cold_chain_biologics",
+    "status": {
+      "procurement_id": "PR-2026-9042-GLO",
+      "stage": "AWAITING_APPROVAL",
+      "investigation_plan": "FULL",
+      "revision_count": 1,
+      "max_revisions": 3,
+      "failure_reason": null
+    },
+    "report": {
+      "vendor_summary": "Global Pharma provides cold-chain biologics and specialized formulation services.",
+      "financial_assessment": "Stable financials, credit score 720, solvency ratio 1.70.",
+      "compliance_findings": "Schedule M GMP compliant. Transit temperature excursion clause flagged.",
+      "flagged_contract_clauses": [
+        "Clause 2.2: 30-minute cumulative temperature excursion threshold (+15°C allowed)."
+      ],
+      "evidence_summary": "Fusion engine resolved temperature specification contradiction in favor of Schedule M; quoted price exceeds DPCO ceiling by ₹8,140,000.",
+      "fused_context": {
+        "facts": [
+          {
+            "fact_id": "fact_glo_1",
+            "text": "WHO TRS 1025 requires strict continuous data logger audit trails without permissive excursion windows.",
+            "source": "vector",
+            "retriever_score": 0.91,
+            "source_weight": 0.85,
+            "final_score": 0.773,
+            "is_primary": true,
+            "contradiction_flag": true,
+            "conflicts_with": "Vendor SLA Clause 2.2"
+          }
+        ],
+        "overall_confidence": 0.68,
+        "fallback_to_vector_only": false
+      },
+      "risk_assessment": {
+        "financial_risk": {
+          "level": "LOW",
+          "rationale": "Credit rating A-, adequate solvency."
+        },
+        "compliance_risk": {
+          "level": "HIGH",
+          "rationale": "Contradiction detected: Contract allows 30-min excursion above 8°C which violates WHO TRS 1025 cold chain standards."
+        },
+        "contract_risk": {
+          "level": "MEDIUM",
+          "rationale": "Clause 2.2 creates regulatory exposure and product degradation risk."
+        },
+        "pricing_risk": {
+          "status": "EXCEEDS_CEILING",
+          "ceiling_price": 40000000.0,
+          "quoted_price": 48140000.0,
+          "excess_amount": 8140000.0
+        },
+        "overall_risk": "HIGH",
+        "confidence_score": 0.68
+      },
+      "risk_explanation": "Critical contradiction: Contract allows 30-min excursion above 8°C (violates WHO TRS 1025). Quoted deal size exceeds DPCO statutory ceiling by ₹81.4 Lakhs.",
+      "recommendation": "REJECT or RENEGOTIATE. Require strict temperature adherence and revision of pricing within DPCO ceiling."
+    },
+    "approval": null,
+    "created_at": "2026-09-13T10:30:00Z"
+  },
+  {
+    "procurement_id": "PR-2026-7731-APX",
+    "vendor_id": "VND-028",
+    "vendor_name": "Apex BioLogistics & Diagnostic Supplies Pvt. Ltd.",
+    "deal_size": 29050000.0,
+    "currency": "INR",
+    "product_category": "active_pharmaceutical_ingredients",
+    "status": {
+      "procurement_id": "PR-2026-7731-APX",
+      "stage": "AWAITING_APPROVAL",
+      "investigation_plan": "FULL",
+      "revision_count": 0,
+      "max_revisions": 3,
+      "failure_reason": null
+    },
+    "report": {
+      "vendor_summary": "Apex BioLogistics is a regional active pharmaceutical ingredient logistics and supply partner.",
+      "financial_assessment": "Moderate credit standing (Credit score: 680), revenue ₹280 Cr.",
+      "compliance_findings": "Valid CDSCO manufacturing and wholesale licenses. Missing ISO-13485 calibration log.",
+      "flagged_contract_clauses": [
+        "Clause 6.3: Limitation of liability strictly capped at 1.0x order value."
+      ],
+      "evidence_summary": "Retriever flagged Clause 2.2.4 temperature threshold contradiction against WHO TRS 1025 cold-chain guidelines.",
+      "fused_context": {
+        "facts": [],
+        "overall_confidence": 0.74,
+        "fallback_to_vector_only": false
+      },
+      "risk_assessment": {
+        "financial_risk": {
+          "level": "LOW",
+          "rationale": "Acceptable credit standing and manageable order volume."
+        },
+        "compliance_risk": {
+          "level": "MEDIUM",
+          "rationale": "Temperature monitoring logs require periodic external calibration audit."
+        },
+        "contract_risk": {
+          "level": "HIGH",
+          "rationale": "1.0x liability cap is insufficient for high-value API shipments; standard is 2.0x."
+        },
+        "pricing_risk": {
+          "status": "WITHIN_CEILING",
+          "ceiling_price": 32000000.0,
+          "quoted_price": 29050000.0,
+          "excess_amount": 0.0
+        },
+        "overall_risk": "MEDIUM",
+        "confidence_score": 0.74
+      },
+      "risk_explanation": "Medium overall risk: Contractual liability cap (1.0x) provides inadequate protection against cargo spoilage. Pricing is within statutory DPCO limits.",
+      "recommendation": "REQUEST AMENDMENT to Clause 6.3 to raise liability cap to 2.0x prior to final purchase order."
+    },
+    "approval": null,
+    "created_at": "2026-09-13T09:15:00Z"
+  },
+  {
+    "procurement_id": "PR-2026-6102-NOV",
+    "vendor_id": "VND-029",
+    "vendor_name": "Nova Biologics & Vaccines India Ltd.",
+    "deal_size": 16600000.0,
+    "currency": "INR",
+    "product_category": "vaccines_temperature_controlled",
+    "status": {
+      "procurement_id": "PR-2026-6102-NOV",
+      "stage": "COMPLETE",
+      "investigation_plan": "LIGHT",
+      "revision_count": 0,
+      "max_revisions": 3,
+      "failure_reason": null
+    },
+    "report": {
+      "vendor_summary": "Nova Biologics is a certified manufacturer of prophylactic vaccines and sterile injectables in Genome Valley.",
+      "financial_assessment": "Audited clean, AAA rated, zero default history.",
+      "compliance_findings": "Fully Schedule M & WHO-GMP compliant; dual redundant cold-chain telemetry.",
+      "flagged_contract_clauses": [],
+      "evidence_summary": "Graph RAG confirmed valid Form 28-D license; statutory DPCO vaccine pricing adhered to.",
+      "fused_context": {
+        "facts": [],
+        "overall_confidence": 0.96,
+        "fallback_to_vector_only": false
+      },
+      "risk_assessment": {
+        "financial_risk": {
+          "level": "LOW",
+          "rationale": "Tier-1 domestic manufacturer with stellar solvency."
+        },
+        "compliance_risk": {
+          "level": "LOW",
+          "rationale": "Full WHO-GMP and Schedule M compliance with validated cold chain."
+        },
+        "contract_risk": {
+          "level": "LOW",
+          "rationale": "Standard balanced pharma supply agreement."
+        },
+        "pricing_risk": {
+          "status": "WITHIN_CEILING",
+          "ceiling_price": 17430000.0,
+          "quoted_price": 16600000.0,
+          "excess_amount": 0.0
+        },
+        "overall_risk": "LOW",
+        "confidence_score": 0.96
+      },
+      "risk_explanation": "Exemplary compliance and financial stability. Deal price ₹1.66 Cr is fully within statutory DPCO ceiling of ₹1.74 Cr.",
+      "recommendation": "PROCEED with expedited procurement order."
+    },
+    "approval": {
+      "decision": "APPROVE",
+      "reason": "Exemplary compliance and verified within NPPA DPCO ceiling.",
+      "decided_at": "2026-09-13T08:00:00Z",
+      "decided_by": "Chief Procurement Officer"
+    },
+    "created_at": "2026-09-13T07:30:00Z"
+  },
+  {
+    "procurement_id": "PR-2026-5540-MED",
+    "vendor_id": "VND-030",
+    "vendor_name": "MediSynth Specialty Formulations Ltd.",
+    "deal_size": 18260000.0,
+    "currency": "INR",
+    "product_category": "specialty_apis",
+    "status": {
+      "procurement_id": "PR-2026-5540-MED",
+      "stage": "AWAITING_APPROVAL",
+      "investigation_plan": "FULL",
+      "revision_count": 0,
+      "max_revisions": 3,
+      "failure_reason": null
+    },
+    "report": {
+      "vendor_summary": "MediSynth produces custom small-molecule chemical formulations and complex synthesis intermediates.",
+      "financial_assessment": "Growing specialty player, Credit rating BBB+, solvency ratio 1.85.",
+      "compliance_findings": "State FDA GMP certified; valid Form 25 license active.",
+      "flagged_contract_clauses": [
+        "Clause 5.4: Custom synthesis price escalation indexed to raw material cost spikes."
+      ],
+      "evidence_summary": "Custom molecule pricing not listed on statutory DPCO NLEM index; pricing risk evaluated as INDETERMINATE.",
+      "fused_context": {
+        "facts": [],
+        "overall_confidence": 0.72,
+        "fallback_to_vector_only": false
+      },
+      "risk_assessment": {
+        "financial_risk": {
+          "level": "LOW",
+          "rationale": "Adequate liquidity and moderate leverage."
+        },
+        "compliance_risk": {
+          "level": "LOW",
+          "rationale": "Clean compliance record with state drug licensing authority."
+        },
+        "contract_risk": {
+          "level": "MEDIUM",
+          "rationale": "Escalation clause 5.4 introduces potential budget variability."
+        },
+        "pricing_risk": {
+          "status": "INDETERMINATE",
+          "ceiling_price": null,
+          "quoted_price": 18260000.0,
+          "excess_amount": 0.0
+        },
+        "overall_risk": "MEDIUM",
+        "confidence_score": 0.72
+      },
+      "risk_explanation": "Medium overall risk: Custom API product is non-scheduled under DPCO 2013, yielding INDETERMINATE pricing risk. Contract price escalation requires oversight.",
+      "recommendation": "APPROVE WITH CONDITIONS: Cap raw material price escalation clause to a maximum of 5%."
+    },
+    "approval": null,
+    "created_at": "2026-09-13T06:00:00Z"
+  }
+]
