@@ -1,0 +1,11 @@
+This design style is called a "Glassmorphic CTA Hero Banner Card" (or "Glassmorphism Ambient Glow Card").
+
+💬 Simple Phrase You Can Say to Me in the Future:
+Whenever you want me to create cards like this in future projects, you can simply ask:
+
+"Create a Glassmorphic CTA Hero Card with backdrop blur, ambient mesh glow, rounded-3xl borders, and hover lift buttons."
+
+🎨 Key Elements Used in This Card:
+Glassmorphism Layer: backdrop-blur-xl bg-card/80 border-border/80 rounded-3xl shadow-xl
+Ambient Mesh Glow: Radial blurred primary light blobs behind the card (bg-primary/10 blur-3xl).
+Tactile Button Physics: Rounded action buttons with spring hover lift (hover:-translate-y-0.5 hover:shadow-xl).

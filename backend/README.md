@@ -93,8 +93,8 @@ backend/
 │       ├── procurement.py             # Endpoints: GET /cases, POST /submit, GET /cases/{id}
 │       └── approval.py                # Endpoints: GET /pending, POST /cases/{id}/approve
 ├── build/                             # Master database ingestion and infrastructure creation scripts
-│   ├── build_all.py                   # The orchestrator: Purges old DBs and builds all 4 new DBs
-│   ├── seed_relational.py             # Dumps the Python objects from src/db/seed.py into SQLite
+│   ├── build_all.py                   # The orchestrator: Synchronizes all databases
+│   ├── seed_data.py                   # Ingests SQL seed data and builds SQLite procurement_cases.db
 │   ├── ingest_rag_docs.py             # Chunks Markdown files, embeds with Nomic, uploads to Qdrant
 │   └── build_knowledge_graph.py       # Extracts entities/rules from Markdown and creates GraphML
 ├── data_collected/                    # Stage 1: Raw untidy dump of scraped PDFs and text files
