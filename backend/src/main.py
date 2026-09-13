@@ -42,11 +42,18 @@ def read_root():
             "/procurement/{id}/status",
             "/procurement/{id}/report",
             "/procurement/all",
+            "/procurement/logs",
+            "/procurement/{id}/audit",
+            "/procurement/vendors",
+            "/procurement/pricing-catalog",
             "/approval/pending",
             "/approval/{id}/decide"
         ],
+        "currency": "INR",
+        "database": "backend/processed_data/sqlite/procurement_cases.db",
         "agents": ["Planner", "Executor", "RiskScorer", "Critic", "ReportWriter"]
     }
+
 
 if __name__ == "__main__":
     import uvicorn

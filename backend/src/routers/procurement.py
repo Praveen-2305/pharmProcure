@@ -192,6 +192,57 @@ async def get_all_procurements():
     """Returns all procurement records sorted by creation date descending."""
     return case_store.get_all()
 
+@router.get("/logs")
+async def get_governance_logs():
+    """Returns forensic audit and governance logs across all procurement workflow cases."""
+    return {
+        "count": len(case_store.get_all()),
+        "currency": "INR",
+        "logs": case_store.get_all_audit_logs()
+    }
+
+@router.get("/{procurement_id}/audit")
+async def get_case_audit(procurement_id: str):
+    """Retrieves step-by-step forensic governance and audit timeline for a specific procurement case."""
+    log = case_store.get_case_audit_log(procurement_id)
+    if not log:
+        raise HTTPException(status_code=404, detail="Procurement case not found")
+    return log
+
+@router.get("/vendors")
+async def list_vendors():
+    """Retrieves all registered pharmaceutical vendors from the SQLite database."""
+    vendors = case_store.get_all_vendors()
+    return {
+        "total": len(vendors),
+        "currency": "INR",
+        "vendors": vendors
+    }
+
+@router.get("/vendors/{vendor_identifier}")
+async def get_vendor_details(vendor_identifier: str):
+    """Retrieves specific vendor record and catalog products from the SQLite database."""
+    vendor = case_store.get_vendor(vendor_identifier)
+    if not vendor:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+    products = case_store.get_vendor_products(vendor.get("vendor_id") or vendor_identifier)
+    profile = case_store.get_vendor_profile(vendor.get("vendor_name"))
+    return {
+        "vendor": vendor,
+        "cached_profile": profile,
+        "products": products
+    }
+
+@router.get("/pricing-catalog")
+async def get_pricing_catalog():
+    """Retrieves NPPA DPCO 2013 statutory price ceiling benchmarks from SQLite."""
+    items = case_store.get_pricing_references()
+    return {
+        "total": len(items),
+        "currency": "INR",
+        "items": items
+    }
+
 # --- Legacy endpoint aliases for backward compatibility ---
 @router.post("/run")
 async def run_procurement_legacy(req: Dict[str, Any], background_tasks: BackgroundTasks):
@@ -243,3 +294,4 @@ async def run_procurement_legacy(req: Dict[str, Any], background_tasks: Backgrou
 @router.get("/queue")
 async def get_queue_legacy():
     return case_store.get_pending_approvals()
+
