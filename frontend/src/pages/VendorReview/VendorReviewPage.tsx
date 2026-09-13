@@ -23,13 +23,13 @@ import { Badge } from '../../components/ui/badge';
 import { Button, buttonVariants } from '../../components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert';
 
-const WORKFLOW_STAGES: Array<{ id: WorkflowStage; label: string; icon: any; description: string }> = [
-  { id: 'PLANNING', label: 'Planner', icon: BrainCircuit, description: 'Decompose procurement scope & schedule investigation plan.' },
-  { id: 'EXECUTING', label: 'Executor', icon: Search, description: 'Query Graph ontology & Vector embeddings in parallel.' },
-  { id: 'SCORING', label: 'Risk Scorer', icon: Scale, description: 'Compute 4D risk metrics across Financial, Compliance, Contract, Pricing.' },
-  { id: 'CRITIQUING', label: 'Critic Loop', icon: RefreshCw, description: 'Audit evidence completeness & resolve source contradictions.' },
-  { id: 'WRITING_REPORT', label: 'Report Writer', icon: FileCheck, description: 'Synthesize audit trail & executive recommendation.' },
-  { id: 'AWAITING_APPROVAL', label: 'Human Authorization', icon: UserCheck, description: 'Awaiting procurement officer sign-off.' },
+const WORKFLOW_STAGES: Array<{ id: WorkflowStage; label: string; skill: string; icon: any; description: string }> = [
+  { id: 'PLANNING', label: 'Planner', skill: 'Investigation Planning', icon: BrainCircuit, description: 'Decompose procurement scope & schedule investigation plan.' },
+  { id: 'EXECUTING', label: 'Executor', skill: 'Hybrid RAG & Scraping', icon: Search, description: 'Query Graph ontology & Vector embeddings in parallel.' },
+  { id: 'SCORING', label: 'Risk Scorer', skill: '4D Risk Evaluation', icon: Scale, description: 'Compute 4D risk metrics across Financial, Compliance, Contract, Pricing.' },
+  { id: 'CRITIQUING', label: 'Critic Loop', skill: 'Self-Critique & Audit', icon: RefreshCw, description: 'Audit evidence completeness & resolve source contradictions.' },
+  { id: 'WRITING_REPORT', label: 'Report Writer', skill: 'Executive Synthesis', icon: FileCheck, description: 'Synthesize audit trail & executive recommendation.' },
+  { id: 'AWAITING_APPROVAL', label: 'Human Authorization', skill: 'Governance Oversight', icon: UserCheck, description: 'Awaiting procurement officer sign-off.' },
 ];
 
 export const VendorReviewPage: React.FC = () => {
@@ -78,49 +78,40 @@ export const VendorReviewPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-6 md:p-8 space-y-8 text-left">
-      {/* Top Breadcrumb & Metadata Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-5">
+      {/* Header with Navigation & Live Refresh */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-1">
-            <Link to="/" className="hover:text-primary flex items-center gap-1 transition-colors">
-              <ArrowLeft className="size-3.5" /> All Cases
+          <div className="flex items-center gap-2">
+            <Link to="/" className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-1 text-xs text-muted-foreground p-0 h-auto hover:bg-transparent")}>
+              <ArrowLeft className="size-3.5" /> Back to Cases
             </Link>
-            <span>/</span>
-            <Badge variant="secondary" className="px-2 font-mono text-[11px] bg-muted/50 text-foreground border">
-              {status.procurementId}
-            </Badge>
+            <span className="text-muted-foreground text-xs">•</span>
+            <span className="text-xs font-mono text-muted-foreground">{id}</span>
           </div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight flex items-center gap-3">
-            Investigation & Audit Casefile
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
+            {report?.vendorSummary ? id : 'Investigation Dossier'}
+            <Badge variant="outline" className="font-mono text-xs font-normal">
+              {status.investigationPlan} Mode
+            </Badge>
           </h1>
         </div>
 
-        {/* Header Action Controls */}
         <div className="flex items-center gap-3">
           <Button
             variant="outline"
             size="sm"
             onClick={handleRefresh}
             disabled={isRefetching}
-            className="gap-1.5 shadow-sm text-xs"
-            title="Refresh casefile status"
+            className="gap-2 text-xs"
           >
             <RefreshCw className={cn("size-3.5", isRefetching && "animate-spin")} />
-            <span>Refresh</span>
+            {isRefetching ? 'Synchronizing...' : 'Refresh State'}
           </Button>
 
-          {status.revisionCount > 0 && (
-            <Badge variant="outline" className="gap-1.5 py-1 px-3 rounded-full text-primary border-primary/30 bg-primary/5">
-              <RefreshCw className="size-3.5 animate-spin" style={{ animationDuration: '4s' }} />
-              <span className="text-xs">
-                Critic Loop: Revision {status.revisionCount} of {status.maxRevisions}
-              </span>
-            </Badge>
-          )}
-
-          {status.stage === 'AWAITING_APPROVAL' && (
-            <Link to="/queue" className={cn(buttonVariants({ variant: "default", size: "sm" }), "gap-2 shadow-md")}>
-              <UserCheck className="size-4" /> Go to Approval Action
+          {isCompleteOrReview && (
+            <Link to="/approvals" className={cn(buttonVariants({ variant: "default", size: "sm" }), "gap-2 text-xs")}>
+              <UserCheck className="size-3.5" />
+              Review in Approval Queue
             </Link>
           )}
         </div>
@@ -130,7 +121,10 @@ export const VendorReviewPage: React.FC = () => {
       {!isFailed && (
         <Card className="shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between px-6 pt-6 pb-2">
-            <CardTitle className="text-base font-semibold">Autonomous Workflow Stage Pipeline</CardTitle>
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <Sparkles className="size-4 text-primary" />
+              Autonomous Agent Skills & Workflow Pipeline
+            </CardTitle>
             <Badge variant={status.stage === 'COMPLETE' ? 'default' : 'secondary'} className="shadow-sm rounded-full px-3 text-xs">
               {status.stage === 'COMPLETE' ? 'Investigation Complete' : `Executing: ${status.stage}`}
             </Badge>
@@ -160,10 +154,15 @@ export const VendorReviewPage: React.FC = () => {
                         {isCompleted ? <CheckCircle2 className="size-3.5" /> : idx + 1}
                       </Badge>
                     </div>
-                    <div className="space-y-1">
-                      <p className={cn("text-sm font-semibold", isCurrent ? "text-primary" : "text-foreground")}>
-                        {stg.label}
-                      </p>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className={cn("text-sm font-semibold", isCurrent ? "text-primary" : "text-foreground")}>
+                          {stg.label}
+                        </p>
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 font-medium">
+                          {stg.skill}
+                        </span>
+                      </div>
                       <p className="text-[11px] text-muted-foreground leading-snug">
                         {stg.description}
                       </p>
