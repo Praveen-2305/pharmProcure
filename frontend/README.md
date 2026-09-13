@@ -1,12 +1,12 @@
 # AutonoSource Frontend Dashboard (`frontend/`)
 
-The **AutonoSource Frontend** is an executive audit and procurement cockpit built for pharmaceutical procurement officers, regulatory compliance auditors, and executive risk committees. It visualizes the multi-agent investigation pipeline, highlights contract contradictions, displays statutory price ceiling variance, and enables GxP-compliant human-in-the-loop decision making.
+The **AutonoSource Frontend** is an executive audit and procurement cockpit built for pharmaceutical procurement officers, regulatory compliance auditors, and executive risk committees. It visualizes the multi-agent investigation pipeline, highlights contract contradictions, displays statutory price ceiling variance in Indian Rupees (INR / ₹) under DPCO 2013, and enables GxP-compliant human-in-the-loop decision making.
 
 ---
 
 ## 🎨 Design Philosophy & Technology Stack
 
-Traditional enterprise procurement software (e.g., legacy SAP or Oracle modules) is often visually dense, sluggish, and unintuitive. AutonoSource provides a modern, high-contrast, responsive interface designed to make multi-factor risk assessments immediate and clear.
+Traditional enterprise procurement software is often visually dense, sluggish, and unintuitive. AutonoSource provides a modern, high-contrast, responsive interface designed to make multi-factor risk assessments immediate and clear.
 
 | Technology | Role | Why We Chose It |
 | :--- | :--- | :--- |
@@ -23,11 +23,11 @@ Traditional enterprise procurement software (e.g., legacy SAP or Oracle modules)
 ## ❓ Frontend Architecture: Why Did We Choose This?
 
 ### 1. Why Glassmorphism & High-Contrast Dark Theme?
-* Investigating complex pharmaceutical audits requires analyzing dense data: FDA citation numbers, temperature tolerances, statutory ceiling rates, and liability caps.
+* Investigating complex pharmaceutical audits requires analyzing dense data: CDSCO alert citations, temperature tolerances, statutory DPCO ceiling rates in INR (₹), and liability caps.
 * High-contrast dark cards with subtle translucent glassmorphism reduce eye fatigue during prolonged analytical sessions while highlighting color-coded risk indicators:
-  - 🟢 **LOW Risk** (Compliant / Safe)
-  - 🟡 **MEDIUM Risk** (Requires review / moderate variance)
-  - 🔴 **HIGH Risk** (Contradictions / regulatory citation / ceiling exceeded)
+  - 🟢 **LOW Risk** (Compliant / Within DPCO ceiling / Verified GMP)
+  - 🟡 **MEDIUM Risk** (Requires review / moderate variance / pending audit)
+  - 🔴 **HIGH Risk** (Contradictions / CDSCO warning / DPCO price ceiling exceeded)
 
 ### 2. Why Dedicated Risk Visualization Components?
 Instead of generic text tables, the dashboard utilizes dedicated, reusable domain components:
@@ -36,7 +36,7 @@ Instead of generic text tables, the dashboard utilizes dedicated, reusable domai
 * **`RiskLevelTag.tsx`:** Standardized badges for Financial, Compliance, Contractual, and Pricing risk levels.
 
 ### 3. Why Stateful Polling for Deal Evaluations?
-* Multi-agent investigations can take 5 to 20 seconds depending on whether the Critic triggers revision loops.
+* Multi-agent investigations run parallel evidence gathering (RAG + Web Scraper) and can take 5 to 20 seconds depending on whether the Critic triggers revision loops.
 * The frontend initiates the audit via `POST /procurement/submit` and polls `GET /procurement/{id}/status` until the pipeline reaches `AWAITING_APPROVAL` or `COMPLETE`, giving users a live view of the active agent stage (`PLANNING` ➔ `GATHERING_EVIDENCE` ➔ `SCORING_RISK` ➔ `CRITIQUING`).
 
 ---
@@ -48,35 +48,36 @@ Instead of generic text tables, the dashboard utilizes dedicated, reusable domai
                       │      Landing Page ( / )      │
                       └──────────────┬───────────────┘
                                      │
-               ┌─────────────────────┴─────────────────────┐
-               ▼                                           ▼
-  ┌─────────────────────────┐                 ┌─────────────────────────┐
-  │   Dashboard (/dashboard)│                 │ Submit Request (/submit)│
-  └────────────┬────────────┘                 └────────────┬────────────┘
-               │                                           │
-               ▼                                           ▼
-  ┌─────────────────────────┐                 ┌─────────────────────────┐
-  │ Vendor Review (/review) │ ◄───────────────┤ Triggers Agent Pipeline │
-  └────────────┬────────────┘                 └─────────────────────────┘
-               │
-               ▼
-  ┌─────────────────────────┐
-  │ Approval Queue (/approval│
-  │ • APPROVED / REJECTED   │
-  └─────────────────────────┘
+                ┌─────────────────────┴─────────────────────┐
+                ▼                                           ▼
+   ┌─────────────────────────┐                 ┌─────────────────────────┐
+   │   Dashboard (/dashboard)│                 │ Submit Request (/submit)│
+   └────────────┬────────────┘                 └────────────┬────────────┘
+                │                                           │
+                ▼                                           ▼
+   ┌─────────────────────────┐                 ┌─────────────────────────┐
+   │ Vendor Review (/review) │ ◄───────────────┤ Parallel Agent Pipeline │
+   └────────────┬────────────┘                 │ (RAG + Scraper Nodes)   │
+                │                              └─────────────────────────┘
+                ▼
+   ┌─────────────────────────┐
+   │ Approval Queue (/approval│
+   │ • APPROVED / REJECTED   │
+   └─────────────────────────┘
 ```
 
 1. **Landing Page (`/`):** High-level overview of the platform, capability highlights, and quick access buttons.
 2. **Procurement Dashboard (`/dashboard`):** Central command ledger showing all vendor evaluations, overall risk distribution, average confidence scores, and current investigation stages.
 3. **Submit Request (`/submit`):** Form allowing procurement analysts to initiate an evaluation:
-   - Vendor Name (e.g. *Apex BioLogistics*, *Nova Biologics*)
-   - Product Category (e.g. *RT-PCR Reagents*, *Pediatric Vaccines*)
-   - Quoted Deal Size & Unit Pricing
+   - Vendor Name (autocompleted from the 50 registered Indian pharmaceutical vendors)
+   - Product Category & Formulation (e.g. *RT-PCR Reagents*, *Pediatric Vaccines*, *Paracetamol 500mg Tablets*)
+   - Quoted Deal Size & Unit Pricing in Indian Rupees (INR / ₹)
    - Master Services Agreement (MSA) / SLA document upload
 4. **Vendor Review & Risk Breakdown (`/review/:id`):** Deep-dive investigative dossier:
-   - **4-Dimension Risk Cards:** Breakdown of Financial, Compliance, Contract, and Pricing risk.
-   - **Contradiction Alert Timeline:** Shows legal and regulatory contradictions detected by the fusion engine.
+   - **4-Dimension Risk Cards:** Breakdown of Financial, Compliance, Contract, and Pricing risk in INR.
+   - **Contradiction Alert Timeline:** Surfaces legal and regulatory contradictions detected by the fusion engine.
    - **Executive Summary:** Synthesized report from the Writer agent with recommendations.
+   - **Audit Trail:** Chronological timeline of agent execution stages, confidence scores, and decisions.
 5. **Executive Approval Queue (`/approval`):** Workflow gate for high-stakes transactions:
    - Displays all cases currently in `AWAITING_APPROVAL`.
    - Allows authorized procurement officers to record an official decision (`APPROVED`, `REJECTED`, or `ESCALATED`) with an audit rationale note.
@@ -90,7 +91,7 @@ frontend/
 ├── src/
 │   ├── api/                   # Type-safe API client wrappers
 │   │   ├── client.ts          # Axios / Fetch client configuration
-│   │   ├── procurement.ts     # /procurement endpoints (submit, status, report, all)
+│   │   ├── procurement.ts     # /procurement endpoints (submit, status, report, cases, logs, vendors, pricing)
 │   │   ├── approval.ts        # /approval endpoints (pending, decide)
 │   │   └── types.ts           # TypeScript interfaces matching backend models
 │   ├── components/            # Reusable UI component library
@@ -102,8 +103,8 @@ frontend/
 │   ├── pages/                 # Route page components
 │   │   ├── Landing/           # Public landing and product overview
 │   │   ├── Dashboard/         # Active procurement case ledger
-│   │   ├── SubmitRequest/     # New audit intake form
-│   │   ├── VendorReview/      # Comprehensive multi-agent report review
+│   │   ├── SubmitRequest/     # New audit intake form with vendor directory autocomplete
+│   │   ├── VendorReview/      # Comprehensive multi-agent report review & audit trail
 │   │   └── ApprovalQueue/     # Human-in-the-loop executive sign-off queue
 │   ├── router.tsx             # React Router configuration
 │   ├── App.tsx                # App root provider wrapper
@@ -121,10 +122,7 @@ frontend/
 
 ### 1. Install Dependencies
 ```bash
-# Navigate to the frontend directory
 cd frontend
-
-# Install using pnpm (or npm / yarn)
 pnpm install
 ```
 
