@@ -1,49 +1,85 @@
 # AutonoSource Build & Database Ingestion Engine (`backend/build/`)
 
-This directory houses the idempotent build and ingestion pipelines responsible for initializing, populating, and synchronizing all storage layers of AutonoSource under `backend/processed_data/`:
+This directory houses the database ingestion, vector chunking, and knowledge graph construction pipelines responsible for initializing and synchronizing storage layers under `backend/processed_data/`:
 
 ```
 backend/build/
-├── build_all.py                   # Master idempotent clean-and-rebuild script for all databases
-├── seed_data.py                   # Ingests SQL seed data and builds SQLite procurement_cases.db
-├── ingest_rag_docs.py             # Chunks verified regulatory PDFs/contracts & embeds into Qdrant vector store
+├── build_all.py                   # Master builder with automatic dataset preservation
+├── seed_data.py                   # Ingests 50 vendors, products, and DPCO catalog into SQLite
+├── ingest_rag_docs.py             # Chunks verified regulatory documents & embeds into local Qdrant
 ├── build_knowledge_graph.py       # Constructs the multi-entity NetworkX property graph (GraphML + JSON)
 ├── embedding_pipeline.py          # Nomic-ai/nomic-embed-text-v1.5 768-dim dense embedding generator
-└── README.md
+├── graph/                         # High-throughput knowledge graph tooling
+│   ├── build_kg_groq.py           # Multi-key parallel Groq pipeline for extracting regulatory relations
+│   └── audit_groq_keys.py         # Validates and audits available Groq API keys and rate limits
+└── sql/                           # Relational seeding generators
+    └── seed_vendors.py            # Generates realistic 50 Indian pharmaceutical vendors dataset
 ```
 
-## Running the Build
+---
 
-### 1. Master Clean & Rebuild (Recommended)
-To clean all existing database artifacts and deterministically rebuild all storage layers in one command:
+## 🗄️ Output Storage Hub (`backend/processed_data/`)
+
+All generated datasets are stored strictly inside organized subdirectories under `backend/processed_data/`:
+
+1. **`sqlite/`**:
+   - `procurement_cases.db`: Full relational SQLite database containing 6 core tables (`vendors`, `vendor_products`, `pricing_references`, `procurement_cases`, `audit_logs`, `vendor_profiles`).
+   - `procurement_cases.json`: Synchronized JSON export of baseline procurement cases.
+2. **`graph/`**:
+   - `knowledge_graph.graphml`: 5,757-node multi-entity regulatory property graph covering CDSCO, DPCO 2013, Schedule M, and WHO TRS 1025.
+   - `knowledge_graph.json`: Serialized JSON graph export for debugging and frontend inspection.
+3. **`qdrant/`**:
+   - Local on-disk Qdrant storage directory hosting dense 768-dimensional vector collections (`procurement_regulatory_docs`).
+
+---
+
+## 🛡️ Dataset Safety & Preservation Rules
+
+> [!IMPORTANT]
+> The master builder (`build_all.py`) is engineered to **preserve existing processed datasets** by default:
+> - If `processed_data/graph/knowledge_graph.graphml` (5,757 nodes) already exists, it will **NOT** be overwritten unless `--rebuild-graph` or `--force-clean` is explicitly specified.
+> - If `processed_data/qdrant/` already exists, vector embeddings will **NOT** be re-computed unless `--rebuild-vector` or `--force-clean` is explicitly specified.
+> - `seed_data.py` safely creates missing tables and upserts records without destroying case history.
+
+---
+
+## 🚀 Running Build & Ingestion Scripts
+
+### 1. Seeding Relational Data Only (Recommended)
+To initialize or refresh the 50 vendors directory, product catalog, and DPCO 2013 price ceiling references in SQLite:
 
 ```bash
 # From repository root:
-python backend/build/build_all.py
-
-# Or from the backend directory:
-cd backend
-python build/build_all.py
-```
-
-This single command:
-1. Flushes and re-creates `backend/processed_data/` as a clean, flat output hub.
-2. Populates `processed_data/` with SQLite `procurement_cases.db` and JSON case ledger.
-3. Ingests regulatory PDFs (via `pymupdf4llm`) and SLA contracts, computing Nomic 768-dim embeddings in `vector_embeddings.json`.
-4. Traverses entity relationships and generates `knowledge_graph.graphml` and `knowledge_graph.json`.
-5. Syncs the statutory NPPA DPCO 2013 ceiling price dataset into `pricing_ceiling_catalog.json`.
-6. Copies verified sample contracts to the root of `processed_data/`.
-
-### 2. Running Individual Ingestion Pipelines
-You can also run modular pipeline components individually:
-
-```bash
-# Relational Database seeding only:
 python backend/build/seed_data.py
 
-# RAG vector store ingestion only:
+# Or from backend directory:
+cd backend
+python build/seed_data.py
+```
+
+### 2. Running Individual Ingestion Pipelines
+
+```bash
+# Ingest regulatory PDFs and contracts into Qdrant vector store:
 python backend/build/ingest_rag_docs.py
 
-# Knowledge graph generation only:
+# Rebuild the NetworkX knowledge graph:
 python backend/build/build_knowledge_graph.py
+
+# Run the high-throughput multi-key Groq knowledge graph pipeline:
+python backend/build/graph/build_kg_groq.py
+
+# Audit and validate your Groq API keys:
+python backend/build/graph/audit_groq_keys.py
+```
+
+### 3. Full Rebuild (Caution)
+To perform an end-to-end clean and rebuild:
+
+```bash
+# Standard run (skips already generated heavy datasets):
+python backend/build/build_all.py
+
+# Force clean and full rebuild of everything (takes several minutes):
+python backend/build/build_all.py --force-clean
 ```
