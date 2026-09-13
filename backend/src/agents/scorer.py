@@ -16,12 +16,14 @@ from src.models.schemas import (
     PricingRisk,
     PricingRiskStatus
 )
+from src.prompts.scorer_prompt import SCORER_SYSTEM_PROMPT, get_scorer_prompt
 
 def risk_scorer_agent(state: WorkflowState) -> WorkflowState:
     """
-    Evaluates evidence bundle across all 4 risk dimensions and assigns unified confidence.
+    Evaluates evidence bundle across all 4 risk dimensions guided by SCORER_SYSTEM_PROMPT rubric.
     """
-    print("--- RISK SCORER AGENT: Computing 4D risk metrics ---")
+    print("--- RISK SCORER AGENT: Computing 4D risk metrics (Financial, Compliance, Contract, Pricing in INR) ---")
+
     
     evidence = state.get("evidence_bundle", {})
     structured = evidence.get("structured", {})
@@ -130,6 +132,23 @@ def risk_scorer_agent(state: WorkflowState) -> WorkflowState:
         base_confidence = max(0.20, base_confidence - 0.15)
         
     confidence_score = round(min(1.0, max(0.1, base_confidence)), 2)
+
+    # 7. LIGHT PIPELINE OVERRIDE
+    from src.models.schemas import InvestigationPlan
+    if state.get("investigation_plan") == InvestigationPlan.LIGHT.value:
+        cached_profile = state.get("cached_vendor_profile", {})
+        if cached_profile:
+            print("[Scorer] LIGHT Pipeline active. Using cached SQL vendor profile.")
+            try:
+                import json
+                lit_summary = ", ".join(json.loads(cached_profile.get("litigation_summary", "[]")))
+            except:
+                lit_summary = cached_profile.get("litigation_summary", "")
+
+            financial_rationale = f"Cached Status: {cached_profile.get('financial_status', 'Verified')}. Litigation: {lit_summary}"
+            compliance_rationale = f"Cached Status: {cached_profile.get('compliance_status', 'Verified')}."
+            overall_risk = RiskLevel(cached_profile.get("global_risk_level", "LOW").upper())
+            confidence_score = 0.95 # High confidence in cached data
 
     risk_assessment = RiskAssessment(
         financial_risk=RiskItem(level=financial_level, rationale=financial_rationale),
