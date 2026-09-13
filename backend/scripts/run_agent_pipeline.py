@@ -30,7 +30,7 @@ def run():
     print("=" * 70)
     print("AUTONOSOURCE: Autonomous Multi-Agent Procurement Audit")
     print(f"Vendor:   {args.vendor}")
-    print(f"Deal:     ${args.deal:,.2f}")
+    print(f"Deal:     ₹{args.deal:,.2f} INR")
     print(f"Category: {args.category}")
     print("=" * 70 + "\n")
 
@@ -51,10 +51,33 @@ def run():
     print("[Pipeline Engine] Invoking LangGraph state graph...\n")
     final_state = workflow.invoke(initial_state)
 
+    # Save to SQLite CaseStore
+    from src.db.session import case_store
+    from src.models.schemas import ProcurementItemSummary, WorkflowStatus
+    from datetime import datetime, timezone
+
+    summary = ProcurementItemSummary(
+        procurement_id="CLI-TEST-001",
+        vendor_name=args.vendor,
+        deal_size=args.deal,
+        status=WorkflowStatus(
+            procurement_id="CLI-TEST-001",
+            stage=final_state.get("stage", WorkflowStage.AWAITING_APPROVAL),
+            investigation_plan=InvestigationPlan(args.plan),
+            revision_count=final_state.get("revisionCount", 0),
+            max_revisions=3
+        ),
+        report=final_state.get("report"),
+        approval=None,
+        created_at=datetime.now(timezone.utc).isoformat()
+    )
+    case_store.save(summary)
+
     print("\n" + "=" * 70)
     print("WORKFLOW AUDIT COMPLETED")
     print(f"Final Stage: {final_state.get('stage')}")
     print(f"Revisions Executed: {final_state.get('revisionCount')} of 3")
+    print(f"Persisted to SQLite: backend/processed_data/sqlite/procurement_cases.db")
     
     report = final_state.get("report")
     if report:
@@ -63,13 +86,15 @@ def run():
         print(f"  Financial Risk:  {risk.financial_risk.level.value:<8} | {risk.financial_risk.rationale}")
         print(f"  Compliance Risk: {risk.compliance_risk.level.value:<8} | {risk.compliance_risk.rationale}")
         print(f"  Contract Risk:   {risk.contract_risk.level.value:<8} | {risk.contract_risk.rationale}")
-        print(f"  Pricing Risk:    {risk.pricing_risk.status.value:<8} | Quoted: ${risk.pricing_risk.quoted_price:,.2f} (Ceiling: {risk.pricing_risk.ceiling_price})")
+        ceiling_str = f"₹{risk.pricing_risk.ceiling_price:,.2f}" if risk.pricing_risk.ceiling_price else "None"
+        print(f"  Pricing Risk:    {risk.pricing_risk.status.value:<8} | Quoted: ₹{risk.pricing_risk.quoted_price:,.2f} (Ceiling: {ceiling_str})")
         print(f"  OVERALL RISK:    {risk.overall_risk.value}")
         print(f"  CONFIDENCE:      {risk.confidence_score:.2f}")
 
         print("\n--- ACTIONABLE RECOMMENDATION ---")
         print(f"  {report.recommendation}")
     print("=" * 70)
+
 
 if __name__ == "__main__":
     run()
