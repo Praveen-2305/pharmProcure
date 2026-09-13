@@ -3,7 +3,8 @@ Workflow State definition for AutonoSource multi-agent pipeline.
 Supports both the canonical flat schema (Specification Section 1) and legacy compatibility.
 """
 
-from typing import TypedDict, Optional, List, Dict, Any
+import operator
+from typing import TypedDict, Optional, List, Dict, Any, Annotated
 from src.models.schemas import (
     InvestigationPlan,
     WorkflowStage,
@@ -47,7 +48,7 @@ class WorkflowState(TypedDict, total=False):
     # Legacy/compatibility fields for existing nodes
     request: Any
     investigation_plan: str
-    evidence_bundle: Dict[str, Any]
+    evidence_bundle: Annotated[Dict[str, Any], operator.ior]
     risk_assessment: Any
     revision_count: int
     max_revisions: int
