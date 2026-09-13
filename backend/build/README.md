@@ -5,7 +5,7 @@ This directory houses the idempotent build and ingestion pipelines responsible f
 ```
 backend/build/
 ├── build_all.py                   # Master idempotent clean-and-rebuild script for all databases
-├── seed_relational.py             # Seeds SQLite relational tables, case ledger, and initial test cases
+├── seed_data.py                   # Ingests SQL seed data and builds SQLite procurement_cases.db
 ├── ingest_rag_docs.py             # Chunks verified regulatory PDFs/contracts & embeds into Qdrant vector store
 ├── build_knowledge_graph.py       # Constructs the multi-entity NetworkX property graph (GraphML + JSON)
 ├── embedding_pipeline.py          # Nomic-ai/nomic-embed-text-v1.5 768-dim dense embedding generator
@@ -39,7 +39,7 @@ You can also run modular pipeline components individually:
 
 ```bash
 # Relational Database seeding only:
-python backend/build/seed_relational.py
+python backend/build/seed_data.py
 
 # RAG vector store ingestion only:
 python backend/build/ingest_rag_docs.py

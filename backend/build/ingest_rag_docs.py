@@ -7,15 +7,13 @@ extracts text, chunks with overlap, and populates the Qdrant vector store.
 
 import os
 import sys
-import glob
-from typing import List, Dict, Any
+from typing import List
 
 backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if backend_root not in sys.path:
     sys.path.insert(0, backend_root)
 
 from build.embedding_pipeline import EmbeddingPipeline
-from src.rag_pipeline.vector_store import VectorStore
 
 RAG_STORAGE_DIR = os.path.join(backend_root, "ingestion", "rag_and_graph")
 
@@ -44,14 +42,14 @@ def extract_text_from_pdf(filepath: str) -> str:
 def chunk_text(text: str, chunk_size: int = 1200, overlap: int = 200) -> List[str]:
     """Splits document text using semantic Markdown boundaries."""
     try:
-        from langchain.text_splitter import MarkdownTextSplitter
+        from langchain_text_splitters import MarkdownTextSplitter
         splitter = MarkdownTextSplitter(chunk_size=chunk_size, chunk_overlap=overlap)
         # LangChain returns Document objects if create_documents is used,
         # but split_text returns strings.
         chunks = splitter.split_text(text)
         return [c.strip() for c in chunks if len(c.strip()) > 40]
-    except ImportError:
-        print("[Warning] langchain not installed, falling back to basic chunking")
+    except Exception as e:
+        print(f"[Warning] langchain_text_splitters failed: {e}, falling back to basic chunking")
         chunks = []
         start = 0
         while start < len(text):
@@ -66,13 +64,15 @@ def run_rag_ingest(vector_store: VectorStore = None) -> int:
     print("-" * 55)
     print("▶ [Build: RAG] Ingesting Clean Regulatory Standards & Contracts")
     print("-" * 55)
-    print(f"  Storage Source: {RAG_STORAGE_DIR}\n")
+    rel_storage_dir = os.path.relpath(RAG_STORAGE_DIR, backend_root)
+    print(f"  Storage Source: {rel_storage_dir}\n")
 
     if not os.path.exists(RAG_STORAGE_DIR):
-        print(f"  [ERROR] Directory {RAG_STORAGE_DIR} does not exist.")
+        print(f"  [ERROR] Directory {rel_storage_dir} does not exist.")
         return 0
 
-    pipeline = EmbeddingPipeline()
+    from build.embedding_pipeline import qdrant_pipeline
+    pipeline = qdrant_pipeline
     # Find all documents across all subdirectories
     doc_paths = []
     for root, _, files in os.walk(RAG_STORAGE_DIR):
@@ -105,6 +105,7 @@ def run_rag_ingest(vector_store: VectorStore = None) -> int:
             all_chunks_to_embed.append({
                 "doc_id": f"{os.path.basename(filepath)}_{i}",
                 "text": c,
+                "source_doc": os.path.basename(filepath),
                 "metadata": {
                     "source": rel_path,
                     "filename": os.path.basename(filepath),
@@ -114,12 +115,12 @@ def run_rag_ingest(vector_store: VectorStore = None) -> int:
 
     # Embed chunks into Qdrant collection
     print(f"\n  Generating dense 768-dim semantic embeddings for {len(all_chunks_to_embed)} chunks...")
-    pipeline.batch_embed_and_index(all_chunks_to_embed[:150]) # index top chunks for fast turnaround
+    pipeline.batch_embed_and_index(all_chunks_to_embed) # index all chunks
     print(f"  ✓ Embedded and stored in Qdrant collection: '{pipeline.collection_name}'")
 
     # Persist serialized vector database snapshot into processed_data/vector/
     import json
-    db_vector_dir = os.path.join(backend_root, "processed_data")
+    db_vector_dir = os.path.join(backend_root, "processed_data", "qdrant")
     os.makedirs(db_vector_dir, exist_ok=True)
     embeddings_file = os.path.join(db_vector_dir, "vector_embeddings.json")
     meta_file = os.path.join(db_vector_dir, "collections_metadata.json")

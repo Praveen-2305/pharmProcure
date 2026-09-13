@@ -5,9 +5,7 @@ and upserting into the Qdrant vector store.
 """
 
 import os
-import hashlib
-import glob
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 
 try:
     from qdrant_client import QdrantClient
@@ -59,8 +57,10 @@ class QdrantEmbeddingPipeline:
             return
 
         try:
-            if self.host == ":memory:":
-                self.client = QdrantClient(location=":memory:")
+            if self.host == ":memory:" or self.host == "local":
+                db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "processed_data", "qdrant")
+                os.makedirs(db_path, exist_ok=True)
+                self.client = QdrantClient(path=db_path)
             else:
                 self.client = QdrantClient(host=self.host, port=6333)
 
@@ -94,7 +94,13 @@ class QdrantEmbeddingPipeline:
             return len(chunks)
 
         points = []
-        for i, chunk in enumerate(chunks):
+        try:
+            from tqdm import tqdm
+            iterable_chunks = tqdm(chunks, desc="Embedding Chunks", unit="chunk")
+        except ImportError:
+            iterable_chunks = chunks
+            
+        for i, chunk in enumerate(iterable_chunks):
             text = chunk.get("text", "")
             vector = compute_dense_embedding(text)
             point_id = i + 1
