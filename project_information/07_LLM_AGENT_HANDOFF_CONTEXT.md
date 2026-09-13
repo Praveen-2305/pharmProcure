@@ -2,35 +2,35 @@
 
 **ATTENTION LLM AGENT:** If you are reading this document at the start of a new session, this is your strictly technical, un-sugared ground truth regarding the current state of the repository. Do not hallucinate paths or architectures. Rely strictly on the structures detailed below.
 
-## 1. Directory Structure Rule
-- **Source Code:** `backend/src/` (Do NOT use `backend/app/`).
-- **Data Inputs for Build:** `backend/ingestion/`
-- **Mock Data Hub:** `backend/mockdata/`
-- **Output Databases:** `backend/processed_data/` (This contains the generated SQLite ledger, Vector JSON, and GraphML files).
+---
 
-## 2. Current Architectural State (What is Done)
-- **Database Build System (`build_all.py`):** Fully functional and idempotent. It correctly purges `processed_data/`, builds the Qdrant HNSW vector store, builds the NetworkX graph, copies the NPPA pricing JSON, and seeds the SQLite ledger (`procurement_cases.db`).
-- **Environment & Dependencies:** `requirements.txt` is updated with `sentence-transformers`, `einops`, `langgraph`, and `langchain`. The virtual environment is assumed to be active.
-- **Pydantic Schemas:** `src/models/schemas.py` is fully implemented and mapped perfectly to the frontend TypeScript interfaces (using `CamelBaseModel` for automatic serialization).
-- **Mock Data:** Valid, context-aware mock SLAs with built-in contradictions (e.g. WHO TRS cold-chain 2C-8C vs ambient 15C-25C) are stored in `backend/mockdata/rag_and_graph/`.
+## 1. Directory Structure Rules & Ground Truth
+- **Source Code:** `backend/src/` (Never use `backend/app/`).
+- **Prompt Engineering:** `backend/src/prompts/` (`planner_prompt.py`, `scraper_prompt.py`, `scorer_prompt.py`, `critic_prompt.py`, `writer_prompt.py`).
+- **Data Ingestion:** `backend/ingestion/` (`rag_and_graph/` for acts/SLA docs, `sql/` for 50 vendors & DPCO catalog).
+- **Output Databases Hub:** `backend/processed_data/` strictly divided into:
+  - `sqlite/procurement_cases.db` (6 tables: `vendors`, `vendor_products`, `pricing_references`, `procurement_cases`, `audit_logs`, `vendor_profiles`).
+  - `graph/knowledge_graph.graphml` (5,757 nodes mapping Indian regulations and entities) and `knowledge_graph.json`.
+  - `qdrant/` (dense 768-dim Nomic vector storage).
+- **Build Scripts:** `backend/build/` (`seed_data.py`, `build_all.py`, `build_knowledge_graph.py`, `ingest_rag_docs.py`).
 
-## 3. Pending Implementation (What the NEXT Agent Must Do)
-The immediate next step in development is the **LangGraph LLM Agent Implementation**. 
+---
 
-### 3.1 LangGraph Nodes (`src/agents/`)
-Currently, the agents (`planner.py`, `executor.py`, `scorer.py`, `critic.py`, `writer.py`, `workflow.py`) are likely deterministic stubs. Your goal is to integrate real LLM calls using `langchain-google-genai` (or whichever LLM provider the user configures).
-- **Executor:** Must trigger the hybrid RAG (Vector + Graph) and the Tavily Web Scraper.
-- **Critic:** Must resolve the mathematical contradictions flagged by the RAG Fusion engine (`src/rag_pipeline/fusion.py`).
-- **Writer:** Must output strict JSON matching `ProcurementReport` from `schemas.py`.
+## 2. Current Architectural State (What is Fully Completed)
+- **LangGraph Multi-Agent Engine:** Fully operational and stateful in [`backend/src/agents/workflow.py`](../backend/src/agents/workflow.py):
+  - `planner.py` evaluates deal size in INR (< ₹5,00,000 `LIGHT` vs ≥ ₹5,00,000 `FULL`).
+  - `rag_agent.py` coordinates Qdrant vector retrieval and 5,757-node graph traversal with 4-step fusion.
+  - `scraper_agent.py` queries SQLite for 50 registered vendors, checks DPCO 2013 ceilings in INR, runs external web searches via `web_scraper.py`, and caches profiles to `vendor_profiles`.
+  - `scorer.py` evaluates 4 risk dimensions (Financial, Compliance, Contractual, Pricing in INR) and computes confidence score.
+  - `critic.py` audits confidence against 0.80 threshold (up to 3 revision loops).
+  - `writer.py` synthesizes the final `ProcurementReport` in INR.
+- **Relational CaseStore:** [`backend/src/db/session.py`](../backend/src/db/session.py) manages the 6 relational tables with queries for vendors, products, pricing references, audit logs, and vendor profiles.
+- **REST API Endpoints:** [`backend/src/routers/procurement.py`](../backend/src/routers/procurement.py) and [`backend/src/routers/approval.py`](../backend/src/routers/approval.py) expose full case submission, status polling, report fetching, global logs (`/procurement/logs`), case audit trail (`/procurement/{id}/audit`), vendor directory (`/procurement/vendors`), and pricing catalog (`/procurement/pricing-catalog`).
 
-### 3.2 Frontend Integration
-Once the Python LangGraph agents are hooked up to real LLMs:
-- Start the FastAPI server (`uvicorn src.main:app`).
-- The frontend (`frontend/src/api/api.ts`) expects REST endpoints at `/procurement/submit` and `/approval/pending`. 
-- Verify the frontend UI correctly displays the LLM-generated reports in the approval dashboard.
+---
 
-## 4. Strict Instructions for AI Assistants
-1. **Never use dummy values:** If asked to generate mock data, make it highly contextual to pharmaceutical regulations (CDSCO, WHO TRS 1025, Schedule M, NPPA DPCO). 
-2. **Path Adherence:** Always run build scripts from `backend/build/`. Always point data paths to `backend/processed_data/`.
-3. **No destructive commands:** When building or running, do not delete `mockdata/` or `ingestion/`. Only `build_all.py` is allowed to wipe `processed_data/`.
-4. **Idempotency:** Ensure any agent code you write is stateless and repeatable. State must be preserved strictly in `src/agents/state.py`.
+## 3. Strict Operational Guidelines for AI Assistants
+1. **Currency Mandate:** All financial amounts, deal sizes, and ceiling checks must be strictly denominated in Indian Rupees (**INR / ₹**).
+2. **Never Wipe `processed_data/`:** Do NOT run commands with `--force-clean` that wipe `processed_data/`. The 5,757-node knowledge graph and Qdrant collections are pre-computed and must be preserved. Use `python backend/build/seed_data.py` to seed relational tables.
+3. **Dedicated Prompts:** Any modifications to LLM behavior should be made directly in [`backend/src/prompts/`](../backend/src/prompts/), preserving Indian statutory references (CDSCO, DPCO 2013, Schedule M, WHO TRS 1025).
+4. **Git Branch:** Active development branch is **`kamalesh`**.
