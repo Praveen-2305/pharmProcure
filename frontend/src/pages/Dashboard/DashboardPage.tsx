@@ -12,6 +12,10 @@ import {
   FilePlus2,
   SlidersHorizontal,
   AlertCircle,
+  FileStack,
+  CheckCircle2,
+  Clock,
+  AlertOctagon,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -105,40 +109,52 @@ export const DashboardPage: React.FC = () => {
 
       {/* Metrics Summary Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Card className="shadow-sm">
-          <CardHeader className="p-4 pb-2">
+        <Card className="shadow-xs hover:shadow-md hover:border-primary/30 transition-all duration-200">
+          <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-xs font-medium text-muted-foreground">Total Case Audits</CardTitle>
+            <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <FileStack className="size-3.5" />
+            </div>
           </CardHeader>
           <CardContent className="p-4 pt-0">
-            <span className="text-2xl font-bold text-foreground block">{items.length}</span>
+            <span className="text-2xl font-bold text-foreground block tracking-tight">{items.length}</span>
           </CardContent>
         </Card>
-        <Card className="shadow-sm">
-          <CardHeader className="p-4 pb-2">
+        <Card className="shadow-xs hover:shadow-md hover:border-emerald-500/30 transition-all duration-200">
+          <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-xs font-medium text-muted-foreground">Completed Reviews</CardTitle>
+            <div className="size-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="size-3.5" />
+            </div>
           </CardHeader>
           <CardContent className="p-4 pt-0">
-            <span className="text-2xl font-bold text-foreground block">
+            <span className="text-2xl font-bold text-foreground block tracking-tight">
               {items.filter((i) => i.status.stage === 'COMPLETE').length}
             </span>
           </CardContent>
         </Card>
-        <Card className="shadow-sm">
-          <CardHeader className="p-4 pb-2">
+        <Card className="shadow-xs hover:shadow-md hover:border-amber-500/30 transition-all duration-200">
+          <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-xs font-medium text-muted-foreground">Awaiting Sign-off</CardTitle>
+            <div className="size-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400">
+              <Clock className="size-3.5" />
+            </div>
           </CardHeader>
           <CardContent className="p-4 pt-0">
-            <span className="text-2xl font-bold text-foreground block">
+            <span className="text-2xl font-bold text-foreground block tracking-tight">
               {items.filter((i) => i.status.stage === 'AWAITING_APPROVAL').length}
             </span>
           </CardContent>
         </Card>
-        <Card className="shadow-sm">
-          <CardHeader className="p-4 pb-2">
+        <Card className="shadow-xs hover:shadow-md hover:border-destructive/30 transition-all duration-200">
+          <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-xs font-medium text-muted-foreground">Terminated / Failed</CardTitle>
+            <div className="size-7 rounded-lg bg-destructive/10 flex items-center justify-center text-destructive">
+              <AlertOctagon className="size-3.5" />
+            </div>
           </CardHeader>
           <CardContent className="p-4 pt-0">
-            <span className="text-2xl font-bold text-destructive block">
+            <span className="text-2xl font-bold text-destructive block tracking-tight">
               {items.filter((i) => i.status.stage === 'FAILED').length}
             </span>
           </CardContent>
