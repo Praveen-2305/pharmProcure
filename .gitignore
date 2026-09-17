@@ -5,7 +5,14 @@
 # Environment variables & secrets
 .env
 .env.*
-!.env.example
+.env.local
+backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
+!*.env.example
+!backend/.env.example
+!frontend/.env.example
 
 # Node / Frontend Dependencies & Builds
 node_modules/
