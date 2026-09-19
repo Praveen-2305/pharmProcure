@@ -65,7 +65,7 @@ def get_groq_api_keys() -> List[str]:
     keys_str = build_config.get("GROQ_API_KEYS", "")
     keys = [k.strip() for k in keys_str.split(",") if k.strip()]
     if not keys:
-        for i in range(1, 60):
+        for i in range(1, 100):
             k = build_config.get(f"GROQ_KEY_{i}")
             if k and k.strip():
                 keys.append(k.strip())
