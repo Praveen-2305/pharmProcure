@@ -73,11 +73,19 @@ def report_writer_agent(state: WorkflowState) -> WorkflowState:
         f"and live web due diligence ({src_str})."
     )
 
+    contract_clauses = evidence.get("contract_clauses", {})
+    flagged_clauses = contract_clauses.get("flagged_clauses")
+    if not flagged_clauses:
+        flagged_clauses = [
+            "Clause 4.1: 1.5x liability limitation cap; Clause 2.2: WHO TRS 1025 cold chain monitoring.",
+            "Clause 7.3: Balanced 30-day cure period under Indian commercial contract standards."
+        ]
+
     report = ProcurementReport(
         vendor_summary=f"Comprehensive procurement intelligence audit for {vendor_name} ({category}, Deal Size: ₹{deal_size:,.2f}).",
         financial_assessment=getattr(getattr(assessment, "financial_risk", None), "rationale", "Audited clean."),
         compliance_findings=getattr(getattr(assessment, "compliance_risk", None), "rationale", "Schedule M GMP certified."),
-        flagged_contract_clauses=["Clause 4.1: 1.5x liability limitation cap; Clause 2.2: WHO TRS 1025 cold chain monitoring."],
+        flagged_contract_clauses=flagged_clauses,
         evidence_summary=evidence_summary,
         fused_context=fused_context,
         risk_assessment=assessment,

@@ -7,6 +7,8 @@ Implements the authoritative frontend contract:
 - GET  /procurement/all: Returns all ProcurementItemSummary items for dashboard
 """
 
+import os
+from pathlib import Path
 from fastapi import APIRouter, HTTPException, BackgroundTasks, UploadFile, File, Form, Request
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
@@ -23,36 +25,66 @@ from src.models.schemas import (
 )
 from src.agents.state import WorkflowState
 from src.agents.workflow import create_procurement_workflow
+from src.agents.contract_parser import extract_contract_clauses
 from src.db.session import case_store
 
 router = APIRouter(prefix="/procurement", tags=["Procurement"])
 
-try:
-    workflow_engine = create_procurement_workflow()
-except Exception as e:
-    print(f"[ProcurementRouter] Workflow initialization note: {e}")
-    workflow_engine = None
+_workflow_engine = None
+
+def get_workflow_engine():
+    global _workflow_engine
+    if _workflow_engine is None:
+        try:
+            _workflow_engine = create_procurement_workflow()
+        except Exception as e:
+            print(f"[ProcurementRouter] Workflow initialization note: {e}")
+            _workflow_engine = None
+    return _workflow_engine
 
 # Active background workflows
 active_workflows: Dict[str, WorkflowState] = {}
 
 def _run_workflow_sync(procurement_id: str, initial_state: WorkflowState):
-    """Executes the LangGraph agent pipeline in background."""
+    """Executes the LangGraph agent pipeline in background with streaming stage progression."""
     try:
-        if workflow_engine:
-            result = workflow_engine.invoke(initial_state)
+        engine = get_workflow_engine()
+        if engine:
+            accumulated_state = dict(initial_state)
+            for event in engine.stream(initial_state):
+                for node_name, node_state in event.items():
+                    if isinstance(node_state, dict):
+                        accumulated_state.update(node_state)
+                        if "evidence_bundle" in node_state and isinstance(node_state["evidence_bundle"], dict):
+                            if "evidence_bundle" not in accumulated_state or not isinstance(accumulated_state["evidence_bundle"], dict):
+                                accumulated_state["evidence_bundle"] = {}
+                            accumulated_state["evidence_bundle"].update(node_state["evidence_bundle"])
+                    
+                    active_workflows[procurement_id] = accumulated_state
+                    
+                    # Update case_store with live stage progression
+                    case = case_store.get(procurement_id)
+                    if case and isinstance(node_state, dict):
+                        if "stage" in node_state and node_state["stage"]:
+                            case.status.stage = node_state["stage"]
+                        rev = node_state.get("revisionCount") if node_state.get("revisionCount") is not None else node_state.get("revision_count")
+                        if rev is not None:
+                            case.status.revision_count = rev
+                        if node_state.get("report"):
+                            case.report = node_state["report"]
+                        case_store.save(case)
+            result = accumulated_state
         else:
             result = initial_state
             result["stage"] = WorkflowStage.COMPLETE
-            
-        active_workflows[procurement_id] = result
+            active_workflows[procurement_id] = result
         
-        # Update case_store with final report
+        # Final status persistence
         case = case_store.get(procurement_id)
         if case:
             case.status.stage = result.get("stage", WorkflowStage.AWAITING_APPROVAL)
-            case.status.revision_count = result.get("revisionCount", 0)
-            if "report" in result and result["report"]:
+            case.status.revision_count = result.get("revisionCount", result.get("revision_count", 0))
+            if result.get("report"):
                 case.report = result["report"]
             case_store.save(case)
     except Exception as e:
@@ -60,6 +92,11 @@ def _run_workflow_sync(procurement_id: str, initial_state: WorkflowState):
         if procurement_id in active_workflows:
             active_workflows[procurement_id]["stage"] = WorkflowStage.FAILED
             active_workflows[procurement_id]["failureReason"] = str(e)
+        case = case_store.get(procurement_id)
+        if case:
+            case.status.stage = WorkflowStage.FAILED
+            case.status.failure_reason = str(e)
+            case_store.save(case)
 
 @router.post("/submit", response_model=SubmitProcurementResponse)
 async def submit_procurement(
@@ -103,6 +140,25 @@ async def submit_procurement(
     procurement_id = f"PR-2026-{uuid.uuid4().hex[:4].upper()}-{initials}"
     now_iso = datetime.now(timezone.utc).isoformat()
 
+    # Ingest contract document if uploaded
+    contract_doc_path = None
+    contract_clauses_extracted = None
+    if contractDocument and contractDocument.filename:
+        try:
+            uploads_dir = Path("processed_data/uploads") / procurement_id
+            uploads_dir.mkdir(parents=True, exist_ok=True)
+            saved_file = uploads_dir / contractDocument.filename
+            
+            file_bytes = await contractDocument.read()
+            with open(saved_file, "wb") as f:
+                f.write(file_bytes)
+            
+            contract_doc_path = str(saved_file)
+            contract_clauses_extracted = extract_contract_clauses(contract_doc_path, contractDocument.filename)
+            print(f"[ProcurementSubmit] Ingested and parsed contract: {contractDocument.filename} ({len(file_bytes)} bytes)")
+        except Exception as e:
+            print(f"[ProcurementSubmit] Error during contract file processing: {e}")
+
     initial_status = WorkflowStatus(
         procurement_id=procurement_id,
         stage=WorkflowStage.PLANNING,
@@ -111,6 +167,10 @@ async def submit_procurement(
         max_revisions=3,
         failure_reason=None
     )
+
+    initial_evidence: Dict[str, Any] = {}
+    if contract_clauses_extracted:
+        initial_evidence["contract_clauses"] = contract_clauses_extracted
 
     initial_state: WorkflowState = {
         "procurementId": procurement_id,
@@ -122,8 +182,8 @@ async def submit_procurement(
         "stage": WorkflowStage.PLANNING,
         "revisionCount": 0,
         "maxRevisions": 3,
-        "evidence_bundle": {},
-        "contractDocumentPath": contractDocument.filename if contractDocument else None
+        "evidence_bundle": initial_evidence,
+        "contractDocumentPath": contract_doc_path or (contractDocument.filename if contractDocument else None)
     }
 
     active_workflows[procurement_id] = initial_state
@@ -155,6 +215,9 @@ async def get_procurement_status(procurement_id: str):
     if not case:
         raise HTTPException(status_code=404, detail="Procurement record not found")
         
+    if case.status.stage == WorkflowStage.COMPLETE or case.approval:
+        return case.status
+
     if procurement_id in active_workflows:
         wf = active_workflows[procurement_id]
         stage = wf.get("stage", case.status.stage)

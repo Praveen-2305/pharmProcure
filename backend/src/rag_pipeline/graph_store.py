@@ -14,6 +14,9 @@ DEFAULT_GRAPH_PATHS = [
     "processed_data/graph/knowledge_graph.graphml"
 ]
 
+# Module-level graph cache to avoid redundant XML parsing
+_CACHED_GRAPH = None
+
 class GraphRAGRetriever:
     """
     Manages property graph traversal over legal entities, obligations, and contract terms.
@@ -29,9 +32,15 @@ class GraphRAGRetriever:
 
     def _load_or_build_graph(self):
         """Loads persisted graph from disk if available, else builds baseline graph."""
+        global _CACHED_GRAPH
+        if _CACHED_GRAPH is not None:
+            self.graph = _CACHED_GRAPH
+            return
+
         if os.path.exists(self.storage_path):
             try:
                 self.graph = nx.read_graphml(self.storage_path)
+                _CACHED_GRAPH = self.graph
                 return
             except Exception as e:
                 print(f"[GraphRAG] GraphML load note ({e}). Building baseline graph.")

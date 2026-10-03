@@ -23,7 +23,7 @@ def planner_agent(state: WorkflowState) -> WorkflowState:
     details = getattr(req, "procurement_details", None) or state.get("procurementDetails", "Standard pharmaceutical supply")
 
     prompt_context = get_planner_prompt(vendor_name, deal_size, category, details)
-    print(f"--- PLANNER AGENT: Evaluating investigation plan for {vendor_name} (₹{deal_size:,.2f} INR) ---")
+    print(f"--- PLANNER AGENT: Evaluating investigation plan for {vendor_name} (INR {deal_size:,.2f}) ---")
     
     # Check SQL cache for vendor profile
     cached_profile = case_store.get_vendor_profile(vendor_name)

@@ -63,6 +63,7 @@ frontend/coverage/
 scratch/
 tmp/
 *.tmp
+backend/processed_data/uploads/
 
 # Operating System & IDE Files
 .DS_Store

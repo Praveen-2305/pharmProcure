@@ -10,6 +10,7 @@ Runs in parallel with the RAG Node.
 
 from datetime import datetime, timezone
 from src.agents.state import WorkflowState
+from src.models.schemas import WorkflowStage
 from src.db.pricing import lookup_ceiling_price
 from src.agents.web_scraper import vendor_scraper
 from src.db.session import case_store
@@ -184,5 +185,5 @@ def scraper_node_agent(state: WorkflowState) -> WorkflowState:
     except Exception as e:
         print(f"  ! Error saving vendor profile to SQLite: {e}")
 
-    return {"evidence_bundle": evidence, "stage": "SCORING"}
+    return {"evidence_bundle": evidence, "stage": WorkflowStage.SCORING}
 

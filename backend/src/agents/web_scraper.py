@@ -30,12 +30,27 @@ class VendorWebScraper:
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key or os.getenv("TAVILY_API_KEY", "")
         self.has_live_api = bool(self.api_key and self.api_key.strip())
-        self.llm = ChatOpenAI(
-            api_key=os.getenv("GROQ_API_KEY"),
-            base_url="https://api.groq.com/openai/v1",
-            model=os.getenv("GROQ_MODEL", "gpt-oss-120b"),
-            temperature=0.1
-        )
+        self._llm = None
+        self.groq_api_key = os.getenv("GROQ_API_KEY", "")
+        self.openai_api_key = os.getenv("OPENAI_API_KEY", "")
+
+    @property
+    def llm(self):
+        """Lazy-loaded LLM instance, safe when API keys are not provided."""
+        if self._llm is None:
+            active_key = self.groq_api_key or self.openai_api_key
+            if active_key and active_key.strip():
+                try:
+                    self._llm = ChatOpenAI(
+                        api_key=active_key,
+                        base_url="https://api.groq.com/openai/v1" if self.groq_api_key else None,
+                        model=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
+                        temperature=0.1
+                    )
+                except Exception as e:
+                    print(f"[WebScraper] LLM initialization note ({e}). Active in rule-based mode.")
+                    self._llm = None
+        return self._llm
 
     def _search_live_http(self, query: str) -> List[Dict[str, str]]:
         """Performs a live HTTP search query against public search endpoints."""
@@ -53,8 +68,41 @@ class VendorWebScraper:
             pass
         return results
 
+    def _extract_rule_based(self, vendor_name: str, raw_texts: List[str], urls: List[str]) -> Dict[str, Any]:
+        """Deterministic rule-based regex extraction from web snippets."""
+        lit_records = []
+        reg_warnings = []
+        recalls = []
+
+        for t in raw_texts:
+            t_lower = t.lower()
+            if any(w in t_lower for w in ["lawsuit", "litigation", "arbitration", "nclt", "commercial dispute", "court"]):
+                lit_records.append(t[:200])
+            if any(w in t_lower for w in ["fda 483", "warning letter", "cdsco notice", "violation", "show-cause", "suspension", "form 483"]):
+                reg_warnings.append(t[:200])
+            if any(w in t_lower for w in ["recall", "spoilage", "cold-chain failure", "temperature breach", "adulterated"]):
+                recalls.append(t[:200])
+
+        is_adverse = bool(lit_records or reg_warnings or recalls)
+        risk_signal = "HIGH" if (len(reg_warnings) > 1 or len(recalls) > 0) else ("MEDIUM" if is_adverse else "LOW")
+        sentiment = "Adverse" if is_adverse else "Positive"
+
+        return {
+            "vendor_name": vendor_name,
+            "litigation_records": lit_records,
+            "regulatory_warnings": reg_warnings,
+            "product_recalls": recalls,
+            "news_sentiment": sentiment,
+            "risk_signal": risk_signal,
+            "sources_scraped": urls,
+            "source_type": "rule_based_fallback"
+        }
+
     def _extract_with_llm(self, vendor_name: str, raw_texts: List[str], urls: List[str]) -> Dict[str, Any]:
-        """Uses LLM to extract structured vendor intelligence from raw web text."""
+        """Uses LLM to extract structured vendor intelligence, with automatic rule-based fallback."""
+        if not self.llm:
+            return self._extract_rule_based(vendor_name, raw_texts, urls)
+
         from src.prompts.scraper_prompt import get_scraper_prompt, SCRAPER_SYSTEM_PROMPT
         
         snippets_text = "\n".join([f"- {t}" for t in raw_texts])
@@ -74,36 +122,7 @@ class VendorWebScraper:
             return extracted
         except Exception as e:
             print(f"[WebScraper] LLM extraction note ({e}). Using rule-based regex parser.")
-            
-            # Rule-based fallback extraction from snippets
-            lit_records = []
-            reg_warnings = []
-            recalls = []
-            combined = " ".join(raw_texts).lower()
-
-            for t in raw_texts:
-                t_lower = t.lower()
-                if any(w in t_lower for w in ["lawsuit", "litigation", "arbitration", "nclt", "commercial dispute", "court"]):
-                    lit_records.append(t[:200])
-                if any(w in t_lower for w in ["fda 483", "warning letter", "cdsco notice", "violation", "show-cause", "suspension", "form 483"]):
-                    reg_warnings.append(t[:200])
-                if any(w in t_lower for w in ["recall", "spoilage", "cold-chain failure", "temperature breach", "adulterated"]):
-                    recalls.append(t[:200])
-
-            is_adverse = bool(lit_records or reg_warnings or recalls)
-            risk_signal = "HIGH" if (len(reg_warnings) > 1 or len(recalls) > 0) else ("MEDIUM" if is_adverse else "LOW")
-            sentiment = "Adverse" if is_adverse else "Positive"
-
-            return {
-                "vendor_name": vendor_name,
-                "litigation_records": lit_records,
-                "regulatory_warnings": reg_warnings,
-                "product_recalls": recalls,
-                "news_sentiment": sentiment,
-                "risk_signal": risk_signal,
-                "sources_scraped": urls,
-                "source_type": "rule_based_fallback"
-            }
+            return self._extract_rule_based(vendor_name, raw_texts, urls)
 
 
     def scrape_vendor_intelligence(self, vendor_name: str, category: str = "Pharmaceuticals") -> Dict[str, Any]:

@@ -14,7 +14,8 @@ from src.models.schemas import (
     RiskItem,
     RiskLevel,
     PricingRisk,
-    PricingRiskStatus
+    PricingRiskStatus,
+    WorkflowStage
 )
 from src.prompts.scorer_prompt import SCORER_SYSTEM_PROMPT, get_scorer_prompt
 
@@ -87,11 +88,24 @@ def risk_scorer_agent(state: WorkflowState) -> WorkflowState:
             compliance_rationale = f"Regulatory advisory noted via external intelligence: {combined_warnings}"
 
     # 3. Contract Risk Evaluation
-    contract_level = RiskLevel.LOW
-    contract_rationale = "Standard indemnification terms and mutually balanced 30-day cure period."
+    contract_clauses = evidence.get("contract_clauses", {})
+    if contract_clauses:
+        c_level_str = str(contract_clauses.get("contract_risk_level", "LOW")).upper()
+        if c_level_str == "HIGH":
+            contract_level = RiskLevel.HIGH
+        elif c_level_str == "MEDIUM":
+            contract_level = RiskLevel.MEDIUM
+        else:
+            contract_level = RiskLevel.LOW
+        contract_rationale = contract_clauses.get("rationale", "Standard indemnification and balanced cure period.")
+    else:
+        contract_level = RiskLevel.LOW
+        contract_rationale = "Standard indemnification terms and mutually balanced 30-day cure period."
+
     if fusion.get("has_unresolved_contradictions"):
-        contract_level = RiskLevel.MEDIUM
-        contract_rationale = "Unresolved terms or contradictory conditions detected between contract and regulatory rules."
+        if contract_level == RiskLevel.LOW:
+            contract_level = RiskLevel.MEDIUM
+        contract_rationale = f"{contract_rationale} Unresolved terms or contradictory conditions detected between contract and regulatory rules."
 
 
     # 4. Pricing Risk Evaluation (Deterministic NPPA/DPCO ceiling check)
@@ -166,6 +180,6 @@ def risk_scorer_agent(state: WorkflowState) -> WorkflowState:
 
     state["riskAssessment"] = risk_assessment
     state["risk_assessment"] = risk_assessment
-    state["stage"] = "CRITIQUING"
+    state["stage"] = WorkflowStage.CRITIQUING
 
     return state

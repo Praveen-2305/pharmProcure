@@ -17,6 +17,7 @@ To rapidly gain full competence over this codebase, read the documents in the fo
 | [**`05_REST_API_AND_FRONTEND_SPECIFICATION.md`**](05_REST_API_AND_FRONTEND_SPECIFICATION.md) | Complete REST API contract (`/procurement/*`, `/approval/*`), camelCase JSON schemas, audit logs, vendor directory endpoints, React frontend screens, and CLI runner commands. |
 | [**`06_DATA_TRANSITION_PLAN_MOCK_TO_PRODUCTION.md`**](06_DATA_TRANSITION_PLAN_MOCK_TO_PRODUCTION.md) | **Mock to Original Production Data Plan**: Migration roadmap for PostgreSQL 16+, Qdrant Cloud, Neo4j, live NPPA DPCO gazettes, and enterprise CLM/ERP integrations. |
 | [**`07_LLM_AGENT_HANDOFF_CONTEXT.md`**](07_LLM_AGENT_HANDOFF_CONTEXT.md) | **LLM Handoff Guide**: Strict technical constraints, path rules, and exact "Next Steps" intended for incoming AI agent sessions to resume development seamlessly. |
+| [**`08_FINAL_PROJECT_COMPLETION_AND_PROCEEDINGS_PLAN.md`**](08_FINAL_PROJECT_COMPLETION_AND_PROCEEDINGS_PLAN.md) | **Final Project Completion & Proceedings Plan**: Executive status breakdown, unblocker fixes, real-time stage streaming, contract PDF extraction, and live verification steps. |
 
 ---
 
