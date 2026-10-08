@@ -44,7 +44,7 @@ export const RadarComparisonChart: React.FC<RadarComparisonChartProps> = ({ cand
   ];
 
   return (
-    <Card className="border border-border/80 shadow-md bg-card/60 backdrop-blur-xs">
+    <Card className="border border-border/80 shadow-md bg-card/60 backdrop-blur-xs h-full flex flex-col justify-between">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-bold flex items-center gap-2">
           <RadarIcon className="size-4 text-primary" />
@@ -54,8 +54,8 @@ export const RadarComparisonChart: React.FC<RadarComparisonChartProps> = ({ cand
           Comparative audit across Financial, Market, Operational, Compliance, and Governance pillars
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-2">
-        <div className="h-72 w-full">
+      <CardContent className="pt-2 flex-1 flex flex-col justify-center">
+        <div className="h-80 w-full min-h-[320px]">
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart cx="50%" cy="50%" outerRadius="75%" data={radarData}>
               <PolarGrid stroke="rgba(255,255,255,0.12)" />

@@ -24,7 +24,7 @@ export const SavingsTrendChart: React.FC<SavingsTrendChartProps> = ({ data }) =>
   }));
 
   return (
-    <Card className="border border-border/80 shadow-md bg-card/60 backdrop-blur-xs">
+    <Card className="border border-border/80 shadow-md bg-card/60 backdrop-blur-xs h-full flex flex-col justify-between">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div>
@@ -44,8 +44,8 @@ export const SavingsTrendChart: React.FC<SavingsTrendChartProps> = ({ data }) =>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-4">
-        <div className="h-72 w-full">
+      <CardContent className="pt-4 flex-1">
+        <div className="h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>

@@ -6,7 +6,7 @@ import { Badge } from '../../components/ui/badge';
 
 export const SubmitRequestPage: React.FC = () => {
   return (
-    <div className="max-w-7xl mx-auto p-6 md:p-10 space-y-8 text-left">
+    <div className="w-full max-w-[1600px] mx-auto p-6 md:p-10 space-y-8 text-left animate-fade-in">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-5">
         <div className="space-y-1">

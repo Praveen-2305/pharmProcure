@@ -58,7 +58,7 @@ export const ImpactDashboardPage: React.FC = () => {
   const highPct = Math.round((riskDistribution.high / totalRiskCount) * 100);
 
   return (
-    <div className="container max-w-7xl py-8 px-4 md:px-6 space-y-8 animate-fade-in">
+    <div className="w-full max-w-[1600px] mx-auto p-6 md:p-8 space-y-8 animate-fade-in text-left">
       {/* Header section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1.5">
@@ -197,7 +197,7 @@ export const ImpactDashboardPage: React.FC = () => {
       </div>
 
       {/* Charts & Risk Distribution Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         {/* Trend Area Chart (2 Cols) */}
         <div className="lg:col-span-2">
           <SavingsTrendChart data={data.savingsOverTime} />

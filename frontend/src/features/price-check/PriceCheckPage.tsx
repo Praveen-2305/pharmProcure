@@ -104,7 +104,7 @@ export const PriceCheckPage: React.FC = () => {
   };
 
   return (
-    <div className="container max-w-5xl py-8 px-4 md:px-6 space-y-8 animate-fade-in">
+    <div className="w-full max-w-[1600px] mx-auto p-6 md:p-8 space-y-8 animate-fade-in text-left">
       {/* Header section */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
@@ -158,18 +158,20 @@ export const PriceCheckPage: React.FC = () => {
         </Button>
       </div>
 
-      {/* Main Form Card */}
-      <Card className="border border-border/80 shadow-md bg-card/60 backdrop-blur-xs">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-bold flex items-center gap-2">
-            <Search className="size-5 text-primary" />
-            Evaluate Quoted Unit Price
-          </CardTitle>
-          <CardDescription>
-            Enter the drug name, quoted vendor price, and batch volume in Indian Rupees (INR / ₹).
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      {/* Main Content Grid: Form (2 cols) + Statutory Catalog Reference (1 col) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        {/* Main Form Card */}
+        <Card className="border border-border/80 shadow-md bg-card/60 backdrop-blur-xs lg:col-span-2">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-bold flex items-center gap-2">
+              <Search className="size-5 text-primary" />
+              Evaluate Quoted Unit Price
+            </CardTitle>
+            <CardDescription>
+              Enter the drug name, quoted vendor price, and batch volume in Indian Rupees (INR / ₹).
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Drug search input with autocomplete */}
             <div className="relative space-y-1.5">
@@ -312,8 +314,56 @@ export const PriceCheckPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Verdict Presentation */}
-      {result && <PriceVerdictCard result={result} />}
+      {/* Right Column: Reference Catalog & Regulatory Guidance */}
+      <Card className="border border-border/80 shadow-md bg-card/60 backdrop-blur-xs flex flex-col justify-between">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <Sparkles className="size-4 text-primary" />
+            DPCO 2013 Reference Benchmark
+          </CardTitle>
+          <CardDescription className="text-xs">
+            Official NPPA notified ceilings currently in effect across active schedules
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3 pt-0">
+          {catalog.slice(0, 5).map((item, idx) => (
+            <div
+              key={idx}
+              className="p-3 rounded-lg border border-border/50 bg-background/50 space-y-1 hover:border-primary/40 transition-colors"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-xs font-semibold text-foreground leading-tight">
+                  {item.name.split('(')[0].trim()}
+                </p>
+                <span className="text-[11px] font-mono font-bold text-primary shrink-0">
+                  ₹{item.ceilingPrice.toLocaleString('en-IN')}
+                </span>
+              </div>
+              <p className="text-[10px] text-muted-foreground truncate" title={item.regulatoryNotification}>
+                {item.regulatoryNotification}
+              </p>
+              <div className="pt-1 flex items-center justify-between text-[10px]">
+                <span className="text-muted-foreground">{item.unitMeasure}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDrugInput(item.name);
+                    setQuotedPrice(String(item.ceilingPrice));
+                    setQuantity('1');
+                  }}
+                  className="text-primary hover:underline font-semibold"
+                >
+                  Use Ceiling Rate →
+                </button>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
     </div>
-  );
+
+    {/* Verdict Presentation */}
+    {result && <PriceVerdictCard result={result} />}
+  </div>
+);
 };

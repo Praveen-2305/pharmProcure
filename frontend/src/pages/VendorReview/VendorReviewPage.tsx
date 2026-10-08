@@ -98,7 +98,7 @@ export const VendorReviewPage: React.FC = () => {
   const isCompleteOrReview = status.stage === 'COMPLETE' || status.stage === 'AWAITING_APPROVAL';
 
   return (
-    <div className="max-w-7xl mx-auto p-6 md:p-8 space-y-8 text-left">
+    <div className="w-full max-w-[1600px] mx-auto p-6 md:p-8 space-y-8 text-left animate-fade-in">
       {/* Header with Navigation & Live Refresh */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6">
         <div className="space-y-1">

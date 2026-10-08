@@ -119,7 +119,7 @@ export const VendorComparisonPage: React.FC = () => {
   };
 
   return (
-    <div className="container max-w-7xl py-8 px-4 md:px-6 space-y-8 animate-fade-in">
+    <div className="w-full max-w-[1600px] mx-auto p-6 md:p-8 space-y-8 animate-fade-in text-left">
       {/* Header */}
       <div className="space-y-1.5">
         <div className="flex items-center gap-2">
@@ -239,7 +239,7 @@ export const VendorComparisonPage: React.FC = () => {
           />
 
           {/* Visuals Row: Radar Chart + Weight Sliders */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
             <RadarComparisonChart candidates={reRankedCandidates} />
             <WeightAdjusterSliders
               weights={weights}

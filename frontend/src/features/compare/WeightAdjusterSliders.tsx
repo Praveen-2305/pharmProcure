@@ -29,7 +29,7 @@ export const WeightAdjusterSliders: React.FC<WeightAdjusterSlidersProps> = ({
   };
 
   return (
-    <Card className="border border-border/80 shadow-md bg-card/60 backdrop-blur-xs">
+    <Card className="border border-border/80 shadow-md bg-card/60 backdrop-blur-xs h-full flex flex-col justify-between">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>

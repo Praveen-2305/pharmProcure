@@ -117,7 +117,7 @@ export const DashboardPage: React.FC = () => {
   });
 
   return (
-    <div className="max-w-[1400px] mx-auto p-6 md:p-8 space-y-6 text-left">
+    <div className="w-full max-w-[1600px] mx-auto p-6 md:p-8 space-y-6 text-left animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-5">
         <div>
