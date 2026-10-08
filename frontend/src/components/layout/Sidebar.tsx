@@ -9,6 +9,7 @@ import {
   Scale,
   FileCheck2,
   Building2,
+  Bell,
   Workflow,
   RotateCw,
   Clock,
@@ -68,6 +69,12 @@ export const Sidebar: React.FC<{ isOpen?: boolean }> = ({ isOpen = true }) => {
       label: 'Vendor Directory',
       icon: Building2,
       description: 'Verified CDSCO supplier master',
+    },
+    {
+      to: '/alerts',
+      label: 'Alerts Center',
+      icon: Bell,
+      description: 'Live regulatory & cold-chain feed',
     },
     {
       to: '/submit',

@@ -478,3 +478,35 @@ export interface Vendor360Response {
   products: VendorProductItem[];
   linkedCases: LinkedCaseItem[];
 }
+
+// --- Alerts Center & Live Monitoring (Feature 8)
+export interface RegulatoryAlert {
+  alertId: string;
+  alertType: "CDSCO_NSQ_ALERT" | "PRICE_CEILING_REVISED" | "COLD_CHAIN_EXCURSION" | "DEBARMENT_NOTICE" | string;
+  vendorId?: string;
+  vendorName: string;
+  severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
+  headline: string;
+  description: string;
+  statuteReference: string;
+  suggestedRemedy: string;
+  isAcknowledged: boolean;
+  createdAt: string;
+}
+
+export interface AlertsListResponse {
+  total: number;
+  unacknowledgedCount: number;
+  alerts: RegulatoryAlert[];
+}
+
+export interface SimulateEventRequest {
+  alertType: string;
+  vendorName: string;
+  severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
+  headline: string;
+  description: string;
+  statuteReference: string;
+  suggestedRemedy: string;
+  vendorId?: string;
+}

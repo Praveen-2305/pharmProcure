@@ -6,6 +6,7 @@ import { ModeToggle } from '../mode-toggle';
 import { Button, buttonVariants } from '../ui/button';
 import { Separator } from '../ui/separator';
 import { cn } from '../../lib/utils';
+import { AlertsBellDropdown } from '../../features/alerts/AlertsBellDropdown';
 
 export const Header: React.FC<{ onMenuClick?: () => void }> = ({ onMenuClick }) => {
   const { user } = useAuth();
@@ -63,6 +64,9 @@ export const Header: React.FC<{ onMenuClick?: () => void }> = ({ onMenuClick }) 
           <Sparkles className="size-3 text-primary" />
           <span>Home</span>
         </Link>
+
+        {/* Live Regulatory Alerts Dropdown */}
+        <AlertsBellDropdown />
 
         <ModeToggle />
 

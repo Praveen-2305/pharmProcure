@@ -11,6 +11,7 @@ import { VendorComparisonPage } from './features/compare/VendorComparisonPage';
 import { ContractAnalyzerPage } from './features/contract-analyzer/ContractAnalyzerPage';
 import { VendorDirectoryPage } from './features/vendors/VendorDirectoryPage';
 import { Vendor360Page } from './features/vendors/Vendor360Page';
+import { AlertsCenterPage } from './features/alerts/AlertsCenterPage';
 
 export const router = createBrowserRouter([
   {
@@ -52,6 +53,10 @@ export const router = createBrowserRouter([
       {
         path: 'vendors/:id',
         element: <Vendor360Page />,
+      },
+      {
+        path: 'alerts',
+        element: <AlertsCenterPage />,
       },
       {
         path: 'submit',
