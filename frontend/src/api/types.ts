@@ -139,3 +139,41 @@ export interface ProcurementItemSummary {
   approval?: ApprovalRecord;
   createdAt: string;
 }
+
+// --- Instant Price Checker Types
+export interface DrugCatalogItem {
+  category: string;
+  name: string;
+  ceilingPrice: number;
+  currency: string;
+  unitMeasure: string;
+  regulatoryNotification: string;
+  therapeuticUse?: string;
+}
+
+export interface PriceCheckRequest {
+  drugName: string;
+  strengthOrPack?: string;
+  quotedPrice: number;
+  quantity: number;
+  vendorName?: string;
+}
+
+export interface PriceCheckResponse {
+  drugName: string;
+  category: string;
+  quotedPrice: number;
+  ceilingPrice: number;
+  quantity: number;
+  totalQuoted: number;
+  totalCeiling: number;
+  unitVariance: number;
+  totalOverpayment: number;
+  percentageDifference: number;
+  isCompliant: boolean;
+  verdict: 'LEGAL' | 'STATUTORY_VIOLATION';
+  verdictMessage: string;
+  dpcoReference: string;
+  unitMeasure: string;
+  therapeuticUse?: string;
+}

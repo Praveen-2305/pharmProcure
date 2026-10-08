@@ -5,6 +5,7 @@ import { DashboardPage } from './pages/Dashboard/DashboardPage';
 import { SubmitRequestPage } from './pages/SubmitRequest/SubmitRequestPage';
 import { VendorReviewPage } from './pages/VendorReview/VendorReviewPage';
 import { ApprovalQueuePage } from './pages/ApprovalQueue/ApprovalQueuePage';
+import { PriceCheckPage } from './features/price-check/PriceCheckPage';
 
 export const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ export const router = createBrowserRouter([
       {
         path: 'dashboard',
         element: <DashboardPage />,
+      },
+      {
+        path: 'price-check',
+        element: <PriceCheckPage />,
       },
       {
         path: 'submit',

@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   PlusCircle,
   ClipboardCheck,
+  Calculator,
   Workflow,
   RotateCw,
   Clock,
@@ -33,6 +34,12 @@ export const Sidebar: React.FC<{ isOpen?: boolean }> = ({ isOpen = true }) => {
       label: 'Audit Dashboard',
       icon: LayoutDashboard,
       description: 'Historical cases & audit trail',
+    },
+    {
+      to: '/price-check',
+      label: 'Price Checker',
+      icon: Calculator,
+      description: 'NPPA DPCO ceiling compliance',
     },
     {
       to: '/submit',

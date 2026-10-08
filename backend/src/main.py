@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.config import settings
 from src.routers.procurement import router as procurement_router
 from src.routers.approval import router as approval_router
+from src.api.price_checker import router as price_checker_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -28,10 +29,12 @@ app.add_middleware(
 # Mount primary routers matching frontend contract
 app.include_router(procurement_router)
 app.include_router(approval_router)
+app.include_router(price_checker_router)
 
 # Mount legacy prefix for backward compatibility
 app.include_router(procurement_router, prefix="/api")
 app.include_router(approval_router, prefix="/api")
+app.include_router(price_checker_router, prefix="/api")
 
 @app.get("/")
 def read_root():
