@@ -6,6 +6,7 @@ import {
   PlusCircle,
   ClipboardCheck,
   Calculator,
+  Scale,
   Workflow,
   RotateCw,
   Clock,
@@ -47,6 +48,12 @@ export const Sidebar: React.FC<{ isOpen?: boolean }> = ({ isOpen = true }) => {
       label: 'Price Checker',
       icon: Calculator,
       description: 'NPPA DPCO ceiling compliance',
+    },
+    {
+      to: '/compare',
+      label: 'Compare Vendors',
+      icon: Scale,
+      description: 'Competitive 5-pillar radar RFP',
     },
     {
       to: '/submit',

@@ -247,3 +247,59 @@ export interface CopilotAskResponse {
   isGrounded: boolean;
   suggestedQueries: string[];
 }
+
+// --- Multi-Vendor Comparison Types
+export interface VendorPillarScores {
+  financialScore: number;
+  marketPowerScore: number;
+  operationalScore: number;
+  complianceScore: number;
+  governanceScore: number;
+}
+
+export interface VendorComparisonCandidate {
+  vendorName: string;
+  vendorId?: string;
+  state: string;
+  creditRating: string;
+  quotedUnitPrice: number;
+  ceilingUnitPrice: number;
+  totalCostOfOwnershipInr: number;
+  isPriceCompliant: boolean;
+  coldChainSla: string;
+  scheduleMStatus: string;
+  otifRatePercent: number;
+  compositeRankScore: number;
+  pillars: VendorPillarScores;
+  flags: string[];
+}
+
+export interface DisqualificationRationale {
+  vendorName: string;
+  disqualificationReason: string;
+}
+
+export interface ComparisonRecommendation {
+  recommendedVendor: string;
+  selectionRationale: string;
+  whyNotOthers: DisqualificationRationale[];
+}
+
+export interface MultiVendorCompareRequest {
+  vendorNames: string[];
+  drugName: string;
+  quantity: number;
+  priceWeight?: number;
+  complianceWeight?: number;
+  resilienceWeight?: number;
+  governanceWeight?: number;
+}
+
+export interface MultiVendorCompareResponse {
+  drugName: string;
+  quantity: number;
+  ceilingPriceInr: number;
+  dpcoReference: string;
+  candidates: VendorComparisonCandidate[];
+  recommendation: ComparisonRecommendation;
+}

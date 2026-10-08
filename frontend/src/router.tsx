@@ -7,6 +7,7 @@ import { VendorReviewPage } from './pages/VendorReview/VendorReviewPage';
 import { ApprovalQueuePage } from './pages/ApprovalQueue/ApprovalQueuePage';
 import { PriceCheckPage } from './features/price-check/PriceCheckPage';
 import { ImpactDashboardPage } from './features/impact/ImpactDashboardPage';
+import { VendorComparisonPage } from './features/compare/VendorComparisonPage';
 
 export const router = createBrowserRouter([
   {
@@ -32,6 +33,10 @@ export const router = createBrowserRouter([
       {
         path: 'price-check',
         element: <PriceCheckPage />,
+      },
+      {
+        path: 'compare',
+        element: <VendorComparisonPage />,
       },
       {
         path: 'submit',
