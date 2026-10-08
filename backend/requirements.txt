@@ -16,3 +16,4 @@ sentence-transformers
 einops
 langchain-openai
 langchain-text-splitters
+reportlab
