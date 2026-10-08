@@ -225,3 +225,25 @@ export interface ImpactAnalyticsResponse {
   topExposedVendors: ExposedVendorSummary[];
   assumptions: ImpactAssumptionData;
 }
+
+// --- AI Copilot Types
+export interface CitationItem {
+  id: string;
+  title: string;
+  source: string;
+  excerpt: string;
+}
+
+export interface CopilotAskRequest {
+  query: string;
+  caseId?: string;
+  vendorName?: string;
+  currentRoute?: string;
+}
+
+export interface CopilotAskResponse {
+  answer: string;
+  citations: CitationItem[];
+  isGrounded: boolean;
+  suggestedQueries: string[];
+}
