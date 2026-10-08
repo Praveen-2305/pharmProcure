@@ -77,6 +77,12 @@ export const Sidebar: React.FC<{ isOpen?: boolean }> = ({ isOpen = true }) => {
       description: 'Live regulatory & cold-chain feed',
     },
     {
+      to: '/audit',
+      label: 'Audit Trail',
+      icon: ShieldCheck,
+      description: 'Forensic event logs & sign-offs',
+    },
+    {
       to: '/submit',
       label: 'Submit Request',
       icon: PlusCircle,

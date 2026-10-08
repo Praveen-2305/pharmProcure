@@ -12,6 +12,7 @@ import { ContractAnalyzerPage } from './features/contract-analyzer/ContractAnaly
 import { VendorDirectoryPage } from './features/vendors/VendorDirectoryPage';
 import { Vendor360Page } from './features/vendors/Vendor360Page';
 import { AlertsCenterPage } from './features/alerts/AlertsCenterPage';
+import { AuditTrailPage } from './pages/AuditTrail/AuditTrailPage';
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +30,10 @@ export const router = createBrowserRouter([
       {
         path: 'dashboard',
         element: <DashboardPage />,
+      },
+      {
+        path: 'audit',
+        element: <AuditTrailPage />,
       },
       {
         path: 'impact',
