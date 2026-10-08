@@ -9,6 +9,8 @@ import { PriceCheckPage } from './features/price-check/PriceCheckPage';
 import { ImpactDashboardPage } from './features/impact/ImpactDashboardPage';
 import { VendorComparisonPage } from './features/compare/VendorComparisonPage';
 import { ContractAnalyzerPage } from './features/contract-analyzer/ContractAnalyzerPage';
+import { VendorDirectoryPage } from './features/vendors/VendorDirectoryPage';
+import { Vendor360Page } from './features/vendors/Vendor360Page';
 
 export const router = createBrowserRouter([
   {
@@ -42,6 +44,14 @@ export const router = createBrowserRouter([
       {
         path: 'contract-analyzer',
         element: <ContractAnalyzerPage />,
+      },
+      {
+        path: 'vendors',
+        element: <VendorDirectoryPage />,
+      },
+      {
+        path: 'vendors/:id',
+        element: <Vendor360Page />,
       },
       {
         path: 'submit',

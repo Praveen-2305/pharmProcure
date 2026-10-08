@@ -8,6 +8,7 @@ import {
   Calculator,
   Scale,
   FileCheck2,
+  Building2,
   Workflow,
   RotateCw,
   Clock,
@@ -61,6 +62,12 @@ export const Sidebar: React.FC<{ isOpen?: boolean }> = ({ isOpen = true }) => {
       label: 'Contract Analyzer',
       icon: FileCheck2,
       description: 'Statutory clause auditor & pack',
+    },
+    {
+      to: '/vendors',
+      label: 'Vendor Directory',
+      icon: Building2,
+      description: 'Verified CDSCO supplier master',
     },
     {
       to: '/submit',

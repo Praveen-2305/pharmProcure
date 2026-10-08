@@ -387,3 +387,94 @@ export interface SimulationResponse {
   dimensions: DimensionScore[];
   negotiationRecommendation: string;
 }
+
+// --- Vendor Directory & Vendor 360 (Feature 3)
+export interface VendorDirectoryItem {
+  vendorId: string;
+  vendorName: string;
+  productCategory: string;
+  country: string;
+  state: string;
+  city: string;
+  creditRating: string;
+  annualRevenueInrCr: number;
+  solvencyRatio: number;
+  whoTrs1025Compliant: boolean;
+  scheduleMCompliant: boolean;
+  coldChainCapable: boolean;
+  auditRiskLevel: string;
+  caseCount: number;
+  productCount: number;
+  otifRatePercent: number;
+  compositeQualityScore: number;
+}
+
+export interface VendorDirectoryResponse {
+  total: number;
+  currency: string;
+  vendors: VendorDirectoryItem[];
+}
+
+export interface VendorProductItem {
+  productId: string;
+  productName: string;
+  dosageForm: string;
+  strength: string;
+  packSize: string;
+  quotedUnitPrice: number;
+  regulatedCeilingPrice?: number;
+  isDpcoCompliant: boolean;
+  coldChainRequired: boolean;
+}
+
+export interface LinkedCaseItem {
+  procurementId: string;
+  dealSize: number;
+  stage: string;
+  overallRisk: string;
+  createdAt: string;
+}
+
+export interface RiskTrendPoint {
+  quarter: string;
+  riskScore: number;
+  auditedCases: number;
+}
+
+export interface PillarBreakdown {
+  financialScore: number;
+  marketPowerScore: number;
+  operationalScore: number;
+  complianceScore: number;
+  governanceScore: number;
+}
+
+export interface Vendor360Response {
+  vendorId: string;
+  vendorName: string;
+  productCategory: string;
+  country: string;
+  state: string;
+  city: string;
+  headquartersAddress: string;
+  contactEmail: string;
+  contactPhone: string;
+  taxIdentificationNumber: string;
+  drugLicenseNumber: string;
+  incorporationYear: number;
+  annualRevenueInrCr: number;
+  currency: string;
+  creditRating: string;
+  solvencyRatio: number;
+  whoGmpCertified: boolean;
+  fdaApproved: boolean;
+  scheduleMCompliant: boolean;
+  whoTrs1025Compliant: boolean;
+  coldChainCapable: boolean;
+  auditRiskLevel: string;
+  otifRatePercent: number;
+  pillars: PillarBreakdown;
+  riskTrend: RiskTrendPoint[];
+  products: VendorProductItem[];
+  linkedCases: LinkedCaseItem[];
+}

@@ -16,6 +16,7 @@ from src.api.copilot import router as copilot_router
 from src.api.comparison import router as comparison_router
 from src.api.contract_analyzer import router as contract_analyzer_router
 from src.api.simulator import router as simulator_router
+from src.api.vendor_directory import router as vendor_directory_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -32,6 +33,7 @@ app.add_middleware(
 )
 
 # Mount primary routers matching frontend contract
+app.include_router(vendor_directory_router)
 app.include_router(procurement_router)
 app.include_router(approval_router)
 app.include_router(price_checker_router)
@@ -42,6 +44,7 @@ app.include_router(contract_analyzer_router)
 app.include_router(simulator_router)
 
 # Mount legacy prefix for backward compatibility
+app.include_router(vendor_directory_router, prefix="/api")
 app.include_router(procurement_router, prefix="/api")
 app.include_router(approval_router, prefix="/api")
 app.include_router(price_checker_router, prefix="/api")
