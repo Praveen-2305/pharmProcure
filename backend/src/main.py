@@ -18,6 +18,7 @@ from src.api.contract_analyzer import router as contract_analyzer_router
 from src.api.simulator import router as simulator_router
 from src.api.vendor_directory import router as vendor_directory_router
 from src.api.alerts import router as alerts_router
+from src.api.dossier_pdf import router as dossier_pdf_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -44,6 +45,7 @@ app.include_router(copilot_router)
 app.include_router(comparison_router)
 app.include_router(contract_analyzer_router)
 app.include_router(simulator_router)
+app.include_router(dossier_pdf_router)
 
 # Mount legacy prefix for backward compatibility
 app.include_router(alerts_router, prefix="/api")
@@ -56,6 +58,7 @@ app.include_router(copilot_router, prefix="/api")
 app.include_router(comparison_router, prefix="/api")
 app.include_router(contract_analyzer_router, prefix="/api")
 app.include_router(simulator_router, prefix="/api")
+app.include_router(dossier_pdf_router, prefix="/api")
 
 @app.get("/")
 def read_root():

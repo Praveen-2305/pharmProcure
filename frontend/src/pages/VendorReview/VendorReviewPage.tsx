@@ -19,6 +19,7 @@ import {
   Sparkles,
   Sliders,
   FileText,
+  Download,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
@@ -40,6 +41,7 @@ export const VendorReviewPage: React.FC = () => {
   const { status, report, loading, error, refetch } = useProcurementStatus(id);
   const [isRefetching, setIsRefetching] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<'report' | 'simulator'>('report');
+  const [downloadingPdf, setDownloadingPdf] = React.useState(false);
 
   const handleRefresh = async () => {
     setIsRefetching(true);
@@ -47,6 +49,21 @@ export const VendorReviewPage: React.FC = () => {
       await refetch();
     } finally {
       setIsRefetching(false);
+    }
+  };
+
+  const handleDownloadPdf = () => {
+    setDownloadingPdf(true);
+    try {
+      const link = document.createElement('a');
+      link.href = `/procurement/${id}/dossier.pdf`;
+      link.download = `AutonoSource_Dossier_${id}.pdf`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } finally {
+      setTimeout(() => setDownloadingPdf(false), 1500);
     }
   };
 
@@ -100,7 +117,21 @@ export const VendorReviewPage: React.FC = () => {
           </h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          {isCompleteOrReview && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadPdf}
+              disabled={downloadingPdf}
+              className="gap-1.5 text-xs border-primary/40 text-primary hover:bg-primary/20 shadow-xs"
+              title="Download Tamper-Evident Forensic Dossier"
+            >
+              <Download className={cn("size-3.5", downloadingPdf && "animate-bounce")} />
+              <span>{downloadingPdf ? 'Exporting PDF...' : 'Download PDF Dossier'}</span>
+            </Button>
+          )}
+
           <Button
             variant="outline"
             size="sm"
