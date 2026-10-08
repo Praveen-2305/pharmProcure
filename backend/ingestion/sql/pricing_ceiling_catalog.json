@@ -1,0 +1,91 @@
+{
+  "catalog_metadata": {
+    "title": "National Pharmaceutical Pricing Authority (NPPA) & DPCO 2013 Statutory Ceiling Index",
+    "currency": "INR",
+    "regulatory_framework": "Drugs (Prices Control) Order, 2013 read with Essential Commodities Act, 1955",
+    "version": "2024.1-IN",
+    "last_revised": "2024-04-01"
+  },
+  "items": [
+    {
+      "category": "active_pharmaceutical_ingredients",
+      "name": "Sterile Active Pharmaceutical Ingredients (Amoxicillin, Rifampicin, Ciprofloxacin IP)",
+      "ceiling_price": 6225000.0,
+      "deal_ceiling_threshold": 6225000.0,
+      "currency": "INR",
+      "unit_measure": "per metric ton",
+      "regulatory_notification": "NPPA S.O. 1245(E) - National List of Essential Medicines (NLEM)",
+      "therapeutic_use": "Bulk API Antibacterial & Anti-tubercular synthesis"
+    },
+    {
+      "category": "cold_chain_biologics",
+      "name": "Biopharmaceutical Cold-Chain Monoclonal Antibodies (Trastuzumab, Rituximab 2°C–8°C)",
+      "ceiling_price": 24900000.0,
+      "deal_ceiling_threshold": 24900000.0,
+      "currency": "INR",
+      "unit_measure": "per 100-vial shipment",
+      "regulatory_notification": "DPCO Schedule-I Form-II Biologics Price Regulation",
+      "therapeutic_use": "Targeted oncology and autoimmune therapeutic antibodies"
+    },
+    {
+      "category": "solid_oral_dosage",
+      "name": "Essential Scheduled Generic Tablets (Paracetamol 650mg, Metformin 500mg, Azithromycin)",
+      "ceiling_price": 2905000.0,
+      "deal_ceiling_threshold": 2905000.0,
+      "currency": "INR",
+      "unit_measure": "per 100,000 blister pack units",
+      "regulatory_notification": "DPCO Schedule-II Ceiling Price Order (Updated WPI 2024)",
+      "therapeutic_use": "First-line analgesics, antidiabetic, and anti-infectives"
+    },
+    {
+      "category": "oncology_injectables",
+      "name": "Cytotoxic Oncology Injectables & Sterile Infusions (Paclitaxel, Carboplatin)",
+      "ceiling_price": 14940000.0,
+      "deal_ceiling_threshold": 14940000.0,
+      "currency": "INR",
+      "unit_measure": "per 50-cycle therapeutic package",
+      "regulatory_notification": "NPPA Special Price Regulation for 42 Anti-Cancer Drugs",
+      "therapeutic_use": "High-potency cytotoxic cancer therapy"
+    },
+    {
+      "category": "vaccines_temperature_controlled",
+      "name": "Ultra-Cold & Temperature-Controlled Vaccines (Rabies, Inactivated Viral Antigens 2°C–8°C)",
+      "ceiling_price": 17430000.0,
+      "deal_ceiling_threshold": 17430000.0,
+      "currency": "INR",
+      "unit_measure": "per 5,000 dose batch",
+      "regulatory_notification": "Universal Immunization Programme (UIP) Reference Standard",
+      "therapeutic_use": "Prophylactic immunization and viral pathogen prevention"
+    },
+    {
+      "category": "surgical_consumables",
+      "name": "Medical Grade Sterile Surgical Consumables, Cannulas & Infusion Sets",
+      "ceiling_price": 2075000.0,
+      "deal_ceiling_threshold": 2075000.0,
+      "currency": "INR",
+      "unit_measure": "per 1,000 sterile pack units",
+      "regulatory_notification": "NPPA Medical Devices Regulation S.O. 1462(E)",
+      "therapeutic_use": "Operating theatre & critical care disposable equipment"
+    },
+    {
+      "category": "diagnostic_reagents",
+      "name": "In-Vitro Diagnostic Reagents & Multiplex RT-PCR Assay Kits",
+      "ceiling_price": 1079000.0,
+      "deal_ceiling_threshold": 1079000.0,
+      "currency": "INR",
+      "unit_measure": "per standard batch (500 tests)",
+      "regulatory_notification": "CDSCO / NPPA Compendium Sec 4 IVD Reference",
+      "therapeutic_use": "Molecular pathology & clinical microbiology testing"
+    },
+    {
+      "category": "ophthalmic_formulations",
+      "name": "Sterile Preservative-Free Ophthalmic Solutions (Moxifloxacin Eye Drops)",
+      "ceiling_price": 3486000.0,
+      "deal_ceiling_threshold": 3486000.0,
+      "currency": "INR",
+      "unit_measure": "per 10,000 unit dose BFS droppers",
+      "regulatory_notification": "NPPA Form-IV Notification on Sterile Topical Solutions",
+      "therapeutic_use": "Ocular infection prophylaxis and post-operative care"
+    }
+  ]
+}

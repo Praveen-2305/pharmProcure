@@ -36,4 +36,3 @@ export const SubmitRequestPage: React.FC = () => {
     </div>
   );
 };
-

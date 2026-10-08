@@ -1,0 +1,157 @@
+"""
+RAG Ingestion & Vector Embedding Build Module for AutonoSource.
+Scans cleaned documents across all subdirectories of ingestion/rag/
+(contracts, drug_regulations, gmp, storage, drugs, pricing),
+extracts text, chunks with overlap, and populates the Qdrant vector store.
+"""
+
+import os
+import sys
+from typing import List
+
+backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if backend_root not in sys.path:
+    sys.path.insert(0, backend_root)
+
+from build.embedding_pipeline import EmbeddingPipeline
+
+RAG_STORAGE_DIR = os.path.join(backend_root, "ingestion", "rag_and_graph")
+
+def extract_text_from_pdf(filepath: str) -> str:
+    """Extracts text from PDF file as Markdown using pymupdf4llm if available, else fallback."""
+    try:
+        import pymupdf4llm
+        md_text = pymupdf4llm.to_markdown(filepath)
+        return md_text
+    except Exception as e:
+        print(f"    [PDF Ingest Note] {os.path.basename(filepath)} ({e}). Extracting text stream fallback.")
+        try:
+            from pypdf import PdfReader
+            reader = PdfReader(filepath)
+            text = ""
+            for i, page in enumerate(reader.pages):
+                page_text = page.extract_text()
+                if page_text:
+                    text += f"\n--- Page {i+1} ---\n" + page_text
+            return text
+        except:
+            with open(filepath, "rb") as f:
+                raw = f.read()
+            return raw.decode("latin-1", errors="ignore")[:60000]
+
+def chunk_text(text: str, chunk_size: int = 1200, overlap: int = 200) -> List[str]:
+    """Splits document text using semantic Markdown boundaries."""
+    try:
+        from langchain_text_splitters import MarkdownTextSplitter
+        splitter = MarkdownTextSplitter(chunk_size=chunk_size, chunk_overlap=overlap)
+        # LangChain returns Document objects if create_documents is used,
+        # but split_text returns strings.
+        chunks = splitter.split_text(text)
+        return [c.strip() for c in chunks if len(c.strip()) > 40]
+    except Exception as e:
+        print(f"[Warning] langchain_text_splitters failed: {e}, falling back to basic chunking")
+        chunks = []
+        start = 0
+        while start < len(text):
+            end = start + chunk_size
+            chunk = text[start:end].strip()
+            if len(chunk) > 40:
+                chunks.append(chunk)
+            start += chunk_size - overlap
+        return chunks
+
+def run_rag_ingest(vector_store: VectorStore = None) -> int:
+    print("-" * 55)
+    print("▶ [Build: RAG] Ingesting Clean Regulatory Standards & Contracts")
+    print("-" * 55)
+    rel_storage_dir = os.path.relpath(RAG_STORAGE_DIR, backend_root)
+    print(f"  Storage Source: {rel_storage_dir}\n")
+
+    if not os.path.exists(RAG_STORAGE_DIR):
+        print(f"  [ERROR] Directory {rel_storage_dir} does not exist.")
+        return 0
+
+    from build.embedding_pipeline import qdrant_pipeline
+    pipeline = qdrant_pipeline
+    # Find all documents across all subdirectories
+    doc_paths = []
+    for root, _, files in os.walk(RAG_STORAGE_DIR):
+        for f in files:
+            ext = os.path.splitext(f)[1].lower()
+            if ext in [".pdf", ".md", ".txt", ".json"]:
+                doc_paths.append(os.path.join(root, f))
+
+    doc_paths.sort()
+    print(f"  Discovered {len(doc_paths)} verified source documents to index:\n")
+
+    total_chunks = 0
+    all_chunks_to_embed = []
+
+    for filepath in doc_paths:
+        rel_path = os.path.relpath(filepath, RAG_STORAGE_DIR)
+        ext = os.path.splitext(filepath)[1].lower()
+
+        if ext == ".pdf":
+            text = extract_text_from_pdf(filepath)
+        else:
+            with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+                text = f.read()
+
+        chunks = chunk_text(text)
+        total_chunks += len(chunks)
+        print(f"  ✓ {rel_path:<45} | Chars: {len(text):>7,} | Chunks: {len(chunks):>3}")
+
+        for i, c in enumerate(chunks):
+            all_chunks_to_embed.append({
+                "doc_id": f"{os.path.basename(filepath)}_{i}",
+                "text": c,
+                "source_doc": os.path.basename(filepath),
+                "metadata": {
+                    "source": rel_path,
+                    "filename": os.path.basename(filepath),
+                    "chunk_index": i
+                }
+            })
+
+    # Embed chunks into Qdrant collection
+    print(f"\n  Generating dense 768-dim semantic embeddings for {len(all_chunks_to_embed)} chunks...")
+    pipeline.batch_embed_and_index(all_chunks_to_embed) # index all chunks
+    print(f"  ✓ Embedded and stored in Qdrant collection: '{pipeline.collection_name}'")
+
+    # Persist serialized vector database snapshot into processed_data/vector/
+    import json
+    db_vector_dir = os.path.join(backend_root, "processed_data", "qdrant")
+    os.makedirs(db_vector_dir, exist_ok=True)
+    embeddings_file = os.path.join(db_vector_dir, "vector_embeddings.json")
+    meta_file = os.path.join(db_vector_dir, "collections_metadata.json")
+
+    from build.embedding_pipeline import compute_dense_embedding
+    vector_dump = []
+    for item in all_chunks_to_embed[:100]:
+        vector_dump.append({
+            "doc_id": item["doc_id"],
+            "text": item["text"][:200] + "...",
+            "metadata": item["metadata"],
+            "vector_sample": compute_dense_embedding(item["text"])[:8]  # first 8 dimensions sample
+        })
+
+    with open(embeddings_file, "w", encoding="utf-8") as f:
+        json.dump(vector_dump, f, indent=2)
+
+    with open(meta_file, "w", encoding="utf-8") as f:
+        json.dump({
+            "collection_name": pipeline.collection_name,
+            "vector_size": 768,
+            "distance": "COSINE",
+            "indexed_chunks_count": len(all_chunks_to_embed),
+            "storage_path": "processed_data"
+        }, f, indent=2)
+
+    print(f"  ✓ Persisted Vector Snapshot: {embeddings_file}")
+    print(f"  ✓ Persisted Collection Meta:  {meta_file}")
+
+    print("\n  [RAG Build Complete] Total Documents: " + str(len(doc_paths)) + " | Chunks: " + str(total_chunks))
+    return total_chunks
+
+if __name__ == "__main__":
+    run_rag_ingest()

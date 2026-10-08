@@ -60,6 +60,43 @@ export interface RiskAssessment {
   confidenceScore: number; // 0-1 — evidence completeness, NOT risk severity. Never merge these two concepts in the UI.
 }
 
+export type MarketPowerLevel = "DOMINANT" | "STRONG" | "MODERATE" | "COMPETITIVE";
+
+export interface OperationalResilience {
+  onTimeDeliveryRate: number;
+  manufacturingCapacityScore: number;
+  coldChainReliability: string;
+  fulfillmentRiskSummary: string;
+}
+
+export interface RegulatoryQualityRecord {
+  cdscoLicenseValid: boolean;
+  scheduleMStatus: string;
+  nsqBatchAlertsCount: number;
+  regulatoryTrackRecord: string;
+}
+
+export interface GovernanceIntegrity {
+  blacklistingStatus: string;
+  litigationCount: number;
+  ncltInsolvencyFlag: boolean;
+  governanceSummary: string;
+}
+
+export interface VendorTransparencyMatrix {
+  annualRevenueCr: number;
+  solvencyRatio: number;
+  creditRating: string;
+  financialHealthSummary: string;
+  marketStanding: string;
+  marketPowerLevel: MarketPowerLevel;
+  bargainingLeverage: string;
+  operationalResilience: OperationalResilience;
+  regulatoryQuality: RegulatoryQualityRecord;
+  governanceIntegrity: GovernanceIntegrity;
+  overallTransparencyScore: number;
+}
+
 // --- Report Writer output (POC §4 Step 8)
 export interface ProcurementReport {
   vendorSummary: string;
@@ -71,6 +108,7 @@ export interface ProcurementReport {
   riskAssessment: RiskAssessment;
   riskExplanation: string;
   recommendation: string;
+  vendorTransparency?: VendorTransparencyMatrix;
 }
 
 // --- Human approval (POC §4 Step 9)

@@ -262,8 +262,11 @@ export const VendorReviewPage: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* 4D Risk Breakdown */}
-          <RiskBreakdown riskAssessment={report.riskAssessment} />
+          {/* 4D Risk Breakdown & 5-Pillar Vendor Transparency Matrix */}
+          <RiskBreakdown
+            riskAssessment={report.riskAssessment}
+            vendorTransparency={report.vendorTransparency || (report as unknown as { vendor_transparency?: typeof report.vendorTransparency }).vendor_transparency}
+          />
 
           {/* Hybrid RAG Evidence Trail */}
           <EvidenceTrail fusedContext={report.fusedContext} />
