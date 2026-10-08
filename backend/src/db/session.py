@@ -196,6 +196,52 @@ class CaseStore:
         except Exception as e:
             print(f"[CaseStore] SQLite save error: {e}")
 
+    def delete(self, procurement_id: str) -> bool:
+        """Deletes a procurement case from in-memory cache and SQLite database."""
+        existed = procurement_id in self._cases
+        if existed:
+            del self._cases[procurement_id]
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("DELETE FROM procurement_cases WHERE procurement_id = ?", (procurement_id,))
+                conn.commit()
+                if cursor.rowcount > 0:
+                    existed = True
+        except Exception as e:
+            print(f"[CaseStore] SQLite delete error: {e}")
+        return existed
+
+    def delete_vendor(self, vendor_identifier: str) -> bool:
+        """Deletes a vendor record from vendors table by ID or Name and any associated procurement cases."""
+        if not vendor_identifier:
+            return False
+        v_clean = vendor_identifier.strip()
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "DELETE FROM vendors WHERE vendor_id = ? OR vendor_name = ? COLLATE NOCASE",
+                    (v_clean, v_clean)
+                )
+                v_deleted = cursor.rowcount > 0
+                cursor.execute(
+                    "DELETE FROM procurement_cases WHERE vendor_name = ? COLLATE NOCASE",
+                    (v_clean,)
+                )
+                p_deleted = cursor.rowcount > 0
+                conn.commit()
+
+                # Clear cases from in-memory cache if any
+                to_remove = [pid for pid, c in self._cases.items() if c.get("vendorName", "").strip().lower() == v_clean.lower()]
+                for pid in to_remove:
+                    del self._cases[pid]
+
+                return v_deleted or p_deleted or len(to_remove) > 0
+        except Exception as e:
+            print(f"[CaseStore] SQLite delete vendor error: {e}")
+            return False
+
     # =========================================================================
     # Vendor Directory Operations (vendors table)
     # =========================================================================

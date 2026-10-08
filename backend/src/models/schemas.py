@@ -83,6 +83,46 @@ class RiskAssessment(CamelBaseModel):
     overall_risk: RiskLevel
     confidence_score: float
 
+class MarketPowerLevel(str, Enum):
+    DOMINANT = "DOMINANT"          # Monopolistic or dominant market share (>40%)
+    STRONG = "STRONG"              # Top-3 tier producer, high pricing power
+    MODERATE = "MODERATE"          # Established competitive producer, balanced power
+    COMPETITIVE = "COMPETITIVE"    # Multiple market substitutes, low supplier leverage
+
+class OperationalResilience(CamelBaseModel):
+    on_time_delivery_rate: float = 0.95
+    manufacturing_capacity_score: float = 0.85
+    cold_chain_reliability: str = "High"
+    fulfillment_risk_summary: str = "Reliable supply chain buffer."
+
+class RegulatoryQualityRecord(CamelBaseModel):
+    cdsco_license_valid: bool = True
+    schedule_m_status: str = "Schedule M GMP Compliant"
+    nsq_batch_alerts_count: int = 0
+    regulatory_track_record: str = "Zero active NSQ batch alerts on CDSCO portal."
+
+class GovernanceIntegrity(CamelBaseModel):
+    blacklisting_status: str = "Clean - Not Debarred"
+    litigation_count: int = 0
+    nclt_insolvency_flag: bool = False
+    governance_summary: str = "Clear MCA21 registry standing and zero debarment flags."
+
+class VendorTransparencyMatrix(CamelBaseModel):
+    # Pillar 1 & 2: Financial & Market Power
+    annual_revenue_cr: float = 0.0
+    solvency_ratio: float = 2.0
+    credit_rating: str = "A"
+    financial_health_summary: str = "Stable liquidity and working capital."
+    market_standing: str = "Established Generic Producer"
+    market_power_level: MarketPowerLevel = MarketPowerLevel.MODERATE
+    bargaining_leverage: str = "Balanced"
+
+    # Pillar 3, 4, 5: Operational, Regulatory & Governance
+    operational_resilience: OperationalResilience = Field(default_factory=OperationalResilience)
+    regulatory_quality: RegulatoryQualityRecord = Field(default_factory=RegulatoryQualityRecord)
+    governance_integrity: GovernanceIntegrity = Field(default_factory=GovernanceIntegrity)
+    overall_transparency_score: int = 85  # 0-100
+
 class ProcurementReport(CamelBaseModel):
     vendor_summary: str
     financial_assessment: str
@@ -93,6 +133,7 @@ class ProcurementReport(CamelBaseModel):
     risk_assessment: RiskAssessment
     risk_explanation: str
     recommendation: str
+    vendor_transparency: Optional[VendorTransparencyMatrix] = None
 
 class ApprovalDecision(str, Enum):
     APPROVE = "APPROVE"

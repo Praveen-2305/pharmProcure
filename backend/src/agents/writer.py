@@ -8,7 +8,8 @@ from src.models.schemas import (
     ProcurementReport,
     RankedContext,
     RankedFact,
-    WorkflowStage
+    WorkflowStage,
+    VendorTransparencyMatrix
 )
 from src.prompts.writer_prompt import WRITER_SYSTEM_PROMPT, get_writer_prompt
 
@@ -81,31 +82,48 @@ def report_writer_agent(state: WorkflowState) -> WorkflowState:
             "Clause 7.3: Balanced 30-day cure period under Indian commercial contract standards."
         ]
 
+    # 5-Pillar Transparency Matrix Integration
+    v_transparency_data = evidence.get("vendor_transparency")
+    vendor_transparency_obj = None
+    if v_transparency_data:
+        try:
+            vendor_transparency_obj = VendorTransparencyMatrix(**v_transparency_data)
+        except Exception as e:
+            print(f"[ReportWriter] Note validating VendorTransparencyMatrix: {e}")
+
+    fin_assessment = getattr(getattr(assessment, "financial_risk", None), "rationale", "Audited clean.")
+    if vendor_transparency_obj:
+        fin_assessment = f"{fin_assessment} Standing: {vendor_transparency_obj.market_standing} (Power: {vendor_transparency_obj.market_power_level.value if hasattr(vendor_transparency_obj.market_power_level, 'value') else vendor_transparency_obj.market_power_level}, Leverage: {vendor_transparency_obj.bargaining_leverage})."
+
+    m_tag = f" — {vendor_transparency_obj.market_standing}" if vendor_transparency_obj else ""
+    t_score_str = f" [Transparency Score: {vendor_transparency_obj.overall_transparency_score}/100]" if vendor_transparency_obj else ""
+
     report = ProcurementReport(
-        vendor_summary=f"Comprehensive procurement intelligence audit for {vendor_name} ({category}, Deal Size: ₹{deal_size:,.2f}).",
-        financial_assessment=getattr(getattr(assessment, "financial_risk", None), "rationale", "Audited clean."),
+        vendor_summary=f"Comprehensive 5-pillar procurement intelligence audit for {vendor_name}{m_tag} ({category}, Deal Size: ₹{deal_size:,.2f}){t_score_str}.",
+        financial_assessment=fin_assessment,
         compliance_findings=getattr(getattr(assessment, "compliance_risk", None), "rationale", "Schedule M GMP certified."),
         flagged_contract_clauses=flagged_clauses,
         evidence_summary=evidence_summary,
         fused_context=fused_context,
         risk_assessment=assessment,
-        risk_explanation=f"Overall risk evaluated as {overall_risk}. Confidence based on regulatory evidence completeness.",
-        recommendation=recommendation
+        risk_explanation=f"Overall risk evaluated as {overall_risk}. Confidence based on regulatory and 5-pillar evidence completeness.",
+        recommendation=recommendation,
+        vendor_transparency=vendor_transparency_obj
     )
 
     # Sync finalized evaluation to SQLite vendor_profiles cache
     from src.db.session import case_store
     try:
-        fin_rat = getattr(getattr(assessment, "financial_risk", None), "rationale", "Audited clean.")
         comp_rat = getattr(getattr(assessment, "compliance_risk", None), "rationale", "Verified compliant.")
         v_id = evidence.get("structured", {}).get("vendor_id") or f"VND-{abs(hash(vendor_name)) % 900 + 100}"
+        fin_status_str = fin_assessment
         case_store.upsert_vendor_profile({
             "vendor_name": vendor_name,
             "vendor_id": v_id,
             "global_risk_level": overall_risk.value if hasattr(overall_risk, "value") else str(overall_risk),
             "compliance_status": comp_rat,
             "litigation_summary": getattr(getattr(assessment, "contract_risk", None), "rationale", "Zero disputes."),
-            "financial_status": fin_rat
+            "financial_status": fin_status_str
         })
     except Exception as e:
         print(f"[ReportWriter] Cache update note: {e}")

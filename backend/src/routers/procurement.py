@@ -255,6 +255,32 @@ async def get_all_procurements():
     """Returns all procurement records sorted by creation date descending."""
     return case_store.get_all()
 
+@router.delete("/vendor/{vendor_identifier}")
+async def delete_vendor(vendor_identifier: str):
+    """Deletes a vendor catalog entry from the database."""
+    deleted = case_store.delete_vendor(vendor_identifier)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+    return {
+        "success": True,
+        "vendor_identifier": vendor_identifier,
+        "message": f"Vendor '{vendor_identifier}' deleted successfully"
+    }
+
+@router.delete("/{procurement_id}")
+async def delete_procurement_case(procurement_id: str):
+    """Deletes a procurement case from the database and active workflows."""
+    if procurement_id in active_workflows:
+        del active_workflows[procurement_id]
+    deleted = case_store.delete(procurement_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Procurement record not found")
+    return {
+        "success": True,
+        "procurement_id": procurement_id,
+        "message": "Procurement case deleted successfully"
+    }
+
 @router.get("/logs")
 async def get_governance_logs():
     """Returns forensic audit and governance logs across all procurement workflow cases."""

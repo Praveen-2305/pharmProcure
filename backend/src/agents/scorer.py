@@ -36,17 +36,23 @@ def risk_scorer_agent(state: WorkflowState) -> WorkflowState:
     litigation = ext_intel.get("litigation_records", [])
     recalls = ext_intel.get("product_recalls", [])
     ext_risk_signal = ext_intel.get("risk_signal", "LOW")
+    transparency = evidence.get("vendor_transparency", {})
+    m_power = transparency.get("market_power_level", "MODERATE")
+    m_standing = transparency.get("market_standing", "Qualified Supplier")
+    solv_ratio = float(transparency.get("solvency_ratio", structured.get("solvency_ratio", 2.0)))
+    rev_cr = float(transparency.get("annual_revenue_cr", structured.get("annual_revenue_cr", 25.0)))
+    blacklisting = transparency.get("governance_integrity", {}).get("blacklisting_status", "Clean - Not Debarred")
 
-    # 1. Financial Risk Evaluation
+    # 1. Financial Risk Evaluation (Solvency, Revenue, Credit Rating & Working Capital)
     financial_level = RiskLevel.LOW
-    financial_rationale = "Healthy liquidity and clean financial audit."
+    financial_rationale = f"Audited healthy balance sheet (₹{rev_cr:.1f} Cr revenue, Solvency: {solv_ratio:.2f})."
     credit_score = structured.get("credit_score", 750)
-    if credit_score < 600:
+    if credit_score < 600 or solv_ratio < 1.3:
         financial_level = RiskLevel.HIGH
-        financial_rationale = f"Severe financial distress flagged (Credit score: {credit_score})."
-    elif credit_score < 700:
+        financial_rationale = f"High solvency/liquidity distress flagged (Credit score: {credit_score}, Solvency: {solv_ratio:.2f})."
+    elif credit_score < 700 or solv_ratio < 1.7:
         financial_level = RiskLevel.MEDIUM
-        financial_rationale = f"Moderate credit profile ({credit_score}). Stricter payment milestones required."
+        financial_rationale = f"Moderate liquidity profile (₹{rev_cr:.1f} Cr, Solvency: {solv_ratio:.2f}). Stricter milestone-based release required."
 
     # Incorporate external commercial litigation / arbitration into financial risk
     has_commercial_litigation = any(
@@ -57,17 +63,17 @@ def risk_scorer_agent(state: WorkflowState) -> WorkflowState:
         lit_summary = "; ".join(litigation)
         if financial_level == RiskLevel.LOW:
             financial_level = RiskLevel.MEDIUM
-            financial_rationale = f"{financial_rationale} Active external legal proceedings flagged: {lit_summary}"
+            financial_rationale = f"{financial_rationale} Active commercial litigation flagged: {lit_summary}"
         else:
             financial_rationale = f"{financial_rationale} Compounded by active legal dispute: {lit_summary}"
 
-    # 2. Compliance Risk Evaluation
+    # 2. Compliance Risk Evaluation (CDSCO, NSQ recalls, GMP, and Debarment)
     compliance_level = RiskLevel.LOW
-    compliance_rationale = "Schedule M GMP and ISO standards verified; clean regulatory record."
+    compliance_rationale = "Schedule M GMP and CDSCO license verified; clean regulatory track record."
     citations = structured.get("fda_483_citations", 0)
     if citations > 2:
         compliance_level = RiskLevel.HIGH
-        compliance_rationale = f"Critical non-compliance: {citations} regulatory citations on file."
+        compliance_rationale = f"Critical non-compliance: {citations} regulatory inspection citations on file."
     elif citations > 0:
         compliance_level = RiskLevel.MEDIUM
         compliance_rationale = f"{citations} minor inspection notice observed."
@@ -87,7 +93,12 @@ def risk_scorer_agent(state: WorkflowState) -> WorkflowState:
             compliance_level = RiskLevel.MEDIUM
             compliance_rationale = f"Regulatory advisory noted via external intelligence: {combined_warnings}"
 
-    # 3. Contract Risk Evaluation
+    # Check for tender debarment / blacklisting flags
+    if "Flagged" in blacklisting:
+        compliance_level = RiskLevel.HIGH
+        compliance_rationale = f"Integrity Alert: {blacklisting}. Vendor flagged in tender debarment records."
+
+    # 3. Contract Risk Evaluation (Clauses, Market Dominance, & Operational Resilience)
     contract_clauses = evidence.get("contract_clauses", {})
     if contract_clauses:
         c_level_str = str(contract_clauses.get("contract_risk_level", "LOW")).upper()
@@ -101,6 +112,19 @@ def risk_scorer_agent(state: WorkflowState) -> WorkflowState:
     else:
         contract_level = RiskLevel.LOW
         contract_rationale = "Standard indemnification terms and mutually balanced 30-day cure period."
+
+    # Factor in Supplier Market Power & Single-Source Lock-in Risk
+    if m_power in ["DOMINANT", "STRONG"] and str(m_power).upper() == "DOMINANT":
+        if contract_level == RiskLevel.LOW:
+            contract_level = RiskLevel.MEDIUM
+        contract_rationale = f"{contract_rationale} Supplier holds dominant market standing ({m_standing}); price rigidity and vendor lock-in leverage flagged."
+
+    # Factor in Operational Fulfillment Track Record (OTIF delivery rate)
+    otif_rate = float(transparency.get("operational_resilience", {}).get("on_time_delivery_rate", 0.95))
+    if otif_rate < 0.90:
+        if contract_level == RiskLevel.LOW:
+            contract_level = RiskLevel.MEDIUM
+        contract_rationale = f"{contract_rationale} Operational fulfillment alert: Historical on-time delivery rate is {otif_rate*100:.1f}% (below 90% benchmark)."
 
     if fusion.get("has_unresolved_contradictions"):
         if contract_level == RiskLevel.LOW:

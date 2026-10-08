@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { SubmitRequestForm } from '../src/pages/SubmitRequest/SubmitRequestForm';
-import { mockProcurementAPI } from '../src/api/procurement';
+import { procurementApi } from '../src/api/client';
 
 // Wrap with router
 const renderComponent = () =>
@@ -33,7 +33,7 @@ describe('SubmitRequestForm Component', () => {
   });
 
   it('submits successfully with valid data', async () => {
-    const submitSpy = vi.spyOn(mockProcurementAPI, 'submitRequest');
+    const submitSpy = vi.spyOn(procurementApi, 'submitRequest');
 
     renderComponent();
 

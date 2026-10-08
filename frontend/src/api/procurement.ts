@@ -20,6 +20,14 @@ export interface ProcurementAPI {
   getStatus(procurementId: string, options?: RequestOptions): Promise<WorkflowStatus>;
   getReport(procurementId: string, options?: RequestOptions): Promise<ProcurementReport | null>;
   getAllProcurements(options?: RequestOptions): Promise<ProcurementItemSummary[]>;
+  deleteProcurement(
+    procurementId: string,
+    options?: RequestOptions
+  ): Promise<{ success: boolean; procurementId: string }>;
+  deleteVendor?(
+    vendorIdentifier: string,
+    options?: RequestOptions
+  ): Promise<{ success: boolean; vendorIdentifier: string }>;
 }
 
 // In-memory store for mock execution
@@ -573,6 +581,21 @@ export const mockProcurementAPI: ProcurementAPI = {
     });
     return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   },
+
+  async deleteProcurement(procurementId: string): Promise<{ success: boolean; procurementId: string }> {
+    const existed = mockStore.delete(procurementId);
+    return { success: existed, procurementId };
+  },
+
+  async deleteVendor(vendorIdentifier: string): Promise<{ success: boolean; vendorIdentifier: string }> {
+    const clean = vendorIdentifier.trim().toLowerCase();
+    mockStore.forEach((val, key) => {
+      if (val.vendorName.trim().toLowerCase() === clean) {
+        mockStore.delete(key);
+      }
+    });
+    return { success: true, vendorIdentifier };
+  },
 };
 
 // HTTP Implementation calling FastAPI endpoints via centralized HttpClient
@@ -613,5 +636,19 @@ export const httpProcurementAPI: ProcurementAPI = {
 
   async getAllProcurements(options?: RequestOptions): Promise<ProcurementItemSummary[]> {
     return httpClient.get<ProcurementItemSummary[]>('/procurement/all', options);
+  },
+
+  async deleteProcurement(procurementId: string, options?: RequestOptions): Promise<{ success: boolean; procurementId: string }> {
+    return httpClient.delete<{ success: boolean; procurementId: string }>(
+      `/procurement/${encodeURIComponent(procurementId)}`,
+      options
+    );
+  },
+
+  async deleteVendor(vendorIdentifier: string, options?: RequestOptions): Promise<{ success: boolean; vendorIdentifier: string }> {
+    return httpClient.delete<{ success: boolean; vendorIdentifier: string }>(
+      `/procurement/vendor/${encodeURIComponent(vendorIdentifier)}`,
+      options
+    );
   },
 };
