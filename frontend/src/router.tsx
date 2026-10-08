@@ -6,6 +6,7 @@ import { SubmitRequestPage } from './pages/SubmitRequest/SubmitRequestPage';
 import { VendorReviewPage } from './pages/VendorReview/VendorReviewPage';
 import { ApprovalQueuePage } from './pages/ApprovalQueue/ApprovalQueuePage';
 import { PriceCheckPage } from './features/price-check/PriceCheckPage';
+import { ImpactDashboardPage } from './features/impact/ImpactDashboardPage';
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +24,10 @@ export const router = createBrowserRouter([
       {
         path: 'dashboard',
         element: <DashboardPage />,
+      },
+      {
+        path: 'impact',
+        element: <ImpactDashboardPage />,
       },
       {
         path: 'price-check',

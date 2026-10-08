@@ -11,6 +11,7 @@ from src.config import settings
 from src.routers.procurement import router as procurement_router
 from src.routers.approval import router as approval_router
 from src.api.price_checker import router as price_checker_router
+from src.api.analytics import router as analytics_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -30,11 +31,13 @@ app.add_middleware(
 app.include_router(procurement_router)
 app.include_router(approval_router)
 app.include_router(price_checker_router)
+app.include_router(analytics_router)
 
 # Mount legacy prefix for backward compatibility
 app.include_router(procurement_router, prefix="/api")
 app.include_router(approval_router, prefix="/api")
 app.include_router(price_checker_router, prefix="/api")
+app.include_router(analytics_router, prefix="/api")
 
 @app.get("/")
 def read_root():

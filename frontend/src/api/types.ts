@@ -177,3 +177,51 @@ export interface PriceCheckResponse {
   unitMeasure: string;
   therapeuticUse?: string;
 }
+
+// --- Impact & ROI Analytics Types
+export interface ImpactAssumptionData {
+  analystHourlyRateInr: number;
+  manualReviewHoursPerCase: number;
+  aiReviewHoursPerCase: number;
+  annualPlatformCostInr: number;
+  statutoryPenaltyMultiplier: number;
+}
+
+export interface MonthlySavingsPoint {
+  month: string;
+  savingsInr: number;
+  casesCount: number;
+  procurementVolumeInr: number;
+}
+
+export interface ExposedVendorSummary {
+  vendorName: string;
+  casesCount: number;
+  totalDealSizeInr: number;
+  overpaymentCaughtInr: number;
+  riskLevel: string;
+  primaryViolation: string;
+}
+
+export interface RiskDistributionSummary {
+  low: number;
+  medium: number;
+  high: number;
+}
+
+export interface ImpactAnalyticsResponse {
+  totalCasesProcessed: number;
+  illegalQuotesBlockedCount: number;
+  totalProcurementVolumeInr: number;
+  totalOverpaymentBlockedInr: number;
+  analystHoursSaved: number;
+  laborCostSavingsInr: number;
+  statutoryPenaltiesPreventedInr: number;
+  netFinancialBenefitInr: number;
+  roiMultiple: number;
+  averageTurnaroundMinutes: number;
+  riskDistribution: RiskDistributionSummary;
+  savingsOverTime: MonthlySavingsPoint[];
+  topExposedVendors: ExposedVendorSummary[];
+  assumptions: ImpactAssumptionData;
+}

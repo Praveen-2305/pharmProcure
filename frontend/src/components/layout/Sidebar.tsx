@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
+  TrendingUp,
   PlusCircle,
   ClipboardCheck,
   Calculator,
@@ -34,6 +35,12 @@ export const Sidebar: React.FC<{ isOpen?: boolean }> = ({ isOpen = true }) => {
       label: 'Audit Dashboard',
       icon: LayoutDashboard,
       description: 'Historical cases & audit trail',
+    },
+    {
+      to: '/impact',
+      label: 'Impact & ROI',
+      icon: TrendingUp,
+      description: 'Quantified savings & DPCO value',
     },
     {
       to: '/price-check',

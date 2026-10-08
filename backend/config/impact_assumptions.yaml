@@ -1,0 +1,13 @@
+# AutonoSource Procurement ROI & Business Impact Assumptions
+# Denominated strictly in Indian Rupees (INR / ₹) for Indian Pharmaceutical Procurement
+
+cost_assumptions:
+  analyst_hourly_rate_inr: 1500.0       # Average hourly cost of Senior Procurement Auditor in India
+  manual_review_hours_per_case: 18.0    # Historic manual turnaround time (audit, CDSCO lookup, pricing)
+  ai_review_hours_per_case: 0.15        # AutonoSource turnaround time (~9 minutes per case)
+  annual_platform_cost_inr: 600000.0    # Enterprise software operational cost benchmark
+  statutory_penalty_multiplier: 1.5     # Statutory penalty avoided under Essential Commodities Act 1955
+
+thresholds:
+  high_risk_threshold_inr: 5000000.0    # Cases above ₹50L flagged as high capital exposure
+  confidence_target: 0.80               # Required confidence score threshold for autonomous sign-off
