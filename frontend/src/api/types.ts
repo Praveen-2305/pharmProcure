@@ -348,3 +348,42 @@ export interface NegotiationPackResponse {
   replacementClauses: ReplacementClauseItem[];
   negotiationStrategyTips: string[];
 }
+
+// --- What-If Scenario Simulator (Feature 7)
+export interface SimulationInputs {
+  quotedPrice?: number;
+  coldChainSla?: string;
+  liabilityCapPercent?: number;
+  liabilityCapInr?: number;
+  otifRatePercent?: number;
+  paymentTermsDays?: number;
+  creditScore?: number;
+  curePeriodDays?: number;
+}
+
+export interface DimensionScore {
+  dimension: string;
+  originalLevel: string;
+  simulatedLevel: string;
+  originalRationale: string;
+  simulatedRationale: string;
+  improved: boolean;
+}
+
+export interface SimulationResponse {
+  procurementId: string;
+  vendorName: string;
+  originalOverallRisk: RiskLevel | string;
+  simulatedOverallRisk: RiskLevel | string;
+  riskScoreBefore: number;
+  riskScoreAfter: number;
+  riskScoreDelta: number;
+  isDpcoCompliantBefore: boolean;
+  isDpcoCompliantAfter: boolean;
+  ceilingPriceInr: number;
+  quotedPriceBefore: number;
+  quotedPriceAfter: number;
+  priceVariancePercentAfter: number;
+  dimensions: DimensionScore[];
+  negotiationRecommendation: string;
+}

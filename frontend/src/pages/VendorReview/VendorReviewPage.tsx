@@ -17,11 +17,14 @@ import {
   UserCheck,
   FileWarning,
   Sparkles,
+  Sliders,
+  FileText,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Button, buttonVariants } from '../../components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert';
+import { WhatIfSimulatorTab } from '../../features/simulator/WhatIfSimulatorTab';
 
 const WORKFLOW_STAGES: Array<{ id: WorkflowStage; label: string; skill: string; icon: any; description: string }> = [
   { id: 'PLANNING', label: 'Planner', skill: 'Investigation Planning', icon: BrainCircuit, description: 'Decompose procurement scope & schedule investigation plan.' },
@@ -36,6 +39,7 @@ export const VendorReviewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { status, report, loading, error, refetch } = useProcurementStatus(id);
   const [isRefetching, setIsRefetching] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState<'report' | 'simulator'>('report');
 
   const handleRefresh = async () => {
     setIsRefetching(true);
@@ -211,65 +215,105 @@ export const VendorReviewPage: React.FC = () => {
         </Card>
       )}
 
-      {/* Complete Report Findings */}
+      {/* Complete Report Findings or What-If Simulator */}
       {isCompleteOrReview && report && (
-        <div className="space-y-8">
-          {/* Executive Summary & Recommendation Banner */}
-          <Card className="shadow-sm">
-            <CardContent className="p-6 space-y-5">
-              <div className="flex items-center gap-2 text-sm font-semibold text-primary border-b pb-3">
-                <Sparkles className="size-4" />
-                <span>Report Writer Synthesis (Multi-Agent Synthesis Engine)</span>
-              </div>
-
-              <div className="space-y-2">
-                <h2 className="text-base font-semibold text-foreground">Executive Case Summary</h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">{report.vendorSummary}</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-2">
-                  <span className="font-semibold text-primary text-sm block">
-                    Strategic Recommendation:
-                  </span>
-                  <p className="text-sm text-foreground leading-relaxed">{report.recommendation}</p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-muted/50 border space-y-2">
-                  <span className="font-semibold text-muted-foreground text-sm block">
-                    Risk Assessment Rationale:
-                  </span>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{report.riskExplanation}</p>
-                </div>
-              </div>
-
-              {/* Flagged Contract Clauses */}
-              {report.flaggedContractClauses.length > 0 && (
-                <div className="pt-2 space-y-3">
-                  <span className="text-sm font-semibold text-muted-foreground">
-                    Flagged Contract Clauses:
-                  </span>
-                  <div className="space-y-2">
-                    {report.flaggedContractClauses.map((clause, i) => (
-                      <Alert key={i} variant="default" className="bg-orange-500/10 border-orange-500/30 text-orange-900 dark:text-orange-100 shadow-sm transition-colors hover:bg-orange-500/15">
-                        <FileWarning className="size-4.5 text-orange-600 dark:text-orange-400" />
-                        <AlertDescription className="text-[13px] font-medium leading-relaxed ml-2">{clause}</AlertDescription>
-                      </Alert>
-                    ))}
-                  </div>
-                </div>
+        <div className="space-y-6">
+          {/* Section Navigation Tabs */}
+          <div className="flex items-center gap-2 border-b border-border/50 pb-2">
+            <button
+              type="button"
+              onClick={() => setActiveTab('report')}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all",
+                activeTab === 'report'
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80"
               )}
-            </CardContent>
-          </Card>
+            >
+              <FileText className="size-4" />
+              <span>Audit Report & Evidence</span>
+            </button>
 
-          {/* 4D Risk Breakdown & 5-Pillar Vendor Transparency Matrix */}
-          <RiskBreakdown
-            riskAssessment={report.riskAssessment}
-            vendorTransparency={report.vendorTransparency || (report as unknown as { vendor_transparency?: typeof report.vendorTransparency }).vendor_transparency}
-          />
+            <button
+              type="button"
+              onClick={() => setActiveTab('simulator')}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all",
+                activeTab === 'simulator'
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+              )}
+            >
+              <Sliders className="size-4" />
+              <span>What-If Deal Simulator</span>
+              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] px-1.5 py-0 uppercase">
+                Interactive
+              </Badge>
+            </button>
+          </div>
 
-          {/* Hybrid RAG Evidence Trail */}
-          <EvidenceTrail fusedContext={report.fusedContext} />
+          {activeTab === 'simulator' ? (
+            <WhatIfSimulatorTab procurementId={id!} report={report} />
+          ) : (
+            <div className="space-y-8">
+              {/* Executive Summary & Recommendation Banner */}
+              <Card className="shadow-sm">
+                <CardContent className="p-6 space-y-5">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-primary border-b pb-3">
+                    <Sparkles className="size-4" />
+                    <span>Report Writer Synthesis (Multi-Agent Synthesis Engine)</span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h2 className="text-base font-semibold text-foreground">Executive Case Summary</h2>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{report.vendorSummary}</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-2">
+                      <span className="font-semibold text-primary text-sm block">
+                        Strategic Recommendation:
+                      </span>
+                      <p className="text-sm text-foreground leading-relaxed">{report.recommendation}</p>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-muted/50 border space-y-2">
+                      <span className="font-semibold text-muted-foreground text-sm block">
+                        Risk Assessment Rationale:
+                      </span>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{report.riskExplanation}</p>
+                    </div>
+                  </div>
+
+                  {/* Flagged Contract Clauses */}
+                  {report.flaggedContractClauses.length > 0 && (
+                    <div className="pt-2 space-y-3">
+                      <span className="text-sm font-semibold text-muted-foreground">
+                        Flagged Contract Clauses:
+                      </span>
+                      <div className="space-y-2">
+                        {report.flaggedContractClauses.map((clause, i) => (
+                          <Alert key={i} variant="default" className="bg-orange-500/10 border-orange-500/30 text-orange-900 dark:text-orange-100 shadow-sm transition-colors hover:bg-orange-500/15">
+                            <FileWarning className="size-4.5 text-orange-600 dark:text-orange-400" />
+                            <AlertDescription className="text-[13px] font-medium leading-relaxed ml-2">{clause}</AlertDescription>
+                          </Alert>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* 4D Risk Breakdown & 5-Pillar Vendor Transparency Matrix */}
+              <RiskBreakdown
+                riskAssessment={report.riskAssessment}
+                vendorTransparency={report.vendorTransparency || (report as unknown as { vendor_transparency?: typeof report.vendorTransparency }).vendor_transparency}
+              />
+
+              {/* Hybrid RAG Evidence Trail */}
+              <EvidenceTrail fusedContext={report.fusedContext} />
+            </div>
+          )}
         </div>
       )}
     </div>
