@@ -13,6 +13,7 @@ import { VendorDirectoryPage } from './features/vendors/VendorDirectoryPage';
 import { Vendor360Page } from './features/vendors/Vendor360Page';
 import { AlertsCenterPage } from './features/alerts/AlertsCenterPage';
 import { AuditTrailPage } from './pages/AuditTrail/AuditTrailPage';
+import { BatchAuditPage } from './features/batch-audit/BatchAuditPage';
 
 export const router = createBrowserRouter([
   {
@@ -34,6 +35,10 @@ export const router = createBrowserRouter([
       {
         path: 'audit',
         element: <AuditTrailPage />,
+      },
+      {
+        path: 'batch-audit',
+        element: <BatchAuditPage />,
       },
       {
         path: 'impact',

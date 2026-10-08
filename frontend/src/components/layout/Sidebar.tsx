@@ -8,6 +8,7 @@ import {
   Calculator,
   Scale,
   FileCheck2,
+  FileSpreadsheet,
   Building2,
   Bell,
   Workflow,
@@ -51,6 +52,12 @@ export const Sidebar: React.FC<{ isOpen?: boolean }> = ({ isOpen = true }) => {
       label: 'Price Checker',
       icon: Calculator,
       description: 'NPPA DPCO ceiling compliance',
+    },
+    {
+      to: '/batch-audit',
+      label: 'Tender Auditor',
+      icon: FileSpreadsheet,
+      description: 'Bulk RFP line-item statutory check',
     },
     {
       to: '/compare',
