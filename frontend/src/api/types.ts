@@ -303,3 +303,48 @@ export interface MultiVendorCompareResponse {
   candidates: VendorComparisonCandidate[];
   recommendation: ComparisonRecommendation;
 }
+
+// --- Contract Analyzer & Negotiation Pack (Feature 6)
+export interface AuditedClauseCard {
+  clauseId: string;
+  clauseTitle: string;
+  extractedText: string;
+  complianceStatus: "COMPLIANT" | "WARNING" | "VIOLATION";
+  severity: "LOW" | "MEDIUM" | "HIGH";
+  statuteCited: string;
+  legalBenchmark: string;
+  recommendedRemedy: string;
+}
+
+export interface ContractAuditResponse {
+  documentName: string;
+  overallContractRisk: "LOW" | "MEDIUM" | "HIGH";
+  totalClausesAnalyzed: number;
+  violationsCount: number;
+  warningsCount: number;
+  compliantCount: number;
+  summaryRationale: string;
+  clauses: AuditedClauseCard[];
+}
+
+export interface ReplacementClauseItem {
+  clauseTitle: string;
+  problematicOriginal: string;
+  statutoryReplacementClause: string;
+  rationale: string;
+}
+
+export interface NegotiationPackRequest {
+  vendorName?: string;
+  contractTitle?: string;
+  flaggedClauses?: string[];
+}
+
+export interface NegotiationPackResponse {
+  vendorName: string;
+  contractTitle: string;
+  emailSubject: string;
+  emailBodyDraft: string;
+  replacementClauses: ReplacementClauseItem[];
+  negotiationStrategyTips: string[];
+}

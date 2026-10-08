@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   Calculator,
   Scale,
+  FileCheck2,
   Workflow,
   RotateCw,
   Clock,
@@ -54,6 +55,12 @@ export const Sidebar: React.FC<{ isOpen?: boolean }> = ({ isOpen = true }) => {
       label: 'Compare Vendors',
       icon: Scale,
       description: 'Competitive 5-pillar radar RFP',
+    },
+    {
+      to: '/contract-analyzer',
+      label: 'Contract Analyzer',
+      icon: FileCheck2,
+      description: 'Statutory clause auditor & pack',
     },
     {
       to: '/submit',
