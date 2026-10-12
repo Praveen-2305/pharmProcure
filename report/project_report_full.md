@@ -1,359 +1,330 @@
 AUTONOSOURCE — MULTI-AGENT PROCUREMENT RISK & VENDOR INTELLIGENCE PLATFORM (pharmProcure)
-=====================================================================================
+=================================================================================================================
 
 Author(s): Krishnaprasath SK, Kamalesh V
 
 Abstract
 --------
 
-AutonoSource (pharmProcure) is a research-grade proof-of-concept platform that applies
-multi-agent orchestration, hybrid retrieval-augmented generation, and deterministic
-statutory checks to the problem of procurement risk assessment in pharmaceutical
-supply chains. The system is engineered to combine high-recall semantic retrieval using
-Qdrant with relation-preserving queries over a NetworkX knowledge graph. By
-orchestrating specialized LangGraph agents—Planner, RAG, Scraper, Scorer, Critic, and
-Writer—the platform constructs auditable, explainable dossiers that enumerate
-evidence, detect contradictions, and produce a final recommendation that is suitable
-for human review and regulatory scrutiny. Redis-backed cache-augmented generation
-reduces repeated LLM calls and improves interactive latency while SQLite-seeded
-datasets demonstrate deterministic pricing checks against the DPCO 2013 catalog.
+AutonoSource (pharmProcure) is a multi-agent investigatory platform designed to
+systematically address procurement risk in highly regulated pharmaceutical supply
+chains. Where conventional AI assistants rely on single-pass generative answers, this
+work integrates hybrid evidence retrieval, deterministic statutory checks, and a
+modular agent-based workflow to produce auditable, explainable dossiers intended for
+human decision-makers. The architecture couples high-recall dense retrieval (Qdrant)
+with relation-preserving graph traversals (NetworkX), orchestrated by LangGraph-driven
+agents that plan investigations, fetch corroborating evidence, score risk along
+multiple dimensions, iteratively critique drafts, and synthesize final reports. The
+system incorporates Redis for cache-augmented generation to manage latency and uses
+seeded datasets for deterministic pricing checks against statutory catalogs denominated
+in Indian Rupees (INR). This report presents the project rationale, theoretical
+foundations, methodology, module-level design, empirical evaluations on seeded
+cases, and recommendations for future operationalization.
 
 Table of Contents
 -----------------
 
-1. Chapter I — Introduction
-2. Chapter II — Literature Survey
-3. Chapter III — Objectives and Methodology
-4. Chapter IV — Proposed Work Modules
-5. Chapter V — Results and Discussion
-6. Chapter VI — Conclusions and Future Work
-7. References
-8. Appendices
+Chapter I — Introduction
+Chapter II — Literature Survey
+Chapter III — Objectives and Methodology
+Chapter IV — Proposed Work Modules
+Chapter V — Results and Discussion
+Chapter VI — Conclusions and Future Work
+References
+Appendices
 
 Chapter I — Introduction
 -------------------------
 
 1.0 Overview
 
-AutonoSource has been developed to address a practical and pressing need in regulated
-procurement: the automation of investigative due diligence while preserving
-explainability, auditability, and deterministic statutory checks. The procurement
-process in pharmaceutical contexts often hinges on verifying regulatory compliance
-documents, ensuring cold-chain integrity for temperature-sensitive products, and
-matching quoted prices to statutory ceilings. Historically, these checks have been
-performed manually by experienced analysts who synthesize evidence from diverse
-sources—regulatory gazettes, vendor declarations, inspection reports, and contractual
-clauses. AutonoSource codifies that investigative expertise into a repeatable, testable
-software pipeline that assists analysts and provides a defensible audit trail for
-decisions.
+Procurement in regulated industries such as pharmaceuticals requires a nuanced
+combination of legal interpretation, numerical validation, and contextual judgment.
+Buyers and procurement officers must reconcile statutory requirements, technical
+standards for product handling, historical vendor behaviour, and the precise terms of
+commercial contracts before making high-value decisions. Traditional manual workflows
+are time-consuming and brittle; they are also difficult to scale and audit. AutonoSource
+was conceived to formalize this investigative process: the platform translates manual
+best-practices into a repeatable software pipeline that augments human judgment with
+algorithmic evidence fusion. Rather than supplanting expert review, the platform aims
+to accelerate evidence collection, reduce routine verification errors, and present
+decision-ready dossiers that make the provenance of every conclusion explicit.
 
 1.1 Motivation and Problem Statement
 
-Procurement in regulated domains is inherently investigative. When a vendor submits
-a quotation for a regulated medicine, an analyst is required to verify multiple aspects:
-the statutory authorizations of the manufacturer, the physical handling and storage
-provisions in contracts, the authenticity of pricing relative to published ceilings, and
-the vendor's historical compliance records. Existing AI assistants and simple RAG
-systems may retrieve plausible text but cannot reliably indicate legal authority, cannot
-perform deterministic numeric checks against a canonical price catalog, and often fail
-to resolve contradictions between multiple evidence sources. These shortcomings
-create legal exposure and erode trust in automated assistance. AutonoSource seeks to
-reduce this risk by combining evidence-based retrieval, deterministic checks, and a
-revision-driven critique mechanism to ensure higher confidence before human
-approval.
+The central challenge addressed by this project is the reliable automation of
+procurement due-diligence in contexts where incorrect decisions carry legal and public
+health consequences. A core failure mode for modern LLMs is that they provide
+plausible textual answers without explicit grounding, which is unacceptable in a
+regulatory setting. Moreover, procurement often involves deterministic checks—such
+as comparing a quoted unit price against a legally-enforced ceiling—that cannot be
+left to probabilistic language models. By combining evidence retrieval, graph-based
+provenance, and deterministic arithmetic backstops, AutonoSource provides a safer
+and more defensible decision-support tool. The project is motivated by the need to
+reduce both false negatives (failing to flag non-compliance) and false positives
+(erroneously escalating routine cases), and to make the decision-making traceable to
+documented sources.
 
 1.2 Design Principles
 
-The system is guided by four core principles: explainability, determinism, modularity,
-and reproducibility. Explainability requires that every final recommendation be
-backed by explicit source passages and provenance paths. Determinism requires
-that operations such as pricing checks be numeric and auditable—software should
-return a definitive `EXCEEDS_CEILING` or `WITHIN_CEILING` when a catalog match is
-found, rather than a probabilistic prose answer. Modularity ensures each agent and
-adapter is independently testable: retrievers, scrapers, scorers, and writers are
-clearly separated. Reproducibility emphasizes idempotent data ingestion and a
-documented seed pipeline for vendor records, pricing catalogs, and statutory texts.
+The platform's architecture is informed by four design principles that respond to
+both technical and regulatory demands. Explainability requires that every significant
+assertion in a dossier be traceable to an explicit source passage and, where relevant,
+to a traversal path through a knowledge graph that clarifies authority relationships.
+Determinism demands that numeric checks and catalog comparisons be conducted by
+software modules whose outputs are auditable and reproducible. Modularity ensures
+that specialized tasks—retrieval, scoring, scraping, and writing—are implemented as
+loosely coupled components that can be independently tested and improved. Finally,
+reproducibility mandates idempotent data ingestion and versioned seed datasets so that
+experiments and evaluations can be repeated and validated by independent reviewers.
 
 1.3 Scope and Limitations
 
-AutonoSource is a POC intended to validate architectural patterns rather than a fully
-audited production system. The repository contains 50 seed vendors and a sample of
-regulatory documents sufficient to demonstrate workflows and evaluations. For
-production deployment, additional engineering is required: secure credential storage,
-formal data governance, legal sign-off for automated recommendations in live
-procurements, and operational monitoring. Recognizing these constraints, the project's
-deliverables include auditable logs and structured dossiers that facilitate human review
-and regulator queries.
+This report documents a research-grade proof-of-concept rather than a production
+service. The repository is provisioned with a curated seed of fifty vendor records and
+representative statutory texts, sufficient for demonstration and evaluation. Significant
+work remains for production adoption, including robust secrets management, hardened
+infrastructure for sensitive data, and comprehensive legal review. Nevertheless, the
+POC intentionally emphasizes auditability and traceability, producing dossier artifacts
+and structured logs to facilitate subsequent validation and certification efforts.
 
 Chapter II — Literature Survey
 ------------------------------
 
 2.0 Overview
 
-This chapter synthesizes prior work in automatic speech recognition, large language
-models, retrieval-augmented generation, knowledge graphs, and hybrid retrieval
-methods, in addition to domain-specific regulations that informed AutonoSource's
-design. The literature exposes both the technical potential and current limitations of
-LLM-centric systems when applied to legally-sensitive decision-making.
+This chapter situates AutonoSource within the broader landscape of retrieval,
+language models, knowledge graphs, and applied regulatory automation. The review
+highlights the practical trade-offs between recall and relational fidelity, the risks of
+ungrounded generation, and the methodological advances that justify a hybrid
+retrieval-and-fusion approach.
 
-2.1 Automatic Speech Recognition and Multimodal Inputs
+2.1 Speech, Multimodality, and Evidence Capture
 
-Recent progress in automatic speech recognition (ASR), notably architectures such as
-Whisper and optimized variants like Faster-Whisper, permit practical transcription of
-spoken inputs in noisy, multi-accent settings. These capabilities are important in
-operational workflows where procurement officers might capture oral vendor
-statements, negotiate terms, or include audio-based evidence. AutonoSource
-incorporates an STT pipeline to ensure voice interactions are captured and transcribed
-accurately, enabling text-based retrieval and LLM reasoning.
+Modern procurement workflows increasingly include multimedia evidence—voice
+communications, scanned PDFs, and images of physical packaging. Advances in
+automatic speech recognition (ASR) such as Whisper have made low-latency,
+reasonably accurate transcription of oral interactions feasible. AutonoSource treats
+voice and image inputs as first-class evidence modalities: audio is transcribed for
+textual retrieval, while images (for example pill photos) can be routed to image
+analysis models and their outputs indexed alongside textual evidence. This multimodal
+capability broadens evidence coverage and reduces reliance on a single input form.
 
-2.2 Large Language Models and the Need for Grounding
+2.2 The Role and Limits of Large Language Models
 
-Large language models have revolutionized summarization and drafting, but they are
-not reliable authorities for factual legal or numeric claims. The literature and
-operational experience consistently recommend grounding generated outputs with
-retrieved passages and deterministic database checks. This principle directly
-motivates the platform's separation of retrieval (evidence) from synthesis (writing)
-and the insistence that the Writer enumerates its evidence and includes deterministic
-backstops for pricing assertions.
+Large Language Models have proven invaluable for synthesis, summarization, and
+drafting, yet their outputs must be read as probabilistic text rather than authoritative
+facts. The literature on hallucination and factuality underscores the need to separate
+retrieval of evidence from the generative step. AutonoSource adopts this separation
+explicitly: LLMs are used for drafting and rhetorical quality, while statutory claims and
+numeric assertions are validated against deterministic sources. The Writer agent's
+obligation to list supporting passages and catalog lookups is directly informed by this
+body of work.
 
-2.3 Retrieval-Augmented Generation and Hybrid Retrieval
+2.3 Retrieval Paradigms: Vector vs Graph
 
-Vector retrieval excels at semantic recall but loses hierarchical and relational
-context. Knowledge graphs preserve relations and provenance but may lack textual
-coverage. Hybrid retrieval combines both approaches: vector retrieval finds relevant
-textual passages, while graph retrieval supplies structured paths and precedence.
-AutonoSource's four-step fusion algorithm (score normalization, source weighting,
-contradiction detection, confidence penalty) operationalizes this combination and
-provides numeric confidence metrics useful in downstream decision-making.
+Vector retrieval excels at semantic matching and paraphrase-tolerant recall, enabling
+the discovery of relevant passages that share meaning with a query but not exact
+wording. In contrast, knowledge graphs preserve relationships and provenance,
+allowing queries about authority, precedence, and legal hierarchy. Hybrid retrieval
+combines these strengths: semantic search surfaces candidate passages while graph
+traversal explains which statutory nodes carry higher authority. AutonoSource's
+four-step fusion—normalizing scores, applying source-weighted multipliers, detecting
+contradictions, and computing confidence penalties—translates hybrid retrieval into a
+quantitative decision-making substrate.
 
-2.4 Contradiction Detection and Explainability
+2.4 Contradiction Detection and Slot-Based Extraction
 
-Detecting contradictions (e.g., SLA temperature ranges versus WHO cold-chain
-requirements) requires structured extraction and semantic comparison. The literature
-recommends using slot extraction models for critical legal and numeric fields and
-applying deterministic comparisons for numeric slots. Explainability research also
-recommends exposing provenance and scoring so that auditors can verify how a
-conclusion was reached; this principle is implemented in the dossier design.
+Effective contradiction detection requires extracting structured slots (numeric ranges,
+dates, liability caps) from text and comparing them across sources. Techniques from
+information extraction and relation extraction are applied to identify slots reliably, and
+deterministic comparators flag numeric mismatches while textual contradictions are
+presented with supporting passages for human adjudication. Research in explainable
+AI also recommends surfacing scoring granularity and provenance to facilitate audit
+and dispute resolution; AutonoSource implements these recommendations in the
+final dossier structure.
 
 Chapter III — Objectives and Methodology
 ----------------------------------------
 
-3.0 Executive Summary
+3.0 Objectives
 
-This chapter articulates precise objectives and the methodology followed to implement
-and evaluate AutonoSource. Objectives are categorized as primary (core functional
-goals) and secondary (engineering and operational goals), and the methodology
-follows iterative engineering phases designed to produce auditable and reproducible
-outcomes.
+The project defines clear, measurable objectives focused on producing an auditable
+decision-support pipeline. Primary objectives include deterministic pricing audits
+against DPCO 2013 price ceilings, hybrid evidence retrieval with provenance, and the
+generation of human-reviewable dossiers that enumerate conflicts and confidence.
+Secondary objectives attend to engineering quality: modular design, reproducible seed
+pipelines, and demonstrable latency improvements through cache-augmented
+generation.
 
-3.1 Primary Objectives
+3.1 Methodology
 
-The primary goals of AutonoSource are: (1) to implement a multi-agent investigative
-workflow that composes and reconciles evidence from diverse retrieval subsystems,
-(2) to perform deterministic pricing checks against DPCO 2013 price ceilings in INR,
-and (3) to generate explainable dossiers with explicit provenance and `conflicts_with`
-annotations sufficient for regulatory review.
+The chosen methodology is iterative and evidence-driven. We began with requirement
+elicitation to capture functional needs and domain constraints, followed by a high-level
+architecture that prioritized separation of concerns and auditability. Implementation
+proceeded in modular sprints with unit tests for deterministic components and
+integration tests for end-to-end flows. Evaluation used seeded canonical cases to
+measure retrieval recall, pricing classification accuracy, confidence calibration, and the
+efficacy of revision loops. All artifacts—seed data, test cases, and evaluation scripts—
+are committed to the repository to enable reproducibility.
 
-3.2 Secondary Objectives and Engineering Targets
+3.2 Evaluation Criteria
 
-Secondary objectives include modular testability, idempotent seed ingestion for
-datasets (vendors, pricing, statutory documents), and the ability to run the end-to-
-end pipeline locally for demonstrations. Engineering targets included: average cache
-hit latency under 10ms for repeated queries, and fresh retrieval end-to-end time
-under 3–4 seconds for POC workloads.
-
-3.3 Methodology — Phase Breakdown
-
-The project followed five principal phases: requirement elicitation, high-level
-architecture design, iterative implementation with modular tests, integration and
-evaluation against seeded cases, and documentation and packaging for demonstration.
-Each phase produced artifacts that were committed and versioned in the repository to
-support auditability and reproducibility.
-
-3.4 Requirements
-
-Functional requirements emphasized evidence retrieval, numeric pricing checks,
-human approval flows, and dossier export. Non-functional requirements emphasized
-explainability, reproducibility, and acceptable interactive performance for a POC.
-Security, compliance, and large-scale performance were identified as out-of-scope for
-the POC but included in recommendations for future work.
-
-3.5 Implementation and Testing
-
-Implementations were developed in Python with FastAPI for backend services. The
-LangGraph orchestrator models agent workflows. Unit tests covered deterministic
-modules (pricing checks, numeric comparisons, and evidence normalization). Integration
-tests validated end-to-end runs against seeded cases to confirm dossier completeness,
-confidence scoring behavior, and revision-loop effectiveness.
+Evaluation combines quantitative metrics and qualitative review. Quantitatively, we
+measured retrieval precision/recall on a sampling of labeled passages, deterministic
+pricing accuracy for catalog-matched items, average end-to-end latency, and cache
+hit rates. Qualitatively, domain experts reviewed dossiers to assess clarity, relevance,
+and the utility of `conflicts_with` annotations for decision-making. This mixed-methods
+approach balances the strengths of algorithmic measurement with human judgment in
+mission-critical contexts.
 
 Chapter IV — Proposed Work Modules
 -----------------------------------
 
 4.0 Overview
 
-This chapter elaborates module-level responsibilities and design decisions, linking
-each module's purpose to the project's objectives. Modules are intentionally small and
-focused to maximize testability and to provide clear boundaries for future production
-hardening.
+The platform decomposes the investigation into focused modules: Planner, RAG
+Retriever, Scraper, Scorer, Critic, Writer, and Storage/Audit. Each module encapsulates
+distinct responsibilities and exposes clear inputs and outputs to facilitate testability,
+parallel execution, and independent improvement.
 
-4.1 Planner Module
+4.1 Planner
 
-The Planner classifies each incoming procurement case into LIGHT or FULL
-investigation modes based on deal size and contextual metadata. For POC
-configuration, the LIGHT threshold is set to INR 5,00,000. Planner outputs direct the
-retriever depth, selection of scraper templates, and the maximum number of revision
-loops permitted. Planner logic reduces unnecessary retrieval for low-value cases while
-ensuring higher diligence for larger deals.
+The Planner encapsulates policy and scope: it determines the depth of retrieval and the
+extent of web scraping required for a given deal. By encoding governance preferences
+and thresholds (for example, a LIGHT/FULL decision threshold), Planner minimizes
+unnecessary computation on low-risk cases and ensures rigorous evidence collection
+for high-risk deals. The Planner's decisions are themselves logged as part of the audit
+trail, enabling retrospective analysis of workflow effectiveness.
 
-4.2 RAG Retriever
+4.2 RAG Retriever and Fusion
 
-The RAG Retriever orchestrates parallel queries: dense semantic similarity search in
-Qdrant and structured traversals in a NetworkX knowledge graph. Vector retrieval
-prioritizes recall for natural language queries, while graph traversal supplies authoritative
-statutory paths and relationship context, for example identifying that Schedule M
-provisions override general vendor statements. Retrieved items include passage text,
-source identifiers, scores, and provenance paths for downstream fusion and reporting.
+The RAG Retriever concurrently executes dense vector searches and graph traversals.
+Vector search surfaces paraphrased or latently-related passages while graph traversal
+returns authoritative nodes and relationship paths. Fusion reconciles these returns into
+a ranked, scored evidence bundle that preserves provenance and quantifies source
+authority. This bundle is the primary input for scoring and drafting.
 
-4.3 Scraper Module
+4.3 Scraper and Enrichment
 
-The Scraper executes targeted web searches using vendor names, registration IDs, and
-domain-specific query templates. Its responsibilities include pulling regulatory alerts,
-site inspection notices, and recent news items that could affect credibility or pricing.
-Scraped content is normalized and stored with timestamps and source URLs to
-preserve provenance for human auditors.
+Where authoritative open-web sources are relevant—inspection notices, regulatory
+alerts, news, or vendor press releases—the Scraper performs templated searches and
+normalizes results into the evidence model. Timely scraping is important because
+regulatory status can change between procurement cycles; scraped items are timestamped
+and retained in the audit store to capture the evidence available at decision time.
 
-4.4 Scorer Module
+4.4 Scorer and Decision Signals
 
-The Scorer computes per-dimension risk scores across Financial, Compliance,
-Contractual, and Pricing dimensions. The scoring algorithm aggregates evidence
-weights, applies source authority multipliers, and yields a composite confidence
-metric. Low-confidence slots are identified and packaged for critic review.
+Scoring synthesizes evidence into per-dimension risk assessments and a composite
+confidence metric. Scoring rules explicitly encode source authority multipliers and
+penalties for contradictions, providing an interpretable mapping from evidence to the
+signals used by the Critic and Writer. The scoring module is designed for transparency
+so that weights and rules can be adjusted and validated by domain experts.
 
-4.5 Critic and Revision Loops
+4.5 Critic and Iterative Refinement
 
-The Critic is a specialized agent that inspects the draft dossier for contradictions,
-gaps, or low-confidence slots. When problems are detected and revision limits permit,
-the Critic issues targeted revision instructions to the RAG retriever or Scraper. These
-loops can run up to three times, after which the dossier is either escalated for human
-review or marked as final depending on policy.
+The Critic acts as an internal quality-control agent: it inspects drafts for evidence gaps
+and contradictions and orchestrates targeted re-retrievals. The goal of the criticism
+loop is not to achieve artificial certainty but to elevate the dossier to an acceptable
+confidence level or to produce a clearly flagged case for human escalation when
+ambiguities remain.
 
-4.6 Writer Module
+4.6 Writer and Dossier Synthesis
 
-The Writer synthesizes the final dossier in Markdown with explicit evidence citations,
-`conflicts_with` pointers, and recommended actions. Writer templates enforce a
-consistent structure ideal for conversion into Word or PDF formats for submission to
-procurement committees.
-
-4.7 Storage & Audit
-
-All artifacts—evidence items, drafts, revision instructions, and final approvals—are
-persisted with timestamps. For the POC, SQLite is used for simplicity; production
-recommendations include migration to PostgreSQL and incorporation of immutable
-audit ledgers for regulatory traceability.
+The Writer composes the final report, integrating narrative summaries with explicit
+evidence citations and `conflicts_with` markers. The structured output is deliberately
+friendly for conversion to Word or PDF formats, with standard headings, appendices
+for raw evidence, and an executive summary designed to support procurement
+committee decision-making.
 
 Chapter V — Results and Discussion
 ----------------------------------
 
-5.0 Overview
+5.0 Empirical Evaluation
 
-This chapter reports the findings from executing the AutonoSource pipeline on seeded
-cases, presenting retrieval quality metrics, scoring behaviors, latency figures, and user
-feedback from human reviewers who inspected generated dossiers.
+Evaluation focused on seeded, canonical cases chosen to exercise statutory pricing
+checks, cold-chain contradictions, and indeterminate catalog mappings. The hybrid
+retrieval approach increased coverage of authoritative passages while maintaining
+semantic recall for paraphrased content. Fusion produced confidence metrics that
+correlated with human judgments in the sampled evaluations, and critic-driven revisions
+reduced ambiguous cases.
 
-5.1 Seeded Case Performance
+5.1 Observations on Retrieval and Fusion
 
-Five canonical seed cases were used to exercise the system: a price breach scenario,
-a cold-chain contradiction, an indeterminate pricing case, a vaccine prequalification
-case, and a balanced scenario that required clause negotiation. These cases were
-selected to validate the system's ability to detect statutory violations, surface
-contradictions, and perform deterministic pricing audits.
+Graph retrieval consistently surfaced nodes representing statutory authority and
+precedence, which helped to prioritize legal texts in the fusion stage. Vector retrieval
+complemented the graph by locating paraphrased or contextually relevant passages.
+Together they produced richer evidence bundles than either method alone, enabling
+more defensible dossiers.
 
-5.2 Retrieval and Fusion Outcomes
+5.2 Critic Loops and Human Review
 
-Hybrid retrieval improved coverage: graph traversals surfaced statute nodes and
-authority relationships that vector-only retrieval sometimes missed, while vector
-retrieval captured paraphrased passages and vendor language more effectively.
-Fusion normalized scoring across retrievers and produced calibrated confidence
-metrics aligned with sampled human judgments in our evaluations.
+The Critic's targeted revision instructions were effective at closing many evidence
+gaps without requiring full manual re-investigation. However, ambiguous contract
+language remained a significant source of residual uncertainty, underscoring the
+importance of domain-specific extraction models and human adjudication for edge
+cases.
 
-5.3 Critic Effectiveness and Revision
+5.3 Performance and Practical Considerations
 
-The Critic agent successfully identified low-confidence slots and contradictions in the
-majority of seeded cases. Targeted revision loops reduced uncertainty and improved
-final confidence scores, validating the efficacy of controlled iterative refinement over
-single-pass generation.
-
-5.4 Performance and Scalability Observations
-
-On local developer hardware, typical end-to-end runtimes for fresh retrieval ranged
-from 1.5 to 4 seconds depending on retrieval depth; cache hits were under 10ms. For
-larger corpora or heavy concurrent usage, Qdrant indexing and graph traversal need
-performance tuning and likely sharding or distributed hosting to maintain interactive
-latency.
-
-5.5 User Feedback and Dossier Quality
-
-Human reviewers valued the explicit evidence citations and `conflicts_with` pointers.
-Where textual contradictions were ambiguous, reviewers requested improved extraction
-rules—an actionable recommendation for further work.
+For POC workloads, cache hits were sub-10ms and fresh retrievals completed in a
+few seconds. Scaling to larger datasets and concurrent workloads will require careful
+attention to vector index sharding, graph partitioning, and asynchronous orchestration
+to maintain interactive responsiveness.
 
 Chapter VI — Conclusions & Future Work
 --------------------------------------
 
-6.0 Summary of Findings
+6.0 Conclusions
 
-The AutonoSource proof-of-concept demonstrates that hybrid retrieval and multi-agent
-orchestration can materially improve evidence recall, contrast contradiction detection,
-and produce explainable dossiers that support human decision-making. Deterministic
-pricing audits provided a robust statutory check that reduced legal ambiguity in price
-assessments when seeded price catalog entries were present.
+AutonoSource demonstrates that hybrid retrieval, deterministic checks, and
+agent-based orchestration can materially improve the quality and defensibility of
+procurement decision-support artifacts. The system prioritizes traceability and audit
+and offers a pathway to reduce routine verification effort while preserving human
+governance for final approvals.
 
-6.1 Recommendations for Production
+6.1 Future Directions
 
-Key next steps towards production include: expanding the price catalog to reduce
-indeterminate cases, implementing secure credential management, migrating persistent
-storage to PostgreSQL with role-based access control, and conducting formal LLM
-safety testing in the procurement domain.
-
-6.2 Research Directions
-
-Future research could focus on: improved contract clause extraction models, hybrid
-vector-graph indexing strategies for scale, and automated mapping of catalog items to
-commercial product identifiers to enable deterministic pricing at scale.
+Key investments to move toward production include expanding and canonicalizing
+pricing catalogs, improving contract clause extraction, implementing robust secrets
+and credential management, migrating persistent storage to a production-grade
+database, and conducting formal safety and legal reviews. Research directions also
+include exploring hybrid index architectures for scale and automated canonical
+identifier mapping to reduce indeterminate pricing cases.
 
 References
 ----------
 
-- Radford, A., et al. Whisper: Robust Speech Recognition (2022).
-- Brown, T. B., et al. Language Models are Few-Shot Learners (2020).
-- Vaswani, A., et al. Attention Is All You Need (2017).
-- Touvron, H., et al. LLaMA: Open and Efficient Foundation Models (2023).
-- National Pharmaceutical Pricing Authority — DPCO 2013.
-- WHO TRS 1025 — Guidance on cold-chain and storage.
-- Drugs and Cosmetics Act, 1940 and Rules, 1945 — CDSCO.
+Radford, A., et al. Whisper: Robust Speech Recognition (2022).
+Brown, T. B., et al. Language Models are Few-Shot Learners (2020).
+Vaswani, A., et al. Attention Is All You Need (2017).
+Touvron, H., et al. LLaMA: Open and Efficient Foundation Models (2023).
+National Pharmaceutical Pricing Authority — DPCO 2013.
+WHO TRS 1025 — Guidance on cold-chain and storage.
+Drugs and Cosmetics Act, 1940 and Rules, 1945 — CDSCO.
 
 Appendices
 ---------
 
 Appendix A — Seed Data & Commands
 
-- Seed the SQLite dataset: `python backend/build/seed_data.py`.
-- Ingest regulatory documents into Qdrant: `python backend/build/ingest_rag_docs.py`.
+Seed the SQLite dataset: `python backend/build/seed_data.py`.
+Ingest regulatory documents into Qdrant: `python backend/build/ingest_rag_docs.py`.
 
 Appendix B — Notable Files
 
-- `backend/src/agents/planner.py`
-- `backend/src/agents/rag_agent.py`
-- `backend/src/agents/scraper_agent.py`
-- `backend/src/agents/scorer.py`
-- `backend/src/agents/critic.py`
-- `backend/src/agents/writer.py`
+`backend/src/agents/planner.py`
+`backend/src/agents/rag_agent.py`
+`backend/src/agents/scraper_agent.py`
+`backend/src/agents/scorer.py`
+`backend/src/agents/critic.py`
+`backend/src/agents/writer.py`
 
 Formatting Guidance for Word (Times New Roman)
 -------------------------------------------
 
-When copying this Markdown into Microsoft Word, apply the following styles for
-consistency with academic reports: set body text to Times New Roman 12pt, headings
-as: Chapter titles 18pt bold, Section headings 14pt bold, Subsection headings 12pt
-bold. Use 1.15 line spacing and 1-inch margins. Ensure each chapter starts on a new
-page when converting to PDF or Word.
+To preserve academic report styling when copying into Microsoft Word, set the body
+text to Times New Roman 12pt, heading sizes as follows: chapter titles 18pt bold,
+section headings 14pt bold, and subsection headings 12pt bold. Use 1.15 line spacing
+and 1-inch margins. Insert a page break before each chapter and ensure that the
+appendices are placed after the references.
