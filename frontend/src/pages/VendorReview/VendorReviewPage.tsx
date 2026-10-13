@@ -96,7 +96,7 @@ export const VendorReviewPage: React.FC = () => {
         </div>
 
         {/* Header Action Controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <Button
             variant="outline"
             size="sm"
