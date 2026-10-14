@@ -26,7 +26,13 @@ SQLITE_DIR = os.path.join(DB_DIR, "sqlite")
 SQLITE_SUBFOLDER_PATH = os.path.join(SQLITE_DIR, "procurement_cases.db")
 LEGACY_SQLITE_PATH = os.path.join(DB_DIR, "procurement_cases.db")
 
-SQLITE_PATH = SQLITE_SUBFOLDER_PATH if (os.path.exists(SQLITE_SUBFOLDER_PATH) or not os.path.exists(LEGACY_SQLITE_PATH)) else LEGACY_SQLITE_PATH
+# Allow overriding the DB path via environment variable (e.g., for Render persistent disk)
+_env_db_path = os.getenv("SQLITE_DB_PATH")
+if _env_db_path:
+    SQLITE_PATH = _env_db_path
+else:
+    SQLITE_PATH = SQLITE_SUBFOLDER_PATH if (os.path.exists(SQLITE_SUBFOLDER_PATH) or not os.path.exists(LEGACY_SQLITE_PATH)) else LEGACY_SQLITE_PATH
+
 JSON_PATH = os.path.join(SQLITE_DIR, "cases.json") if os.path.exists(os.path.join(SQLITE_DIR, "cases.json")) else os.path.join(DB_DIR, "cases.json")
 
 class CaseStore:
