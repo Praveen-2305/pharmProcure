@@ -181,7 +181,7 @@ async def submit_procurement(
         "investigationPlan": investigationPlan,
         "stage": WorkflowStage.PLANNING,
         "revisionCount": 0,
-        "maxRevisions": 3,
+        "maxRevisions": 1,
         "evidence_bundle": initial_evidence,
         "contractDocumentPath": contract_doc_path or (contractDocument.filename if contractDocument else None)
     }
@@ -358,7 +358,7 @@ async def run_procurement_legacy(req: Dict[str, Any], background_tasks: Backgrou
         "investigationPlan": InvestigationPlan.FULL,
         "stage": WorkflowStage.PLANNING,
         "revisionCount": 0,
-        "maxRevisions": 3,
+        "maxRevisions": 1,
         "evidence_bundle": {}
     }
     active_workflows[procurement_id] = initial_state

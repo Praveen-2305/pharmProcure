@@ -43,6 +43,6 @@ def planner_agent(state: WorkflowState) -> WorkflowState:
     state["revision_count"] = 0
     state["revisionCount"] = 0
     state["max_revisions"] = 3
-    state["maxRevisions"] = 3
+    state["maxRevisions"] = 1
     
     return state

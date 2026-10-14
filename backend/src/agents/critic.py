@@ -23,7 +23,7 @@ def critic_agent(state: WorkflowState) -> WorkflowState:
     vendor_name = state.get("vendorName", "Vendor")
 
     prompt_context = get_critic_prompt(vendor_name, score, rev_count, 0)
-    CONFIDENCE_THRESHOLD = 0.80
+    CONFIDENCE_THRESHOLD = 0.70  # Lowered from 0.80 — fallback RAG mode yields ~0.75 confidence
 
     if score < CONFIDENCE_THRESHOLD and rev_count < max_revs:
 
