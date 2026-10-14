@@ -33,6 +33,10 @@ app.include_router(approval_router)
 app.include_router(procurement_router, prefix="/api")
 app.include_router(approval_router, prefix="/api")
 
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "version": settings.VERSION}
+
 @app.get("/")
 def read_root():
     return {
@@ -58,5 +62,8 @@ def read_root():
 
 
 if __name__ == "__main__":
+    import os
     import uvicorn
-    uvicorn.run("src.main:app", host="0.0.0.0", port=8000, reload=True)
+    host = os.getenv("HOST", "0.0.0.0")
+    port = int(os.getenv("PORT", "8000"))
+    uvicorn.run("src.main:app", host=host, port=port, reload=False)

@@ -83,12 +83,12 @@ If the Vector and Graph retrievers return conflicting information, the system ex
                           └─────────────────────┘
 ```
 
-1. **Planner Agent ([`planner.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/src/agents/planner.py)):** Evaluates vendor profile, historical relationship, and deal size to establish a `LIGHT` (< ₹5,00,000) or `FULL` (≥ ₹5,00,000) strategy via [`planner_prompt.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/src/prompts/planner_prompt.py).
-2. **RAG Agent ([`rag_agent.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/src/agents/rag_agent.py)):** Coordinates vector retrieval (Qdrant) and graph retrieval (5,757-node NetworkX property graph), executing the 4-step fusion algorithm with contradiction detection.
-3. **Scraper Agent ([`scraper_agent.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/src/agents/scraper_agent.py)):** Queries verified financials from the 50 registered vendors in SQLite, verifies quotes against DPCO 2013 ceiling rates in INR, crawls external regulatory alerts via [`web_scraper.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/src/agents/web_scraper.py), and caches profiles in the database.
-4. **Risk Scorer Agent ([`scorer.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/src/agents/scorer.py)):** Evaluates evidence across the 4 risk dimensions in INR using [`scorer_prompt.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/src/prompts/scorer_prompt.py) and computes an aggregated **Confidence Score**.
-5. **Critic Agent ([`critic.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/src/agents/critic.py)):** Reviews evidence completeness against the 0.80 threshold. If confidence is < 0.80 and revision count < 3, triggers a targeted revision loop for the RAG and Scraper nodes.
-6. **Report Writer Agent ([`writer.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/src/agents/writer.py)):** Compiles findings, flagged clauses, contradiction trails, and recommendations into an executive dossier in INR via [`writer_prompt.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/src/prompts/writer_prompt.py).
+1. **Planner Agent ([`planner.py`](backend/src/agents/planner.py)):** Evaluates vendor profile, historical relationship, and deal size to establish a `LIGHT` (< ₹5,00,000) or `FULL` (≥ ₹5,00,000) strategy via [`planner_prompt.py`](backend/src/prompts/planner_prompt.py).
+2. **RAG Agent ([`rag_agent.py`](backend/src/agents/rag_agent.py)):** Coordinates vector retrieval (Qdrant) and graph retrieval (5,757-node NetworkX property graph), executing the 4-step fusion algorithm with contradiction detection.
+3. **Scraper Agent ([`scraper_agent.py`](backend/src/agents/scraper_agent.py)):** Queries verified financials from the 50 registered vendors in SQLite, verifies quotes against DPCO 2013 ceiling rates in INR, crawls external regulatory alerts via [`web_scraper.py`](backend/src/agents/web_scraper.py), and caches profiles in the database.
+4. **Risk Scorer Agent ([`scorer.py`](backend/src/agents/scorer.py)):** Evaluates evidence across the 4 risk dimensions in INR using [`scorer_prompt.py`](backend/src/prompts/scorer_prompt.py) and computes an aggregated **Confidence Score**.
+5. **Critic Agent ([`critic.py`](backend/src/agents/critic.py)):** Reviews evidence completeness against the 0.80 threshold. If confidence is < 0.80 and revision count < 3, triggers a targeted revision loop for the RAG and Scraper nodes.
+6. **Report Writer Agent ([`writer.py`](backend/src/agents/writer.py)):** Compiles findings, flagged clauses, contradiction trails, and recommendations into an executive dossier in INR via [`writer_prompt.py`](backend/src/prompts/writer_prompt.py).
 7. **Human-in-the-Loop (`/approval/*`):** Presents recommendations to a human procurement officer for final review (`APPROVED`, `REJECTED`, or `ESCALATED`).
 
 ---
@@ -96,14 +96,14 @@ If the Vector and Graph retrievers return conflicting information, the system ex
 ## 🛠️ Implemented Technology Stack
 
 ### Backend Engine (`backend/`)
-- **Framework:** FastAPI & Uvicorn ([`src/main.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/src/main.py))
-- **AI Orchestration:** LangGraph & LangChain ([`src/agents/workflow.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/src/agents/workflow.py))
-- **Prompt Architecture:** Dedicated prompts module ([`src/prompts/`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/src/prompts/)) with INR standards
-- **Vector Store:** Local Qdrant Database ([`processed_data/qdrant/`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/processed_data/qdrant/))
-- **Graph Store:** NetworkX Property Graph with 5,757 nodes ([`processed_data/graph/knowledge_graph.graphml`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/processed_data/graph/knowledge_graph.graphml))
-- **Relational Storage:** SQLite 3 ([`processed_data/sqlite/procurement_cases.db`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/processed_data/sqlite/procurement_cases.db)) hosting 6 tables: `vendors`, `vendor_products`, `pricing_references`, `procurement_cases`, `audit_logs`, and `vendor_profiles`
-- **Build Engine:** Master build orchestrator ([`build/build_all.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/build/build_all.py)) and seeder ([`build/seed_data.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/build/seed_data.py))
-- **Regulatory Due Diligence:** Multi-source web scraper ([`src/agents/web_scraper.py`](file:///media/kamalesh/KAMALESH/PROJECTS/procurement-agent/backend/src/agents/web_scraper.py))
+- **Framework:** FastAPI & Uvicorn ([`src/main.py`](backend/src/main.py))
+- **AI Orchestration:** LangGraph & LangChain ([`src/agents/workflow.py`](backend/src/agents/workflow.py))
+- **Prompt Architecture:** Dedicated prompts module ([`src/prompts/`](backend/src/prompts/)) with INR standards
+- **Vector Store:** Local Qdrant Database ([`processed_data/qdrant/`](backend/processed_data/qdrant/))
+- **Graph Store:** NetworkX Property Graph with 5,757 nodes ([`processed_data/graph/knowledge_graph.graphml`](backend/processed_data/graph/knowledge_graph.graphml))
+- **Relational Storage:** SQLite 3 ([`processed_data/sqlite/procurement_cases.db`](backend/processed_data/sqlite/procurement_cases.db)) hosting 6 tables: `vendors`, `vendor_products`, `pricing_references`, `procurement_cases`, `audit_logs`, and `vendor_profiles`
+- **Build Engine:** Master build orchestrator ([`build/build_all.py`](backend/build/build_all.py)) and seeder ([`build/seed_data.py`](backend/build/seed_data.py))
+- **Regulatory Due Diligence:** Multi-source web scraper ([`src/agents/web_scraper.py`](backend/src/agents/web_scraper.py))
 
 ### Frontend Dashboard (`frontend/`)
 - **Framework:** React 18 with TypeScript & Vite

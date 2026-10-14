@@ -10,8 +10,7 @@ backend/build/
 ├── build_knowledge_graph.py       # Constructs the multi-entity NetworkX property graph (GraphML + JSON)
 ├── embedding_pipeline.py          # Nomic-ai/nomic-embed-text-v1.5 768-dim dense embedding generator
 ├── graph/                         # High-throughput knowledge graph tooling
-│   ├── build_kg_groq.py           # Multi-key parallel Groq pipeline for extracting regulatory relations
-│   └── audit_groq_keys.py         # Validates and audits available Groq API keys and rate limits
+│   └── build_kg_groq.py           # Multi-key parallel Groq pipeline for extracting regulatory relations
 └── sql/                           # Relational seeding generators
     └── seed_vendors.py            # Generates realistic 50 Indian pharmaceutical vendors dataset
 ```
@@ -67,10 +66,7 @@ python backend/build/ingest_rag_docs.py
 python backend/build/build_knowledge_graph.py
 
 # Run the high-throughput multi-key Groq knowledge graph pipeline:
-python backend/build/graph/build_kg_groq.py
-
-# Audit and validate your Groq API keys:
-python backend/build/graph/audit_groq_keys.py
+python backend/build/build_knowledge_graph_groq.py
 ```
 
 ### 3. Full Rebuild (Caution)

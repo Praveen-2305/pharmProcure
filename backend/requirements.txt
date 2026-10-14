@@ -16,3 +16,6 @@ sentence-transformers
 einops
 langchain-openai
 langchain-text-splitters
+python-multipart
+httpx
+rich

@@ -37,7 +37,9 @@ export class HttpClient {
   private readonly errorInterceptors: ErrorInterceptor[] = [];
 
   constructor(options: HttpClientOptions = {}) {
-    this.baseURL = (options.baseURL ?? (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000')).replace(/\/+$/, '');
+    const envBase = import.meta.env.VITE_API_BASE_URL;
+    const resolvedBase = options.baseURL ?? (envBase !== undefined ? envBase : 'http://localhost:8000');
+    this.baseURL = resolvedBase.replace(/\/+$/, '');
     this.defaultTimeout = options.defaultTimeout ?? 15000;
     this.defaultHeaders = {
       Accept: 'application/json',

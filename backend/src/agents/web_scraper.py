@@ -15,8 +15,10 @@ import httpx
 import json
 
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import PromptTemplate
+try:
+    from langchain_openai import ChatOpenAI
+except Exception:
+    ChatOpenAI = None
 
 # Ensure .env is loaded
 backend_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -39,7 +41,7 @@ class VendorWebScraper:
         """Lazy-loaded LLM instance, safe when API keys are not provided."""
         if self._llm is None:
             active_key = self.groq_api_key or self.openai_api_key
-            if active_key and active_key.strip():
+            if active_key and active_key.strip() and ChatOpenAI is not None:
                 try:
                     self._llm = ChatOpenAI(
                         api_key=active_key,

@@ -143,9 +143,7 @@ backend/
 │   ├── seed_data.py                   # Ingests 50 vendors, products, and DPCO catalog into SQLite
 │   ├── ingest_rag_docs.py             # Chunks regulatory documents & embeds into Qdrant vector store
 │   ├── build_knowledge_graph.py       # Compiles regulatory ontology into NetworkX GraphML
-│   ├── graph/                         # Knowledge graph construction tools
-│   │   ├── build_kg_groq.py           # High-throughput multi-key Groq knowledge graph pipeline
-│   │   └── audit_groq_keys.py         # API key validation and rate limit auditor
+│   ├── build_knowledge_graph_groq.py  # High-throughput multi-key Groq knowledge graph pipeline
 │   └── README.md                      # Detailed build guide and safety instructions
 ├── ingestion/                         # Canonical Data Ingestion Sources
 │   ├── rag_and_graph/                 # Regulatory Acts (CDSCO, DPCO 2013, Schedule M, WHO TRS 1025)
