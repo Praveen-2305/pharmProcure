@@ -38,7 +38,10 @@ export class HttpClient {
 
   constructor(options: HttpClientOptions = {}) {
     const envBase = import.meta.env.VITE_API_BASE_URL;
-    const resolvedBase = options.baseURL ?? (envBase !== undefined ? envBase : 'http://localhost:8000');
+    const defaultBase = import.meta.env.PROD
+      ? 'https://pharmprocure.onrender.com'
+      : 'http://localhost:8000';
+    const resolvedBase = options.baseURL ?? (envBase && envBase.trim() !== '' ? envBase : defaultBase);
     this.baseURL = resolvedBase.replace(/\/+$/, '');
     this.defaultTimeout = options.defaultTimeout ?? 60000;
     this.defaultHeaders = {

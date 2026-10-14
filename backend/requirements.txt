@@ -5,15 +5,12 @@ langchain
 langchain-google-genai
 pydantic
 qdrant-client
-chromadb
 networkx
 pymongo
 tavily-python
 python-dotenv
 pymupdf4llm
 pymupdf
-sentence-transformers
-einops
 langchain-openai
 langchain-text-splitters
 python-multipart
