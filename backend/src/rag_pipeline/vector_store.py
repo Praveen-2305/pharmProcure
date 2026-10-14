@@ -23,15 +23,19 @@ except Exception:
 _encoder = None
 
 def get_encoder():
-    """Lazily loads and caches the SentenceTransformer model."""
+    """Lazily loads and caches the SentenceTransformer model with safe fallback."""
     global _encoder
     if _encoder is None:
         try:
             import torchvision
         except Exception:
             sys.modules["torchvision"] = None
-        from sentence_transformers import SentenceTransformer
-        _encoder = SentenceTransformer(MODEL_NAME)
+        try:
+            from sentence_transformers import SentenceTransformer
+            _encoder = SentenceTransformer(MODEL_NAME)
+        except Exception as e:
+            print(f"[VectorRAG] Encoder note ({e}). Active in fast fallback mode.")
+            _encoder = None
     return _encoder
 
 
@@ -81,6 +85,9 @@ class VectorRAGRetriever:
         try:
             from qdrant_client.models import PointStruct
             encoder = get_encoder()
+            if encoder is None:
+                print("[VectorRAG] Encoder unavailable. Skipping runtime embedding seeding.")
+                return
             baseline_chunks = [
                 {
                     "id": 1,
@@ -141,7 +148,8 @@ class VectorRAGRetriever:
         if self.initialized and self.client:
             try:
                 encoder = get_encoder()
-                query_vector = encoder.encode(query_text).tolist()
+                if encoder is not None:
+                    query_vector = encoder.encode(query_text).tolist()
 
                 # Query Qdrant (supporting both query_points and legacy search methods)
                 if hasattr(self.client, "query_points"):

@@ -49,7 +49,7 @@ def scraper_node_agent(state: WorkflowState) -> WorkflowState:
     db_vendor = case_store.get_vendor(vendor_name)
 
     if db_vendor:
-        print(f"  ✓ Retrieved structured vendor record from SQLite: {db_vendor['vendor_id']} ({db_vendor['vendor_name']})")
+        print(f"  [OK] Retrieved structured vendor record from SQLite: {db_vendor['vendor_id']} ({db_vendor['vendor_name']})")
         rev_inr = db_vendor.get("annual_revenue_inr", 25000000.0)
         rev_cr = db_vendor.get("annual_revenue_inr_cr") or (rev_inr / 10000000.0)
         c_rating = db_vendor.get("credit_rating", "A")
@@ -228,7 +228,7 @@ def scraper_node_agent(state: WorkflowState) -> WorkflowState:
 
     try:
         case_store.upsert_vendor_profile(synthesized_profile)
-        print(f"  ✓ Cached synthesized 5-pillar profile in SQLite `vendor_profiles` for {vendor_name} (Risk: {global_risk}, Score: {t_score}/100)")
+        print(f"  [OK] Cached synthesized 5-pillar profile in SQLite `vendor_profiles` for {vendor_name} (Risk: {global_risk}, Score: {t_score}/100)")
     except Exception as e:
         print(f"  ! Error saving vendor profile to SQLite: {e}")
 
