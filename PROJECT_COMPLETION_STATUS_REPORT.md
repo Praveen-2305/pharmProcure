@@ -2,7 +2,7 @@
 
 **Document Title:** AutonoSource End-to-End Project Status, Implemented Features & Production Gap Analysis  
 **Repository:** `Praveen-2305/pharmProcure`  
-**Active Branch:** `kamalesh`  
+**Active Branch:** `main`  
 **Generated Date:** September 19, 2026  
 **Target Audience:** Engineering Leads, Product Stakeholders, AI/ML Engineers, Compliance Auditors  
 
