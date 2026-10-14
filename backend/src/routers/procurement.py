@@ -75,10 +75,53 @@ def _run_workflow_sync(procurement_id: str, initial_state: WorkflowState):
                         case_store.save(case)
             result = accumulated_state
         else:
-            result = initial_state
-            result["stage"] = WorkflowStage.COMPLETE
-            active_workflows[procurement_id] = result
-        
+            # LangGraph unavailable — run agents directly in sequence as fallback
+            print(f"[WorkflowRunner] LangGraph engine unavailable. Running agents in direct sequence for {procurement_id}.")
+            try:
+                from src.agents.planner import planner_agent
+                from src.agents.scraper_agent import scraper_node_agent
+                from src.agents.rag_agent import rag_node_agent
+                from src.agents.scorer import risk_scorer_agent
+                from src.agents.critic import critic_agent
+                from src.agents.writer import report_writer_agent
+
+                result = dict(initial_state)
+                result = planner_agent(result)
+                case = case_store.get(procurement_id)
+                if case:
+                    case.status.stage = result.get("stage", WorkflowStage.EXECUTING)
+                    case_store.save(case)
+                active_workflows[procurement_id] = result
+
+                result_scraper = scraper_node_agent(dict(result))
+                if isinstance(result_scraper, dict) and "evidence_bundle" in result_scraper:
+                    eb = result.get("evidence_bundle", {})
+                    eb.update(result_scraper["evidence_bundle"])
+                    result["evidence_bundle"] = eb
+
+                result_rag = rag_node_agent(dict(result))
+                if isinstance(result_rag, dict) and "evidence_bundle" in result_rag:
+                    eb = result.get("evidence_bundle", {})
+                    eb.update(result_rag["evidence_bundle"])
+                    result["evidence_bundle"] = eb
+
+                result = risk_scorer_agent(result)
+                case = case_store.get(procurement_id)
+                if case:
+                    case.status.stage = result.get("stage", WorkflowStage.CRITIQUING)
+                    case_store.save(case)
+                active_workflows[procurement_id] = result
+
+                result = critic_agent(result)
+                result = report_writer_agent(result)
+                active_workflows[procurement_id] = result
+            except Exception as fallback_err:
+                print(f"[WorkflowRunner] Direct agent fallback error: {fallback_err}")
+                result = dict(initial_state)
+                result["stage"] = WorkflowStage.FAILED
+                result["failureReason"] = str(fallback_err)
+                active_workflows[procurement_id] = result
+
         # Final status persistence
         case = case_store.get(procurement_id)
         if case:
@@ -97,6 +140,7 @@ def _run_workflow_sync(procurement_id: str, initial_state: WorkflowState):
             case.status.stage = WorkflowStage.FAILED
             case.status.failure_reason = str(e)
             case_store.save(case)
+
 
 @router.post("/submit", response_model=SubmitProcurementResponse)
 async def submit_procurement(
