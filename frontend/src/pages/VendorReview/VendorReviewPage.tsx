@@ -61,9 +61,22 @@ export const VendorReviewPage: React.FC = () => {
         <Alert variant="destructive">
           <AlertOctagon className="size-4" />
           <AlertTitle>Investigation Runtime Exception</AlertTitle>
-          <AlertDescription>{error || 'Unknown workflow identifier.'}</AlertDescription>
+          <AlertDescription className="space-y-2">
+            <p>{error || 'Unknown workflow identifier.'}</p>
+            <p className="text-xs opacity-75 mt-1">
+              💡 If the server is warming up (Render free tier), this may take 30–60 seconds. Click Retry below.
+            </p>
+          </AlertDescription>
         </Alert>
-        <div className="mt-4">
+        <div className="mt-4 flex gap-2">
+          <button
+            onClick={handleRefresh}
+            disabled={isRefetching}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-input bg-background text-sm hover:bg-accent transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={cn("size-3.5", isRefetching && "animate-spin")} />
+            {isRefetching ? 'Retrying...' : 'Retry'}
+          </button>
           <Link to="/" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-2")}>
             <ArrowLeft className="size-4" /> Back to Dashboard
           </Link>
@@ -71,6 +84,7 @@ export const VendorReviewPage: React.FC = () => {
       </div>
     );
   }
+
 
   const currentStageIndex = WORKFLOW_STAGES.findIndex((s) => s.id === status.stage);
   const isFailed = status.stage === 'FAILED';

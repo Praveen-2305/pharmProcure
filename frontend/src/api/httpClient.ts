@@ -40,7 +40,7 @@ export class HttpClient {
     const envBase = import.meta.env.VITE_API_BASE_URL;
     const resolvedBase = options.baseURL ?? (envBase !== undefined ? envBase : 'http://localhost:8000');
     this.baseURL = resolvedBase.replace(/\/+$/, '');
-    this.defaultTimeout = options.defaultTimeout ?? 15000;
+    this.defaultTimeout = options.defaultTimeout ?? 60000;
     this.defaultHeaders = {
       Accept: 'application/json',
       ...options.defaultHeaders,
