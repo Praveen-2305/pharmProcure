@@ -54,11 +54,11 @@ def _run_workflow_sync(procurement_id: str, initial_state: WorkflowState):
             for event in engine.stream(initial_state):
                 for node_name, node_state in event.items():
                     if isinstance(node_state, dict):
+                        saved_eb = dict(accumulated_state.get("evidence_bundle") or {})
                         accumulated_state.update(node_state)
                         if "evidence_bundle" in node_state and isinstance(node_state["evidence_bundle"], dict):
-                            if "evidence_bundle" not in accumulated_state or not isinstance(accumulated_state["evidence_bundle"], dict):
-                                accumulated_state["evidence_bundle"] = {}
-                            accumulated_state["evidence_bundle"].update(node_state["evidence_bundle"])
+                            saved_eb.update(node_state["evidence_bundle"])
+                        accumulated_state["evidence_bundle"] = saved_eb
                     
                     active_workflows[procurement_id] = accumulated_state
                     
@@ -184,7 +184,7 @@ async def submit_procurement(
     procurement_id = f"PR-2026-{uuid.uuid4().hex[:4].upper()}-{initials}"
     now_iso = datetime.now(timezone.utc).isoformat()
 
-    # Ingest contract document if uploaded
+    # Ingest contract document if uploaded OR parse scope from procurementDetails
     contract_doc_path = None
     contract_clauses_extracted = None
     if contractDocument and contractDocument.filename:
@@ -198,10 +198,21 @@ async def submit_procurement(
                 f.write(file_bytes)
             
             contract_doc_path = str(saved_file)
-            contract_clauses_extracted = extract_contract_clauses(contract_doc_path, contractDocument.filename)
+            contract_clauses_extracted = extract_contract_clauses(
+                file_path=contract_doc_path,
+                filename=contractDocument.filename,
+                text_override=procurementDetails
+            )
             print(f"[ProcurementSubmit] Ingested and parsed contract: {contractDocument.filename} ({len(file_bytes)} bytes)")
         except Exception as e:
             print(f"[ProcurementSubmit] Error during contract file processing: {e}")
+    else:
+        # Parse scope terms & conditions directly from procurementDetails
+        contract_clauses_extracted = extract_contract_clauses(
+            file_path=None,
+            filename="Procurement Scope Specification",
+            text_override=procurementDetails
+        )
 
     initial_status = WorkflowStatus(
         procurement_id=procurement_id,
@@ -216,6 +227,15 @@ async def submit_procurement(
     if contract_clauses_extracted:
         initial_evidence["contract_clauses"] = contract_clauses_extracted
 
+    req_dict: ProcurementRequest = {
+        "vendor_name": vendorName,
+        "deal_size": dealSize,
+        "procurement_details": procurementDetails,
+        "category": "Pharmaceuticals",
+        "quoted_unit_price": None,
+        "contract_document_id": contractDocument.filename if contractDocument else None
+    }
+
     initial_state: WorkflowState = {
         "procurementId": procurement_id,
         "vendorName": vendorName,
@@ -227,7 +247,9 @@ async def submit_procurement(
         "revisionCount": 0,
         "maxRevisions": 1,
         "evidence_bundle": initial_evidence,
-        "contractDocumentPath": contract_doc_path or (contractDocument.filename if contractDocument else None)
+        "contractDocumentPath": contract_doc_path or (contractDocument.filename if contractDocument else None),
+        "request": req_dict,
+        "investigation_plan": investigationPlan.value if hasattr(investigationPlan, "value") else str(investigationPlan)
     }
 
     active_workflows[procurement_id] = initial_state

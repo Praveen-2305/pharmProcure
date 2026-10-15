@@ -67,6 +67,14 @@ def risk_scorer_agent(state: WorkflowState) -> WorkflowState:
         else:
             financial_rationale = f"{financial_rationale} Compounded by active legal dispute: {lit_summary}"
 
+    contract_clauses = evidence.get("contract_clauses", {})
+    scope_risk_factors = [str(rf).lower() for rf in contract_clauses.get("risk_factors", [])]
+
+    # Incorporate prepayment / advance terms into financial risk
+    if any("advance" in rf or "prepayment" in rf for rf in scope_risk_factors):
+        financial_level = RiskLevel.HIGH
+        financial_rationale = f"High commercial prepayment exposure: Substantial upfront advance required prior to QA clearance or delivery milestones."
+
     # 2. Compliance Risk Evaluation (CDSCO, NSQ recalls, GMP, and Debarment)
     compliance_level = RiskLevel.LOW
     compliance_rationale = "Schedule M GMP and CDSCO license verified; clean regulatory track record."
@@ -77,6 +85,15 @@ def risk_scorer_agent(state: WorkflowState) -> WorkflowState:
     elif citations > 0:
         compliance_level = RiskLevel.MEDIUM
         compliance_rationale = f"{citations} minor inspection notice observed."
+
+    # Incorporate scope licensing / regulatory non-compliance
+    if any("license" in rf or "cdsco" in rf or "unrenewed" in rf or "unlicensed" in rf for rf in scope_risk_factors):
+        compliance_level = RiskLevel.HIGH
+        compliance_rationale = "Critical regulatory risk: Active procurement requested under pending/unrenewed CDSCO Form 28 drug manufacturing license."
+    elif any("cold chain" in rf or "thermal" in rf or "excursion" in rf for rf in scope_risk_factors):
+        if compliance_level == RiskLevel.LOW:
+            compliance_level = RiskLevel.MEDIUM
+        compliance_rationale = f"{compliance_rationale} Cold-chain continuity unverified; lacks WHO TRS 1025 digital temperature logging validation."
 
     # Incorporate external web scraping regulatory warnings & product recalls
     if reg_warnings or recalls:

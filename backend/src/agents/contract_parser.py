@@ -67,12 +67,21 @@ def extract_text_from_document(file_path: str) -> str:
         return ""
 
 
-def extract_contract_clauses(file_path: str, filename: str) -> Dict[str, Any]:
+def extract_contract_clauses(
+    file_path: Optional[str] = None,
+    filename: str = "Procurement Scope Document",
+    text_override: Optional[str] = None
+) -> Dict[str, Any]:
     """
-    Parses contract text and extracts structured procurement clause findings,
-    scoring risk against CDSCO, Schedule M, and Indian Commercial Contract standards.
+    Parses contract text and scope specifications, extracting structured clause findings
+    and scoring risk against CDSCO, Schedule M, and Indian Commercial Contract standards.
     """
-    text = extract_text_from_document(file_path)
+    text = ""
+    if text_override:
+        text += text_override + "\n"
+    if file_path:
+        text += extract_text_from_document(file_path)
+
     text_lower = text.lower() if text else ""
 
     flagged_clauses: List[str] = []
@@ -80,10 +89,15 @@ def extract_contract_clauses(file_path: str, filename: str) -> Dict[str, Any]:
     contract_risk_level = "LOW"
     
     # 1. Cold Chain & Temperature Control (Schedule M / WHO TRS 1025)
-    cold_chain_present = any(kw in text_lower for kw in ["cold chain", "2°c", "2-8°c", "2 to 8", "temperature monitoring", "who trs 1025", "refrigerat"])
+    cold_chain_present = any(kw in text_lower for kw in ["cold chain", "2°c", "2-8°c", "2 to 8", "temperature monitoring", "who trs 1025", "refrigerat", "sub-zero", "deep freeze", "-20°c"])
     data_logger_present = any(kw in text_lower for kw in ["data logger", "continuous temperature", "temperature excursion", "temp log"])
-    
-    if cold_chain_present:
+    unverified_cold = any(kw in text_lower for kw in ["unverified cold", "unverified sub-zero", "no logger", "excursion", "temperature breach"])
+
+    if unverified_cold:
+        flagged_clauses.append("Clause 2.2: Critical Cold-Chain Risk — Storage conditions unverified; missing validated continuous digital data logging under WHO TRS 1025.")
+        risk_factors.append("Cold chain storage is unverified and lacks continuous digital temperature logging SLAs, presenting high thermal excursion risks.")
+        contract_risk_level = "HIGH"
+    elif cold_chain_present:
         if data_logger_present:
             flagged_clauses.append("Clause 2.2: WHO TRS 1025 Cold Chain (2°C–8°C) mandatory continuous digital data logging verified.")
         else:
@@ -94,10 +108,15 @@ def extract_contract_clauses(file_path: str, filename: str) -> Dict[str, Any]:
         flagged_clauses.append("Clause 2.1: Standard ambient storage terms (Controlled Room Temperature 15°C–25°C).")
 
     # 2. Liability Limitation & Indemnity
+    sub_one_liability = any(kw in text_lower for kw in ["0.5x", "0.25x", "0.5 liability", "capped at 0.", "limited to 0."])
     uncapped_liability = any(kw in text_lower for kw in ["unlimited liability", "no limitation of liability", "indemnify without limit"])
-    capped_liability = any(kw in text_lower for kw in ["aggregate liability shall not exceed", "limitation of liability", "capped at", "maximum liability"])
-    
-    if uncapped_liability:
+    capped_liability = any(kw in text_lower for kw in ["aggregate liability shall not exceed", "limitation of liability", "capped at", "maximum liability", "1.5x", "1.0x"])
+
+    if sub_one_liability:
+        flagged_clauses.append("Clause 4.1: High Risk — Liability limitation cap restricted to 0.5x purchase order value (severely below standard 1.0x–1.5x benchmark).")
+        risk_factors.append("Vendor limits total liability to 0.5x deal value, exposing the procurement entity to disproportionate commercial loss.")
+        contract_risk_level = "HIGH"
+    elif uncapped_liability:
         flagged_clauses.append("Clause 4.1: Uncapped vendor indemnification and unlimited consequential liability clause.")
         risk_factors.append("Contract contains uncapped indemnification obligations exposing the buyer to unlimited third-party liabilities.")
         contract_risk_level = "HIGH"
@@ -106,8 +125,21 @@ def extract_contract_clauses(file_path: str, filename: str) -> Dict[str, Any]:
     else:
         flagged_clauses.append("Clause 4.1: Mutual standard indemnification terms under Indian Contract Act, 1872.")
 
-    # 3. Termination Notice & Cure Period
-    # Look for notice period: e.g. "30 days", "15 days", "7 days"
+    # 3. Commercial Payment Terms & Prepayment Exposure
+    high_advance = any(kw in text_lower for kw in ["80%", "90%", "100% advance", "upfront advance", "full prepayment", "unsecured advance"])
+    if high_advance:
+        flagged_clauses.append("Clause 5.1: High Commercial Risk — Significant upfront advance demanded prior to inspection or delivery.")
+        risk_factors.append("Demands substantial upfront advance payment without bank guarantee or QA milestone clearance.")
+        contract_risk_level = "HIGH"
+
+    # 4. Regulatory & Licensing Warranties in Contract / Scope
+    license_issue = any(kw in text_lower for kw in ["pending license", "license renewal", "pending form 28", "unlicensed", "expired license", "cdsco renewal"])
+    if license_issue:
+        flagged_clauses.append("Clause 3.1: Regulatory Non-Compliance — Active supply under pending/unrenewed CDSCO Form 28 drug manufacturing license.")
+        risk_factors.append("Vendor operates under pending/unrenewed CDSCO manufacturing license, exposing order to seizure under Drugs & Cosmetics Act.")
+        contract_risk_level = "HIGH"
+
+    # 5. Termination Notice & Cure Period
     cure_match = re.search(r"(\d+)\s*(?:-\s*day|day|days)\s+(?:written\s+)?(?:cure|notice|remedy)\s+period", text_lower)
     notice_match = re.search(r"termination\s+upon\s+(\d+)\s+days", text_lower)
     
@@ -131,7 +163,7 @@ def extract_contract_clauses(file_path: str, filename: str) -> Dict[str, Any]:
     else:
         flagged_clauses.append(f"Clause 7.3: Balanced {days}-day cure period for non-critical performance defaults.")
 
-    # 4. Dispute Resolution & Governing Law
+    # 6. Dispute Resolution & Governing Law
     indian_jurisdiction = any(kw in text_lower for kw in ["arbitration and conciliation act", "laws of india", "delhi", "mumbai", "bengaluru", "chennai", "hyderabad", "indian law"])
     foreign_jurisdiction = any(kw in text_lower for kw in ["london court of international arbitration", "singapore international arbitration", "icc international", "laws of england", "laws of delaware"])
 
@@ -142,14 +174,6 @@ def extract_contract_clauses(file_path: str, filename: str) -> Dict[str, Any]:
             contract_risk_level = "MEDIUM"
     else:
         flagged_clauses.append("Clause 11.2: Domestic arbitration governed by Indian Arbitration & Conciliation Act, 1996.")
-
-    # Default fallback flagged clauses if text was too sparse or unparsed
-    if not flagged_clauses:
-        flagged_clauses = [
-            "Clause 4.1: 1.5x liability limitation cap; Clause 2.2: WHO TRS 1025 cold chain monitoring.",
-            "Clause 7.3: Balanced 30-day cure period for performance defaults.",
-            "Clause 11.2: Dispute resolution seated under Indian Arbitration Act, 1996."
-        ]
 
     rationale = (
         f"Contract audit completed for '{filename}': {len(flagged_clauses)} critical operational clauses evaluated. "
@@ -163,6 +187,6 @@ def extract_contract_clauses(file_path: str, filename: str) -> Dict[str, Any]:
         "risk_factors": risk_factors,
         "rationale": rationale,
         "has_cold_chain_clause": cold_chain_present,
-        "has_data_logger_sla": data_logger_present,
+        "has_data_logger_sla": data_logger_present and not unverified_cold,
         "char_count": len(text)
     }
